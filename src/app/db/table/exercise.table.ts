@@ -32,6 +32,8 @@ export interface IExerciseTable {
 
   exerciseUnit: TExerciseUnitType;
 
+  plannedDurationMin?: number;
+
   exerciseSets: IExerciseSet[];
 }
 

@@ -15,6 +15,7 @@ export async function createExercise(payload: ICreateExercisePayload) {
   return db.exercises.add({
     ...payload,
     title: payload.title.trim(),
+    plannedDurationMin: normalizePlannedDuration(payload.plannedDurationMin),
   });
 }
 
@@ -107,6 +108,14 @@ async function updateExerciseSets(
       exerciseSets: updater(exercise.exerciseSets),
     });
   });
+}
+
+function normalizePlannedDuration(duration?: number) {
+  if (typeof duration !== "number" || Number.isNaN(duration) || duration <= 0) {
+    return undefined;
+  }
+
+  return Math.round(duration);
 }
 
 function sortExercisesByNewest(exercises: IExerciseTable[]) {

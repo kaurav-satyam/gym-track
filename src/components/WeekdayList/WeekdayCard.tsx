@@ -1,13 +1,15 @@
+import type { TDay } from "../../app/db/table/exercise.table";
 import { ArrowUpRight } from "lucide-react";
 import { Badge, Panel, ProgressBar } from "../ui";
 
 interface IWeekdayCardProps {
-  readonly day: string;
+  readonly day: TDay;
   readonly workoutType?: string;
   readonly exerciseCount?: number;
   readonly duration?: number;
   readonly muscleGroups?: string[];
   readonly progress?: number;
+  readonly progressLabel?: string;
   readonly isRestDay?: boolean;
   readonly onClick?: () => void;
 }
@@ -19,13 +21,16 @@ export default function WeekdayCard({
   duration,
   muscleGroups = [],
   progress = 0,
+  progressLabel,
   onClick,
 }: IWeekdayCardProps) {
   const durationLabel = duration ? `${duration}m` : "--";
   const muscleGroupLabel =
     muscleGroups.length > 0
       ? muscleGroups.join(" • ")
-      : "Tap in to build this day.";
+      : exerciseCount > 0
+        ? "Open the day to manage exercises and sets."
+        : "Tap in to build this day.";
 
   return (
     <Panel
@@ -65,7 +70,7 @@ export default function WeekdayCard({
         <Metric label="Duration" value={durationLabel} />
       </div>
 
-      <ProgressBar value={progress} />
+      <ProgressBar value={progress} label={progressLabel} />
     </Panel>
   );
 }
@@ -76,7 +81,9 @@ function Metric({ label, value }: { label: string; value: string }) {
       <p className="text-xs uppercase tracking-[0.16em] text-(--text-muted)">
         {label}
       </p>
-      <p className="mt-2 text-lg font-semibold text-(--text-strong)">{value}</p>
+      <p className="mt-2 text-lg font-semibold text-(--text-strong)">
+        {value}
+      </p>
     </div>
   );
 }

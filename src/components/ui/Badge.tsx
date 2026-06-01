@@ -15,8 +15,8 @@ export default function Badge({
   className,
 }: IBadgeProps) {
   const toneClasses = {
-    solid: "bg-(--accent) text-(color:--accent-ink) border-transparent",
-    soft: "border-(--surface-border) bg-white/[0.04] text-(color:--text-soft)",
+    solid: "bg-(--accent) text-(--accent-ink) border-transparent",
+    soft: "border-(--surface-border) bg-white/[0.04] text-(--text-soft)",
   };
 
   return (

@@ -42,6 +42,7 @@ export default function AddExercise({
   const [title, setTitle] = useState("");
   const [exerciseType, setExerciseType] = useState<TExerciseType>("reps");
   const [exerciseUnit, setExerciseUnit] = useState<TExerciseUnitType>("kg");
+  const [plannedDurationMin, setPlannedDurationMin] = useState("");
 
   const displayUnits = useMemo(
     () => (exerciseType === "reps" ? ExerciseWeightUnits : ExerciseTimeUnits),
@@ -55,11 +56,15 @@ export default function AddExercise({
       return;
     }
 
+    const nextPlannedDuration =
+      plannedDurationMin === "" ? undefined : Number(plannedDurationMin);
+
     const data: ICreateExercisePayload = {
       title: normalizedTitle,
       day,
       exerciseType,
       exerciseUnit,
+      plannedDurationMin: nextPlannedDuration,
       exerciseSets: [],
     };
 
@@ -68,6 +73,7 @@ export default function AddExercise({
     setTitle("");
     setExerciseType("reps");
     setExerciseUnit("kg");
+    setPlannedDurationMin("");
     setIsOpen(false);
   }
 
@@ -82,7 +88,9 @@ export default function AddExercise({
           <p className="text-xs font-medium uppercase tracking-[0.22em] text-(--text-muted)">
             Add exercise
           </p>
-          <h2 className="text-2xl font-semibold text-(--text-strong)">{day}</h2>
+          <h2 className="text-2xl font-semibold text-(--text-strong)">
+            {day}
+          </h2>
         </div>
 
         <div
@@ -151,6 +159,23 @@ export default function AddExercise({
                   </option>
                 ))}
               </SelectField>
+            </Field>
+
+            <Field
+              label="Planned duration"
+              htmlFor="exercise-duration"
+              hint="Shown on the home screen as the estimated time for this exercise."
+            >
+              <TextField
+                id="exercise-duration"
+                type="number"
+                min="1"
+                step="1"
+                inputMode="numeric"
+                placeholder="15"
+                value={plannedDurationMin}
+                onChange={(e) => setPlannedDurationMin(e.target.value)}
+              />
             </Field>
 
             <Button type="submit" tone="primary" fullWidth>

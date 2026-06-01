@@ -23,11 +23,11 @@ export default function Button({
   ...props
 }: IButtonProps) {
   const toneClasses = {
-    primary: "border-transparent bg-(--accent) text-(color:--accent-ink) hover:opacity-90",
+    primary: "border-transparent bg-(--accent) text-(--accent-ink) hover:opacity-90",
     secondary:
-      "border-(--surface-border) bg-white/[0.04] text-(color:--text-strong) hover:border-(--surface-border-strong) hover:bg-white/[0.08]",
+      "border-(--surface-border) bg-white/[0.04] text-(--text-strong) hover:border-(--surface-border-strong) hover:bg-white/[0.08]",
     ghost:
-      "border-dashed border-(--surface-border) bg-transparent text-(color:--text-soft) hover:border-(--surface-border-strong) hover:bg-white/[0.04]",
+      "border-dashed border-(--surface-border) bg-transparent text-(--text-soft) hover:border-(--surface-border-strong) hover:bg-white/[0.04]",
     danger: "border-transparent bg-(--danger) text-white hover:opacity-90",
   };
 
