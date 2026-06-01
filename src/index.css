@@ -1,1 +1,58 @@
 @import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --app-bg: #050816;
+  --app-glow-primary: rgba(56, 189, 248, 0.14);
+  --app-glow-secondary: rgba(163, 230, 53, 0.08);
+  --surface-panel: rgba(8, 15, 30, 0.8);
+  --surface-row: rgba(15, 23, 42, 0.72);
+  --surface-border: rgba(148, 163, 184, 0.16);
+  --surface-border-strong: rgba(226, 232, 240, 0.22);
+  --text-strong: #f8fafc;
+  --text-soft: #cbd5e1;
+  --text-muted: #94a3b8;
+  --accent: #f8fafc;
+  --accent-ink: #020617;
+  --success: #22c55e;
+  --danger: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at top left,
+      var(--app-glow-primary),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at top right,
+      var(--app-glow-secondary),
+      transparent 22%
+    ),
+    linear-gradient(180deg, #071120 0%, var(--app-bg) 100%);
+  color: var(--text-strong);
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+::selection {
+  background: rgba(148, 163, 184, 0.28);
+}

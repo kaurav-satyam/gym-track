@@ -1,3 +1,4 @@
+import { useLiveQuery } from "dexie-react-hooks";
 import {
   ChevronDown,
   ChevronUp,
@@ -7,13 +8,11 @@ import {
   Timer,
 } from "lucide-react";
 import { useState } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
 import { useNavigate } from "react-router";
-import {
-  addExerciseSet,
-} from "../../app/db/repositories/exercise.repository";
+import { addExerciseSet } from "../../app/db/repositories/exercise.repository";
 import { listCompletedSetIdsByExerciseOnDate } from "../../app/db/repositories/workout-log.repository";
 import type { IExerciseTable } from "../../app/db/table/exercise.table";
+import { Button, IconButton, Panel } from "../ui";
 import SetRow from "./SetRow";
 
 interface IExerciseCardProps {
@@ -34,32 +33,14 @@ export default function ExerciseCard({ exercise }: IExerciseCardProps) {
   const totalSets = exercise.exerciseSets.length;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 text-white">
-      <button
-        onClick={() => setExpanded((prev) => !prev)}
-        className="
-          flex
-          w-full
-          items-center
-          justify-between
-          px-4
-          py-3
-          transition
-          hover:bg-zinc-900
-        "
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className="
-              flex
-              h-10
-              w-10
-              items-center
-              justify-center
-              rounded-lg
-              bg-zinc-900
-            "
-          >
+    <Panel className="overflow-hidden">
+      <div className="flex items-start gap-3 px-4 py-4 sm:px-5">
+        <button
+          type="button"
+          onClick={() => setExpanded((prev) => !prev)}
+          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+        >
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-(--surface-border) bg-white/4 text-(--text-soft)">
             {exercise.exerciseType === "reps" ? (
               <Dumbbell size={18} />
             ) : (
@@ -67,73 +48,81 @@ export default function ExerciseCard({ exercise }: IExerciseCardProps) {
             )}
           </div>
 
-          <div className="text-left">
-            <h2 className="text-sm font-semibold">{exercise.title}</h2>
-            <div
-              className="
-                flex
-                items-center
-                gap-2
-                text-xs
-                text-zinc-400
-              "
-            >
-              <span>{exercise.exerciseType}</span>
+          <div className="min-w-0 space-y-1">
+            <h2 className="truncate text-base font-semibold text-(--text-strong)">
+              {exercise.title}
+            </h2>
+
+            <div className="flex flex-wrap items-center gap-2 text-xs text-(--text-muted)">
+              <span className="capitalize">{exercise.exerciseType}</span>
               <span>•</span>
               <span>{exercise.exerciseUnit}</span>
+              <span>•</span>
+              <span>
+                {totalSets} planned set{totalSets === 1 ? "" : "s"}
+              </span>
             </div>
           </div>
-        </div>
+        </button>
 
-        <div className="flex items-center gap-3">
-          <Eye onClick={() => navigate(`/logscreen/${exercise.id}`)} />
-          <span className="text-xs text-zinc-500">{totalSets} sets</span>
+        <div className="flex shrink-0 items-center gap-2">
+          <IconButton
+            size="sm"
+            tone="secondary"
+            aria-label={`View ${exercise.title} history`}
+            onClick={() => navigate(`/logscreen/${exercise.id}`)}
+          >
+            <Eye size={16} />
+          </IconButton>
 
-          {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          <IconButton
+            size="sm"
+            tone="secondary"
+            aria-label={
+              expanded
+                ? `Collapse ${exercise.title}`
+                : `Expand ${exercise.title}`
+            }
+            onClick={() => setExpanded((prev) => !prev)}
+          >
+            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </IconButton>
         </div>
-      </button>
+      </div>
 
       {expanded && (
-        <div className="border-t border-zinc-800 p-3">
-          <div className="space-y-2">
-            {exercise.exerciseSets.map((set, index) => (
-              <SetRow
-                key={set.id}
-                exerciseId={exerciseId}
-                set={set}
-                setNumber={index + 1}
-                exerciseType={exercise.exerciseType}
-                exerciseUnit={exercise.exerciseUnit}
-                completedToday={completedSetIdSet.has(set.id)}
-              />
-            ))}
-          </div>
+        <div className="border-t border-(--surface-border) px-4 pb-4 pt-3 sm:px-5">
+          {exercise.exerciseSets.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-(--surface-border) px-4 py-5 text-center text-sm text-(--text-muted)">
+              No sets added yet.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {exercise.exerciseSets.map((set, index) => (
+                <SetRow
+                  key={set.id}
+                  exerciseId={exerciseId}
+                  set={set}
+                  setNumber={index + 1}
+                  exerciseType={exercise.exerciseType}
+                  exerciseUnit={exercise.exerciseUnit}
+                  completedToday={completedSetIdSet.has(set.id)}
+                />
+              ))}
+            </div>
+          )}
 
-          <button
+          <Button
+            tone="ghost"
+            fullWidth
+            className="mt-3"
+            leadingIcon={<Plus size={16} />}
             onClick={() => addExerciseSet(exerciseId)}
-            className="
-              mt-3
-              flex
-              h-9
-              w-full
-              items-center
-              justify-center
-              gap-2
-              rounded-lg
-              border
-              border-dashed
-              border-zinc-700
-              text-sm
-              text-zinc-400
-              transition
-              hover:bg-zinc-900
-            "
           >
-            <Plus size={14} />
-            Add Set
-          </button>
+            Add set
+          </Button>
         </div>
       )}
-    </div>
+    </Panel>
   );
 }

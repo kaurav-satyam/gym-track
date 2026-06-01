@@ -1,15 +1,20 @@
-import { Calendar, Dumbbell } from "lucide-react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { Calendar, Dumbbell } from "lucide-react";
 import { useParams } from "react-router";
 import { getExercise } from "../../app/db/repositories/exercise.repository";
+import { listWorkoutLogsByExercise } from "../../app/db/repositories/workout-log.repository";
 import type {
   TExerciseType,
   TExerciseUnitType,
 } from "../../app/db/table/exercise.table";
+import type { IWorkoutSetLog } from "../../app/db/table/workout-log.table";
 import {
-  type IWorkoutSetLog,
-} from "../../app/db/table/workout-log.table";
-import { listWorkoutLogsByExercise } from "../../app/db/repositories/workout-log.repository";
+  Badge,
+  EmptyState,
+  PageShell,
+  Panel,
+  RowCard,
+} from "../../components/ui";
 
 export default function LogScreen() {
   const { excid } = useParams<{ excid: string }>();
@@ -28,11 +33,25 @@ export default function LogScreen() {
   );
 
   if (!hasValidExerciseId) {
-    return <div className="p-4 text-red-400">Invalid exercise</div>;
+    return (
+      <PageShell title="Exercise history">
+        <EmptyState
+          title="Invalid exercise"
+          description="Open an exercise from one of the weekday screens to see its full history."
+        />
+      </PageShell>
+    );
   }
 
   if (!exercise) {
-    return <div className="p-4">Loading...</div>;
+    return (
+      <PageShell title="Exercise history">
+        <EmptyState
+          title="Loading exercise"
+          description="Fetching the saved workout logs."
+        />
+      </PageShell>
+    );
   }
 
   const groupedLogs = logs.reduce<TGroupedLogs>((acc, log) => {
@@ -48,96 +67,83 @@ export default function LogScreen() {
   }, {});
 
   return (
-    <div className="mx-auto max-w-3xl p-4">
-      <div
-        className="
-          rounded-2xl
-          border
-          border-zinc-800
-          bg-zinc-950
-          p-5
-        "
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className="
-              flex
-              h-12
-              w-12
-              items-center
-              justify-center
-              rounded-xl
-              bg-zinc-900
-            "
-          >
+    <PageShell
+      eyebrow="Exercise history"
+      title={exercise.title}
+      description="Every completed set is stored as a dated log so you can review how the exercise has been performed over time."
+    >
+      <Panel className="p-5 sm:p-6">
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-(--surface-border) bg-white/4 text-(--text-soft)">
             <Dumbbell size={20} />
           </div>
 
-          <div>
-            <h1 className="text-xl font-bold text-white">{exercise.title}</h1>
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm text-(--text-soft)">
+                Saved exercise details
+              </p>
+              <p className="mt-1 text-sm leading-6 text-(--text-muted)">
+                Review the planned unit and compare it against the completed log
+                entries below.
+              </p>
+            </div>
 
-            <p className="text-sm text-zinc-400">
-              {exercise.exerciseType}
-              {" • "}
-              {exercise.exerciseUnit}
-            </p>
+            <div className="flex flex-wrap gap-2">
+              <Badge tone="soft">{exercise.exerciseType}</Badge>
+              <Badge tone="soft">{exercise.exerciseUnit}</Badge>
+            </div>
           </div>
         </div>
-      </div>
+      </Panel>
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <StatCard label="Total Sets" value={logs.length} />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <StatCard label="Completed Sets" value={logs.length} />
         <StatCard label="Planned Sets" value={exercise.exerciseSets.length} />
       </div>
 
-      <div className="mt-6 space-y-5">
-        {Object.entries(groupedLogs).map(([date, entries]) => (
-          <section key={date}>
-            <div
-              className="
-                  mb-2
-                  flex
-                  items-center
-                  gap-2
-                  text-zinc-400
-                "
-            >
-              <Calendar size={16} />
-              <h2>{date}</h2>
-            </div>
+      {logs.length === 0 ? (
+        <EmptyState
+          title="No workout logs yet"
+          description="Mark sets as complete from the day screen and each finished set will appear here."
+        />
+      ) : (
+        <div className="space-y-5">
+          {Object.entries(groupedLogs).map(([date, entries]) => (
+            <section key={date} className="space-y-3">
+              <div className="flex items-center gap-2 text-sm text-(--text-muted)">
+                <Calendar size={16} />
+                <h2>{date}</h2>
+              </div>
 
-            <div className="space-y-2">
-              {entries.map((log) => (
-                <LogRow
-                  key={log.id}
-                  log={log}
-                  exerciseType={exercise.exerciseType}
-                  exerciseUnit={exercise.exerciseUnit}
-                />
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
-    </div>
+              <div className="space-y-2">
+                {entries.map((log) => (
+                  <LogRow
+                    key={log.id}
+                    log={log}
+                    exerciseType={exercise.exerciseType}
+                    exerciseUnit={exercise.exerciseUnit}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
+    </PageShell>
   );
 }
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div
-      className="
-        rounded-xl
-        border
-        border-zinc-800
-        bg-zinc-950
-        p-4
-      "
-    >
-      <p className="text-xs text-zinc-500">{label}</p>
-
-      <h2 className="mt-1 text-2xl font-bold text-white">{value}</h2>
-    </div>
+    <Panel className="p-4">
+      <p className="text-xs font-medium uppercase tracking-[0.16em] text-(--text-muted)">
+        {label}
+      </p>
+      <h2 className="mt-2 text-3xl font-semibold text-(--text-strong)">
+        {value}
+      </h2>
+    </Panel>
   );
 }
 
@@ -149,41 +155,32 @@ interface ILogRowProps {
 
 function LogRow({ log, exerciseType, exerciseUnit }: ILogRowProps) {
   return (
-    <div
-      className="
-        flex
-        items-center
-        justify-between
-        rounded-xl
-        border
-        border-zinc-800
-        bg-zinc-950
-        px-4
-        py-3
-      "
-    >
+    <RowCard className="flex items-center justify-between gap-3 px-4 py-3">
       {exerciseType === "reps" ? (
         <div>
-          <span className="font-semibold text-white">
-            {log.weight}
+          <p className="text-base font-semibold text-(--text-strong)">
+            {log.weight ?? "--"}
             {exerciseUnit}
-          </span>
-
-          <span className="ml-2 text-zinc-400">× {log.reps}</span>
+          </p>
+          <p className="text-sm text-(--text-muted)">{log.reps ?? "--"} reps</p>
         </div>
       ) : (
         <div>
-          <span className="font-semibold text-white">
-            {log.time}
+          <p className="text-base font-semibold text-(--text-strong)">
+            {log.time ?? "--"}
             {exerciseUnit}
-          </span>
+          </p>
+          <p className="text-sm text-(--text-muted)">Timed effort</p>
         </div>
       )}
 
-      <span className="text-xs text-zinc-500">
-        {new Date(log.completedAt).toLocaleTimeString()}
+      <span className="text-xs font-medium uppercase tracking-[0.16em] text-(--text-muted)">
+        {log.completedAt.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
       </span>
-    </div>
+    </RowCard>
   );
 }
 

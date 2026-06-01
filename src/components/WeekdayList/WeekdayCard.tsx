@@ -1,3 +1,6 @@
+import { ArrowUpRight } from "lucide-react";
+import { Badge, Panel, ProgressBar } from "../ui";
+
 interface IWeekdayCardProps {
   readonly day: string;
   readonly workoutType?: string;
@@ -6,8 +9,7 @@ interface IWeekdayCardProps {
   readonly muscleGroups?: string[];
   readonly progress?: number;
   readonly isRestDay?: boolean;
-
-  readonly onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  readonly onClick?: () => void;
 }
 
 export default function WeekdayCard({
@@ -19,76 +21,62 @@ export default function WeekdayCard({
   progress = 0,
   onClick,
 }: IWeekdayCardProps) {
+  const durationLabel = duration ? `${duration}m` : "--";
+  const muscleGroupLabel =
+    muscleGroups.length > 0
+      ? muscleGroups.join(" • ")
+      : "Tap in to build this day.";
+
   return (
-    <div
-      data-day={day}
+    <Panel
+      as="button"
+      type="button"
+      interactive
       onClick={onClick}
-      className="
-        rounded-3xl
-        bg-zinc-950
-        border
-        border-zinc-800
-        p-4
-        space-y-4
-        active:scale-[0.98]
-        transition-transform
-      "
+      className="w-full space-y-5 p-5 text-left"
     >
-      {/* Top */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-white">{day}</h2>
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-[0.22em] text-(--text-muted)">
+            Day plan
+          </p>
 
-          <p className="text-zinc-400 text-sm">{muscleGroups.join(" • ")}</p>
+          <div>
+            <h2 className="text-xl font-semibold text-(--text-strong)">
+              {day}
+            </h2>
+            <p className="mt-1 text-sm text-(--text-muted)">
+              {muscleGroupLabel}
+            </p>
+          </div>
         </div>
 
-        <span
-          className="
-            px-3
-            py-1
-            rounded-full
-            bg-white
-            text-black
-            text-xs
-            font-medium
-          "
-        >
-          {workoutType}
-        </span>
-      </div>
+        <div className="flex items-center gap-2">
+          {workoutType && <Badge>{workoutType}</Badge>}
 
-      {/* Stats */}
-      <div className="flex items-center gap-6 text-sm">
-        <div className="flex flex-col">
-          <span className="text-zinc-500">Exercises</span>
-
-          <span className="text-white font-medium">{exerciseCount}</span>
-        </div>
-
-        <div className="flex flex-col">
-          <span className="text-zinc-500">Duration</span>
-
-          <span className="text-white font-medium">{duration}m</span>
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-(--surface-border) bg-white/3 text-(--text-soft)">
+            <ArrowUpRight size={16} />
+          </div>
         </div>
       </div>
 
-      {/* Progress */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-xs">
-          <span className="text-zinc-500">Progress</span>
-
-          <span className="text-zinc-400">{progress}%</span>
-        </div>
-
-        <div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
-          <div
-            className="h-full bg-white rounded-full"
-            style={{
-              width: `${progress}%`,
-            }}
-          />
-        </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Metric label="Exercises" value={String(exerciseCount)} />
+        <Metric label="Duration" value={durationLabel} />
       </div>
+
+      <ProgressBar value={progress} />
+    </Panel>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-(--surface-border) bg-black/10 px-4 py-3">
+      <p className="text-xs uppercase tracking-[0.16em] text-(--text-muted)">
+        {label}
+      </p>
+      <p className="mt-2 text-lg font-semibold text-(--text-strong)">{value}</p>
     </div>
   );
 }

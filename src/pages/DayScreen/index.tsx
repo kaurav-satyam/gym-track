@@ -5,13 +5,14 @@ import { listExercisesByDay } from "../../app/db/repositories/exercise.repositor
 import type { TDay } from "../../app/db/table/exercise.table";
 import AddExercise from "../../components/AddExercise";
 import ExerciseCard from "../../components/ExerciseCard";
+import { EmptyState, PageShell } from "../../components/ui";
 
 export default function DayScreen() {
   const { day } = useParams<{
     day: TDay;
   }>();
 
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const exercises = useLiveQuery(
     async () => {
@@ -26,36 +27,47 @@ export default function DayScreen() {
   );
 
   if (!day) {
-    return <div className="p-6 text-red-400">Invalid day</div>;
+    return (
+      <PageShell title="Day not found">
+        <EmptyState
+          title="Invalid day"
+          description="Pick one of the weekdays from the home screen and try again."
+        />
+      </PageShell>
+    );
   }
 
+  const exerciseCountLabel = `${exercises.length} exercise${exercises.length === 1 ? "" : "s"}`;
   const shouldShowAddExerciseForm = exercises.length === 0 || isOpen;
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
+    <PageShell
+      eyebrow="Workout day"
+      title={day}
+      description={
+        exercises.length > 0
+          ? `${exerciseCountLabel} planned for this session.`
+          : "Start the session by adding the first exercise for this day."
+      }
+    >
       <AddExercise
         isOpen={shouldShowAddExerciseForm}
         setIsOpen={setIsOpen}
         day={day}
       />
 
-      <div className="space-y-3">
-        {exercises.length === 0 && (
-          <div
-            className="
-              rounded-3xl border border-dashed
-              border-zinc-800 bg-zinc-950 p-10
-              text-center text-zinc-500
-            "
-          >
-            No exercises added yet
-          </div>
-        )}
-
-        {exercises.map((exercise) => (
-          <ExerciseCard key={exercise.id} exercise={exercise} />
-        ))}
-      </div>
-    </div>
+      {exercises.length === 0 ? (
+        <EmptyState
+          title="No exercises yet"
+          description="Add your first movement above and its sets will show up here."
+        />
+      ) : (
+        <div className="space-y-3">
+          {exercises.map((exercise) => (
+            <ExerciseCard key={exercise.id} exercise={exercise} />
+          ))}
+        </div>
+      )}
+    </PageShell>
   );
 }
