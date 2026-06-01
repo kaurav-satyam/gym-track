@@ -1,45 +1,51 @@
 import { Calendar, Dumbbell } from "lucide-react";
-
-import { useParams } from "react-router";
-
 import { useLiveQuery } from "dexie-react-hooks";
-
-import { db } from "../../app/db";
+import { useParams } from "react-router";
+import { getExercise } from "../../app/db/repositories/exercise.repository";
+import type {
+  TExerciseType,
+  TExerciseUnitType,
+} from "../../app/db/table/exercise.table";
+import {
+  type IWorkoutSetLog,
+} from "../../app/db/table/workout-log.table";
+import { listWorkoutLogsByExercise } from "../../app/db/repositories/workout-log.repository";
 
 export default function LogScreen() {
   const { excid } = useParams<{ excid: string }>();
-
   const exerciseId = Number(excid);
+  const hasValidExerciseId = Number.isFinite(exerciseId);
 
-  const exercise = useLiveQuery(() => db.exercises.get(exerciseId));
-
-  const logs = useLiveQuery(() =>
-    db.workoutlogs
-      .where("exerciseId")
-      .equals(exerciseId)
-      .reverse()
-      .sortBy("completedAt"),
+  const exercise = useLiveQuery(
+    () => (hasValidExerciseId ? getExercise(exerciseId) : undefined),
+    [exerciseId],
   );
+
+  const logs = useLiveQuery(
+    () => (hasValidExerciseId ? listWorkoutLogsByExercise(exerciseId) : []),
+    [exerciseId],
+    [],
+  );
+
+  if (!hasValidExerciseId) {
+    return <div className="p-4 text-red-400">Invalid exercise</div>;
+  }
 
   if (!exercise) {
     return <div className="p-4">Loading...</div>;
   }
 
-  const groupedLogs =
-    logs?.reduce(
-      (acc, log) => {
-        const date = log.completedAt.toDateString();
+  const groupedLogs = logs.reduce<TGroupedLogs>((acc, log) => {
+    const date = log.completedAt.toDateString();
 
-        if (!acc[date]) {
-          acc[date] = [];
-        }
+    if (!acc[date]) {
+      acc[date] = [];
+    }
 
-        acc[date].push(log);
+    acc[date].push(log);
 
-        return acc;
-      },
-      {} as Record<string, typeof logs>,
-    ) ?? {};
+    return acc;
+  }, {});
 
   return (
     <div className="mx-auto max-w-3xl p-4">
@@ -79,15 +85,10 @@ export default function LogScreen() {
         </div>
       </div>
 
-      {/* Stats */}
-
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <StatCard label="Total Sets" value={logs?.length ?? 0} />
-
+        <StatCard label="Total Sets" value={logs.length} />
         <StatCard label="Planned Sets" value={exercise.exerciseSets.length} />
       </div>
-
-      {/* Logs */}
 
       <div className="mt-6 space-y-5">
         {Object.entries(groupedLogs).map(([date, entries]) => (
@@ -140,7 +141,13 @@ function StatCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-function LogRow({ log, exerciseType, exerciseUnit }: any) {
+interface ILogRowProps {
+  log: IWorkoutSetLog;
+  exerciseType: TExerciseType;
+  exerciseUnit: TExerciseUnitType;
+}
+
+function LogRow({ log, exerciseType, exerciseUnit }: ILogRowProps) {
   return (
     <div
       className="
@@ -179,3 +186,5 @@ function LogRow({ log, exerciseType, exerciseUnit }: any) {
     </div>
   );
 }
+
+type TGroupedLogs = Record<string, IWorkoutSetLog[]>;

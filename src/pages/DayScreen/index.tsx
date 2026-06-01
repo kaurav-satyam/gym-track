@@ -1,11 +1,8 @@
 import { useLiveQuery } from "dexie-react-hooks";
+import { useState } from "react";
 import { useParams } from "react-router";
-
-import { db } from "../../app/db";
-
+import { listExercisesByDay } from "../../app/db/repositories/exercise.repository";
 import type { TDay } from "../../app/db/table/exercise.table";
-
-import { useEffect, useState } from "react";
 import AddExercise from "../../components/AddExercise";
 import ExerciseCard from "../../components/ExerciseCard";
 
@@ -18,30 +15,30 @@ export default function DayScreen() {
 
   const exercises = useLiveQuery(
     async () => {
-      if (!day) return [];
+      if (!day) {
+        return [];
+      }
 
-      return await db.exercises.where("day").equals(day).reverse().sortBy("id");
+      return listExercisesByDay(day);
     },
     [day],
     [],
   );
 
-  useEffect(() => {
-    setIsOpen(exercises.length ? false : true);
-  }, [exercises]);
-
   if (!day) {
     return <div className="p-6 text-red-400">Invalid day</div>;
   }
 
-
+  const shouldShowAddExerciseForm = exercises.length === 0 || isOpen;
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
-      {/* Add Exercise Card */}
-      <AddExercise isOpen={isOpen} setIsOpen={setIsOpen} day={day} />
+      <AddExercise
+        isOpen={shouldShowAddExerciseForm}
+        setIsOpen={setIsOpen}
+        day={day}
+      />
 
-      {/* Exercise List */}
       <div className="space-y-3">
         {exercises.length === 0 && (
           <div
@@ -56,7 +53,7 @@ export default function DayScreen() {
         )}
 
         {exercises.map((exercise) => (
-          <ExerciseCard exercise={exercise} />
+          <ExerciseCard key={exercise.id} exercise={exercise} />
         ))}
       </div>
     </div>

@@ -1,14 +1,18 @@
 import { Check, Trash2, X } from "lucide-react";
-
-import { deleteSet, updateSet } from "../../app/db/service/exercise.repository";
 import {
-  completeSet,
-  uncompleteSet,
-} from "../../app/db/service/workout-log.repository";
+  deleteExerciseSet,
+  updateExerciseSet,
+} from "../../app/db/repositories/exercise.repository";
+import {
+  completeExerciseSet,
+  uncompleteExerciseSet,
+} from "../../app/db/repositories/workout-log.repository";
 import type {
   IExerciseSet,
   TExerciseType,
 } from "../../app/db/table/exercise.table";
+import Button from "../Button";
+import Input from "../Input";
 
 interface ISetRowProps {
   exerciseId: number;
@@ -35,133 +39,70 @@ export default function SetRow({
 
       {exerciseType === "reps" ? (
         <>
-          <input
+          <Input
             type="number"
             value={set.weight ?? ""}
             placeholder={exerciseUnit}
             onChange={(e) =>
-              updateSet(exerciseId, set.id, {
+              updateExerciseSet(exerciseId, set.id, {
                 weight:
                   e.target.value === "" ? undefined : Number(e.target.value),
               })
             }
-            className="
-              h-9
-              w-20
-              rounded-md
-              border
-              border-zinc-700
-              bg-black
-              px-2
-              text-sm
-              outline-none
-              focus:border-white
-            "
+            className="w-20"
           />
 
-          <input
+          <Input
             type="number"
             value={set.reps ?? ""}
             placeholder="reps"
             onChange={(e) =>
-              updateSet(exerciseId, set.id, {
+              updateExerciseSet(exerciseId, set.id, {
                 reps:
                   e.target.value === "" ? undefined : Number(e.target.value),
               })
             }
-            className="
-              h-9
-              w-20
-              rounded-md
-              border
-              border-zinc-700
-              bg-black
-              px-2
-              text-sm
-              outline-none
-              focus:border-white
-            "
+            className="w-20"
           />
         </>
       ) : (
-        <input
+        <Input
           type="number"
           value={set.time ?? ""}
           placeholder={exerciseUnit}
           onChange={(e) =>
-            updateSet(exerciseId, set.id, {
+            updateExerciseSet(exerciseId, set.id, {
               time: e.target.value === "" ? undefined : Number(e.target.value),
             })
           }
-          className="
-            h-9
-            flex-1
-            rounded-md
-            border
-            border-zinc-700
-            bg-black
-            px-2
-            text-sm
-            outline-none
-            focus:border-white
-          "
         />
       )}
 
       {completedToday ? (
-        <button
-          onClick={() => uncompleteSet(set.id)}
-          className="
-        flex
-        h-8
-        w-8
-        items-center
-        justify-center
-        rounded-md
-        bg-green-600
-        text-white
-      "
+        <Button
+          variant="success"
+          size="sm"
+          onClick={() => uncompleteExerciseSet(set.id)}
         >
           <X size={15} />
-        </button>
+        </Button>
       ) : (
-        <button
-          onClick={() => completeSet(exerciseId, set)}
-          className="
-        flex
-        h-8
-        w-8
-        items-center
-        justify-center
-        rounded-md
-        bg-zinc-800
-        text-zinc-400
-        hover:bg-green-600
-        hover:text-white
-      "
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => completeExerciseSet(exerciseId, set)}
         >
           <Check size={15} />
-        </button>
+        </Button>
       )}
 
-      <button
-        onClick={() => deleteSet(exerciseId, set.id)}
-        className="
-          flex
-          h-8
-          w-8
-          items-center
-          justify-center
-          rounded-md
-          bg-zinc-800
-          text-zinc-400
-          transition
-          hover:bg-red-600
-          hover:text-white
-        "
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={() => deleteExerciseSet(exerciseId, set.id)}
       >
         <Trash2 size={15} />
-      </button>
+      </Button>
     </div>
   );
 }

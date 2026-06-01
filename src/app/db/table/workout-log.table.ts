@@ -12,4 +12,8 @@ export interface IWorkoutSetLog {
   time?: number;
 }
 
-export const WorkoutSetLogSchema = "++id,exerciseId,exerciseSetId,completedAt";
+export const WorkoutSetLogSchema = [
+  "++id,exerciseId,exerciseSetId,completedAt",
+  "[exerciseId+completedAt]",
+  "[exerciseSetId+completedAt]",
+].join(",");

@@ -1,26 +1,22 @@
 import Dexie, { type EntityTable } from "dexie";
 import { ExerciseSchema, type IExerciseTable } from "./table/exercise.table";
-import {
-  WorkoutSetLogSchema,
-  type IWorkoutSetLog,
-} from "./table/workout-log.table";
+import { WorkoutSetLogSchema, type IWorkoutSetLog } from "./table/workout-log.table";
 
-const db = new Dexie("GymTrack") as Dexie & {
-  exercises: EntityTable<IExerciseTable, "id">;
-  workoutlogs: EntityTable<IWorkoutSetLog, "id">;
-};
+class GymTrackDatabase extends Dexie {
+  exercises!: EntityTable<IExerciseTable, "id">;
+  workoutLogs!: EntityTable<IWorkoutSetLog, "id">;
 
-db.version(1).stores({
-  exercises: ExerciseSchema,
-  workoutlogs: WorkoutSetLogSchema,
-});
+  constructor() {
+    super("GymTrack");
 
-db.on("populate", async function () {
-  try {
-  } catch (error) {
-    console.error("Not able to seed the initial data");
+    this.version(1).stores({
+      exercises: ExerciseSchema,
+      workoutlogs: WorkoutSetLogSchema,
+    });
+
+    this.exercises = this.table("exercises");
+    this.workoutLogs = this.table("workoutlogs");
   }
-  console.info("data seeding done");
-});
+}
 
-export { db };
+export const db = new GymTrackDatabase();

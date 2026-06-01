@@ -6,15 +6,14 @@ import {
   Plus,
   Timer,
 } from "lucide-react";
-
 import { useState } from "react";
-
-import type { IExerciseTable } from "../../app/db/table/exercise.table";
-
 import { useLiveQuery } from "dexie-react-hooks";
 import { useNavigate } from "react-router";
-import { db } from "../../app/db";
-import { addSet } from "../../app/db/service/exercise.repository";
+import {
+  addExerciseSet,
+} from "../../app/db/repositories/exercise.repository";
+import { listCompletedSetIdsByExerciseOnDate } from "../../app/db/repositories/workout-log.repository";
+import type { IExerciseTable } from "../../app/db/table/exercise.table";
 import SetRow from "./SetRow";
 
 interface IExerciseCardProps {
@@ -23,27 +22,16 @@ interface IExerciseCardProps {
 
 export default function ExerciseCard({ exercise }: IExerciseCardProps) {
   const navigate = useNavigate();
-
-  const todayLogs = useLiveQuery(async () => {
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
-
-    return db.workoutlogs
-      .where("completedAt")
-      .between(start, end, true, true)
-      .toArray();
-  });
-
-  const completedSetIds = new Set(
-    todayLogs?.map((log) => log.exerciseSetId) ?? [],
-  );
-
   const [expanded, setExpanded] = useState(false);
 
-  const totalSets = exercise.exerciseSets?.length ?? 0;
+  const exerciseId = exercise.id!;
+  const completedSetIds = useLiveQuery(
+    () => listCompletedSetIdsByExerciseOnDate(exerciseId),
+    [exerciseId],
+    [],
+  );
+  const completedSetIdSet = new Set(completedSetIds);
+  const totalSets = exercise.exerciseSets.length;
 
   return (
     <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 text-white">
@@ -111,18 +99,18 @@ export default function ExerciseCard({ exercise }: IExerciseCardProps) {
             {exercise.exerciseSets.map((set, index) => (
               <SetRow
                 key={set.id}
-                exerciseId={exercise.id!}
+                exerciseId={exerciseId}
                 set={set}
                 setNumber={index + 1}
                 exerciseType={exercise.exerciseType}
                 exerciseUnit={exercise.exerciseUnit}
-                completedToday={completedSetIds.has(set.id)}
+                completedToday={completedSetIdSet.has(set.id)}
               />
             ))}
           </div>
 
           <button
-            onClick={() => addSet(exercise.id!)}
+            onClick={() => addExerciseSet(exerciseId)}
             className="
               mt-3
               flex

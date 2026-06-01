@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import {
-  ExerciseService,
-  type IAddExercisePayload,
-} from "../../app/db/service/exercise.service";
+  createExercise,
+  type ICreateExercisePayload,
+} from "../../app/db/repositories/exercise.repository";
 import {
   ExerciseTimeUnits,
   ExerciseTypes,
@@ -25,7 +25,6 @@ export default function AddExercise({
 }: IAddExerciseProps) {
   const [title, setTitle] = useState("");
   const [exerciseType, setExerciseType] = useState<TExerciseType>("reps");
-
   const [exerciseUnit, setExerciseUnit] = useState<TExerciseUnitType>("kg");
 
   const displayUnits = useMemo(
@@ -34,20 +33,30 @@ export default function AddExercise({
   );
 
   async function addExercise() {
-    const data: IAddExercisePayload = {
-      title,
+    const normalizedTitle = title.trim();
+
+    if (!normalizedTitle) {
+      return;
+    }
+
+    const data: ICreateExercisePayload = {
+      title: normalizedTitle,
       day,
       exerciseType,
       exerciseUnit,
       exerciseSets: [],
     };
-    console.log("hitt", data);
-    await ExerciseService.addExercise(data);
+
+    await createExercise(data);
+
+    setTitle("");
+    setExerciseType("reps");
+    setExerciseUnit("kg");
+    setIsOpen(false);
   }
 
   return (
     <div className="w-full max-w-md overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 shadow-xl">
-      {/* Header */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -59,7 +68,6 @@ export default function AddExercise({
           <h2 className="text-2xl font-bold text-white">{day}</h2>
         </div>
 
-        {/* Collapse Icon */}
         <div
           className={`
             flex h-10 w-10 items-center justify-center
@@ -72,7 +80,6 @@ export default function AddExercise({
         </div>
       </button>
 
-      {/* Collapsible Content */}
       <div
         className={`
           grid transition-all duration-300 ease-in-out
@@ -85,13 +92,10 @@ export default function AddExercise({
           <form
             className="space-y-5 px-6 pb-6"
             onSubmit={(e) => {
-              console.log("ddd");
-
               e.preventDefault();
-              addExercise();
+              void addExercise();
             }}
           >
-            {/* Exercise Title */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-300">
                 Exercise Name
@@ -111,7 +115,6 @@ export default function AddExercise({
               />
             </div>
 
-            {/* Exercise Type */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-300">
                 Exercise Type
@@ -146,7 +149,6 @@ export default function AddExercise({
                         checked={active}
                         onChange={() => {
                           setExerciseType(value);
-
                           setExerciseUnit(value === "reps" ? "kg" : "sec");
                         }}
                         className="hidden"
@@ -159,7 +161,6 @@ export default function AddExercise({
               </div>
             </div>
 
-            {/* Unit */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-300">Unit</label>
 
@@ -183,7 +184,6 @@ export default function AddExercise({
               </select>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               className="
