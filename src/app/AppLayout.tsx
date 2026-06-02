@@ -1,4 +1,5 @@
 import { Outlet } from "react-router";
+import IosInstallPrompt from "../features/pwa/components/IosInstallPrompt";
 
 export default function AppLayout() {
   return (
@@ -6,6 +7,7 @@ export default function AppLayout() {
       <main className="min-h-screen">
         <Outlet />
       </main>
+      <IosInstallPrompt />
     </div>
   );
 }

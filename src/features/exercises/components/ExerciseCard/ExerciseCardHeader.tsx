@@ -38,7 +38,7 @@ export default function ExerciseCardHeader({
 
   return (
     <div className="flex items-start gap-3 px-4 py-4 sm:px-5">
-      <div className="w-[4.5rem] shrink-0 sm:w-[4.75rem]">
+      <div className="w-18 shrink-0 sm:w-19">
         <div
           className={cn(
             "flex w-full flex-col items-center justify-center gap-2 rounded-[1.35rem] border px-3 py-3 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]",
@@ -90,7 +90,7 @@ export default function ExerciseCardHeader({
               <Eye size={14} />
             </IconButton>
 
-            <div className="inline-flex items-center rounded-xl border border-(--surface-border) bg-white/[0.03] p-0.5">
+            <div className="inline-flex items-center rounded-xl border border-(--surface-border) bg-white/3 p-0.5">
               <IconButton
                 tone="ghost"
                 size="sm"
