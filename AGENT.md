@@ -2,37 +2,38 @@
 
 ## Purpose
 
-GymTrack is a workout record-keeping PWA.
+GymTrack is a workout-tracking PWA for planning recurring gym days and logging completed sets.
 
-- The home screen lists all weekdays from Sunday through Saturday.
+- The home screen shows Sunday through Saturday.
 - Each weekday stores reusable exercise templates.
-- Each exercise template contains multiple planned sets.
-- Pressing the check icon on a set creates a dated workout log entry for that specific set.
+- Each exercise template contains planned sets.
+- Completing a set writes a dated snapshot log for that set.
 
 ## Main User Flow
 
 1. Open the home screen and choose a weekday.
-2. Add exercises to that weekday.
-3. Add one or more sets to each exercise.
-4. Use the set inputs as reusable template values the user expects to see next time.
-5. On workout day, review or adjust those template values.
-6. Tap the check icon to mark each finished set complete for that day.
-7. Open exercise history to review logged performance over time.
+2. Add one or more exercises to that day.
+3. Add planned sets to each exercise.
+4. Reuse the set values on future workouts as the starting template.
+5. On workout day, adjust values if needed.
+6. Mark sets complete to save snapshot logs for that day.
+7. Open exercise history to review past performance.
 
 ## Product Rules
 
 - Set inputs on the day screen are reusable template data.
-- A set can be completed at most once per calendar day.
-- Completing a set should store a snapshot of the current values at that time.
-- Old logs must stay unchanged even if the exercise template changes later.
-- Home-screen progress should be week-scoped and reset every Sunday.
-- Exercise rename, delete, reorder, and set reorder are desired later, but not the current priority.
+- A set can be completed at most once per local calendar day.
+- Completing a set stores a snapshot of the current values at that moment.
+- Old logs must not change when template values change later.
+- Home-screen progress is intended to be week-scoped and reset every Sunday.
+- Exercise order is day-scoped and persisted.
+- Set reorder does not exist yet.
 
 ## Current Routes
 
-- `/` - weekly split home
-- `/dayscreen/:day` - weekday template editor and workout screen
-- `/logscreen/:excid` - exercise history
+- `/` - weekly home screen
+- `/days/:day` - workout-day planner and template editor
+- `/exercises/:exerciseId/history` - exercise history
 
 ## Current Storage Model
 
@@ -46,6 +47,7 @@ Fields:
 
 - `id`
 - `day`
+- `sortOrder`
 - `title`
 - `exerciseType`
 - `exerciseUnit`
@@ -54,12 +56,12 @@ Fields:
 
 ### `exerciseSets`
 
-Nested inside an exercise record.
+Nested inside an exercise template.
 
 - Each set has a stable `id`.
-- Reps-based sets use `weight` and `reps`.
-- Timed sets use `time`.
-- These values act as the reusable template the user sees on future workouts.
+- Reps exercises use `weight` and `reps`.
+- Timed exercises use `time`.
+- These values are the reusable template shown on future workouts.
 
 ### `workoutLogs`
 
@@ -73,63 +75,187 @@ One record per completed set per day.
 - `reps`
 - `time`
 
-There is no separate workout-session table right now. Session history is inferred from dated set logs.
+There is no separate workout-session table. Session history is inferred from dated set logs.
 
-## Implementation Map
+## Current Database Notes
+
+- Dexie setup lives in `src/app/db/db.client.ts`.
+- `exercises` schema is versioned and now includes persisted `sortOrder`.
+- The database upgrade backfills `sortOrder` for older local data.
+- Day-based completion uses local calendar boundaries from `getDayBounds()`.
+
+## Current App Structure
+
+### App shell
 
 - Router: `src/app/AppRouter.tsx`
-- App shell: `src/app/AppLayout.tsx`
-- Home screen: `src/pages/Home/index.tsx`
-- Weekday cards and summary UI: `src/components/WeekdayList/*`
-- Day screen: `src/pages/DayScreen/index.tsx`
-- Add exercise form: `src/components/AddExercise/index.tsx`
-- Exercise card and set row: `src/components/ExerciseCard/*`
-- Exercise history: `src/pages/LogScreen/index.tsx`
-- Dexie setup: `src/app/db/index.ts`
-- Table types: `src/app/db/table/*`
-- Repository logic: `src/app/db/repositories/*`
-- Day-boundary helper: `src/app/db/utils/date.ts`
+- App layout: `src/app/AppLayout.tsx`
+
+### Shared layer
+
+- Shared UI primitives: `src/shared/ui/*`
+- Shared constants: `src/shared/constants/weekdays.ts`
+
+### Features
+
+- Week plan: `src/features/week-plan/*`
+- Exercises: `src/features/exercises/*`
+- Exercise history: `src/features/exercise-history/*`
+- PWA helpers: `src/features/pwa/*`
+
+### Data layer
+
+- Models: `src/app/db/models/*`
+- Schemas: `src/app/db/schema/*`
+- Repositories: `src/app/db/repositories/*`
+- Utilities: `src/app/db/utils/*`
+
+## Important Screen And Component Map
+
+- Week home screen: `src/features/week-plan/screens/WeekPlanScreen.tsx`
+- Weekday summary list/card: `src/features/week-plan/components/*`
+- Workout day screen: `src/features/exercises/screens/WorkoutDayScreen.tsx`
+- Add exercise form: `src/features/exercises/components/AddExerciseForm.tsx`
+- Exercise card stack: `src/features/exercises/components/ExerciseCard/*`
+- Exercise history screen: `src/features/exercise-history/screens/ExerciseHistoryScreen.tsx`
+- iOS install helper: `src/features/pwa/components/IosInstallPrompt.tsx`
+
+## Current Exercise UI
+
+### Exercise card header
+
+The exercise header uses a two-column mobile-first layout.
+
+- Left column: a vertical exercise-type tile with a larger icon above `REPS` or `TIME`.
+- Right column row 1: exercise title.
+- Right column row 2: metadata line with unit and planned set count.
+- Right column row 3: compact icon-only actions.
+
+Current header actions:
+
+- View history
+- Move exercise up
+- Move exercise down
+- Expand or collapse
+
+### Set layout
+
+The old HTML table was removed.
+
+Sets now render as stacked mobile cards instead of table rows.
+
+Each set card uses two levels:
+
+- Top row: `Set N`, compact previous-performance text, delete button.
+- Bottom row: editable value inputs and a large `Complete` or `Undo` button.
+
+Rep-based sets show:
+
+- weight input with unit suffix
+- reps input with `reps` suffix
+- previous performance formatted like `15kgx10`
+
+Time-based sets show:
+
+- time input with unit suffix
+- previous performance formatted like `30sec`
+
+Completed sets have a clear tinted success state.
+
+## Current Repository API
+
+### Exercise repository
+
+File: `src/app/db/repositories/exercise.repository.ts`
+
+Key functions:
+
+- `createExerciseTemplate()`
+- `getExerciseById()`
+- `listExerciseTemplates()`
+- `listExercisesForDay()`
+- `updateExerciseTemplate()`
+- `removeExerciseTemplate()`
+- `addExerciseTemplateSet()`
+- `updateExerciseTemplateSet()`
+- `removeExerciseSet()`
+- `moveExerciseTemplate()`
+
+### Workout log repository
+
+File: `src/app/db/repositories/workout-log.repository.ts`
+
+Key functions:
+
+- `listExerciseHistory()`
+- `listCompletedSetIdsForExerciseDay()`
+- `logExerciseSetCompletion()`
+- `removeExerciseSetCompletion()`
+- `deleteLogsByExercise()`
+- `deleteLogsByExerciseSet()`
+
+### Week plan repository
+
+File: `src/app/db/repositories/week-plan.repository.ts`
+
+Key function:
+
+- `listWeekPlanSummaries()`
 
 ## How The Current App Works
 
-- Home reads all exercises and logs, then computes weekday summaries.
-- A weekday screen shows all exercise templates assigned to that day.
-- Creating an exercise starts with an empty `exerciseSets` array.
-- Expanding an exercise reveals its planned sets.
-- Editing a set updates the template inside `exercises`.
-- Pressing complete creates a `workoutLogs` entry if that set has not already been completed today.
-- Pressing undo removes that set completion for the current day.
-- The history screen groups logs by date and shows the snapshot values stored at completion time.
+- The home screen reads exercise templates and logs, then builds weekday summaries.
+- A workout-day screen shows all templates for that day ordered by `sortOrder`.
+- New exercises are appended to the end of that day.
+- Move up/down updates persisted `sortOrder` within the same day.
+- Expanding an exercise reveals its set cards.
+- Editing a set updates template data in `exercises`.
+- Completing a set writes a snapshot log to `workoutLogs` if that set has not already been completed today.
+- Undo removes that set completion for the current day.
+- Exercise history groups logs by date and shows the stored snapshot values.
+- `Previous` performance in the set UI is derived from the latest saved log for that specific set.
+
+## PWA Notes
+
+- The app uses `vite-plugin-pwa` and registers a service worker in `src/main.tsx`.
+- Netlify config for the manifest and service worker lives in `netlify.toml`.
+- Android browsers may show a native install prompt.
+- iOS does not provide the same automatic install prompt flow.
+- iOS installation is manual through the browser share sheet and `Add to Home Screen`.
+- The app now includes a global iOS-only helper banner in `IosInstallPrompt.tsx`.
+- That helper only shows when the app is running on iOS and is not already in standalone mode.
+- The helper is dismissible and mounted from `AppLayout.tsx`.
+- If users do not see `Add to Home Screen`, the intended guidance is to open the app in Safari.
 
 ## Important Technical Notes
 
-- Day-based completion uses local calendar boundaries from `getDayBounds()`, so "once per day" is based on the device/browser local time.
-- Logs are already snapshot-based. The current completion code copies the set values into `workoutLogs` when the check action is pressed.
-- The app is offline-capable and uses `vite-plugin-pwa`.
+- `workoutLogs` is append-only snapshot data.
+- Old logs should never be retroactively mutated.
+- Deleting an exercise currently also deletes its logs.
+- Deleting a set currently also deletes logs for that set.
+- The current Apple touch icon asset exists, but it is `192x192`; if polishing iOS install assets later, consider shipping a dedicated `180x180` touch icon.
 
 ## Known Gaps Or Mismatches
 
-- Weekly progress does not yet match the intended product rule.
-  - Current code in `src/app/db/repositories/weekday.repository.ts` calculates progress from the latest logged workout date for that weekday.
+- Weekly progress on the home screen still does not match the intended Sunday-to-Saturday reset rule.
+  - Current code in `src/app/db/repositories/week-plan.repository.ts` derives progress from the latest logged workout date for that weekday.
   - Intended behavior is week-scoped progress that resets every Sunday.
-- The root `README.md` is still the default Vite template and does not describe the app.
-- Exercise management UI is incomplete.
-  - There is no visible UI for renaming, deleting, or reordering exercises.
-  - There is no visible UI for reordering sets.
-- Repository behavior to note before exposing delete in the UI:
-  - Deleting an exercise currently also deletes its logs.
-  - Confirm that behavior before adding a user-facing delete action.
+- There is still no UI for renaming exercises.
+- There is still no UI for reordering sets.
+- There are no automated tests configured in the repo right now.
 
 ## Repo Health Notes
 
 As checked on 2026-06-02:
 
 - `yarn build` passes.
-- `yarn lint` fails because generated files under `dev-dist/` are being linted and reference missing ESLint rules. This is not a functional app runtime issue, but it should be cleaned up before relying on lint as a quality gate.
+- The app has been refactored away from the old `src/pages/*` and `src/components/*` feature files into the current `src/features/*` and `src/shared/*` structure.
 
 ## Guidance For Future Changes
 
 - Keep `workoutLogs` append-only snapshot data.
-- Do not retroactively mutate old logs when template values change.
+- Do not mutate old logs when template values change.
+- Preserve day-scoped exercise ordering through `sortOrder`.
 - Any future progress logic should use Sunday-to-Saturday week boundaries.
-- If exercise delete is added to the UI, decide explicitly whether logs should also be deleted or preserved.
+- If exercise delete behavior changes, decide explicitly whether history should be preserved or deleted.
+- If iOS install UX is changed, keep the distinction clear between Android automatic prompts and iOS manual share-sheet installation.
