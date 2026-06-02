@@ -1,9 +1,9 @@
-import type { TDay } from "../../app/db/table/exercise.table";
 import { ArrowUpRight } from "lucide-react";
-import { Badge, Panel, ProgressBar } from "../ui";
+import type { WorkoutDay } from "../../../app/db/models/exercise.model";
+import { Badge, Panel, ProgressBar } from "../../../shared/ui";
 
-interface IWeekdayCardProps {
-  readonly day: TDay;
+interface IWeekdaySummaryCardProps {
+  readonly day: WorkoutDay;
   readonly workoutType?: string;
   readonly exerciseCount?: number;
   readonly duration?: number;
@@ -14,7 +14,7 @@ interface IWeekdayCardProps {
   readonly onClick?: () => void;
 }
 
-export default function WeekdayCard({
+export default function WeekdaySummaryCard({
   day,
   workoutType,
   exerciseCount = 0,
@@ -23,7 +23,7 @@ export default function WeekdayCard({
   progress = 0,
   progressLabel,
   onClick,
-}: IWeekdayCardProps) {
+}: IWeekdaySummaryCardProps) {
   const durationLabel = duration ? `${duration}m` : "--";
   const muscleGroupLabel =
     muscleGroups.length > 0

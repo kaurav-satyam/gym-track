@@ -1,15 +1,15 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useNavigate } from "react-router";
-import { listWeekdaySummaries } from "../../app/db/repositories/weekday.repository";
-import { WEEKDAYS } from "../../data/weekday.data";
-import WeekdayCard from "./WeekdayCard";
+import { listWeekPlanSummaries } from "../../../app/db/repositories/week-plan.repository";
+import { WEEKDAYS } from "../../../shared/constants/weekdays";
+import WeekdaySummaryCard from "./WeekdaySummaryCard";
 
-export default function WeekdayList() {
+export default function WeekdaySummaryList() {
   const navigate = useNavigate();
-  const weekdaySummaries = useLiveQuery(() => listWeekdaySummaries(), [], []);
+  const weekPlanSummaries = useLiveQuery(() => listWeekPlanSummaries(), [], []);
 
   const summaryByDay = new Map(
-    weekdaySummaries.map((summary) => [summary.day, summary]),
+    weekPlanSummaries.map((summary) => [summary.day, summary]),
   );
 
   return (
@@ -24,14 +24,14 @@ export default function WeekdayList() {
             : "No sets planned";
 
         return (
-          <WeekdayCard
+          <WeekdaySummaryCard
             key={day}
             day={day}
             exerciseCount={summary?.exerciseCount ?? 0}
             duration={summary?.plannedDurationMin}
             progress={summary?.progress ?? 0}
             progressLabel={progressLabel}
-            onClick={() => navigate(`/dayscreen/${day}`)}
+            onClick={() => navigate(`/days/${day}`)}
           />
         );
       })}

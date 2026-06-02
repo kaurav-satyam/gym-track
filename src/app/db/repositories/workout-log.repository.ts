@@ -1,9 +1,9 @@
-import { db } from "..";
-import type { IExerciseSet } from "../table/exercise.table";
-import type { IWorkoutSetLog } from "../table/workout-log.table";
-import { getDayBounds } from "../utils/date";
+import { db } from "../db.client";
+import type { ExerciseSet } from "../models/exercise.model";
+import type { WorkoutSetLog } from "../models/workout-log.model";
+import { getDayBounds } from "../utils/getDayBounds";
 
-export async function listWorkoutLogsByExercise(exerciseId: number) {
+export async function listExerciseHistory(exerciseId: number) {
   const logs = await db.workoutLogs.where("exerciseId").equals(exerciseId).toArray();
 
   return logs.sort(
@@ -11,21 +11,21 @@ export async function listWorkoutLogsByExercise(exerciseId: number) {
   );
 }
 
-export async function listCompletedSetIdsByExerciseOnDate(
+export async function listCompletedSetIdsForExerciseDay(
   exerciseId: number,
   date = new Date(),
 ) {
-  const logs = await listWorkoutLogsByExerciseOnDate(exerciseId, date);
+  const logs = await listExerciseHistoryForDay(exerciseId, date);
 
   return logs.map((log) => log.exerciseSetId);
 }
 
-export async function completeExerciseSet(
+export async function logExerciseSetCompletion(
   exerciseId: number,
-  set: IExerciseSet,
+  set: ExerciseSet,
   completedAt = new Date(),
 ) {
-  const existingLog = await getWorkoutLogBySetOnDate(set.id, completedAt);
+  const existingLog = await getExerciseSetCompletionForDay(set.id, completedAt);
 
   if (existingLog?.id) {
     return existingLog.id;
@@ -41,11 +41,11 @@ export async function completeExerciseSet(
   });
 }
 
-export async function uncompleteExerciseSet(
+export async function removeExerciseSetCompletion(
   exerciseSetId: string,
   date = new Date(),
 ) {
-  const existingLog = await getWorkoutLogBySetOnDate(exerciseSetId, date);
+  const existingLog = await getExerciseSetCompletionForDay(exerciseSetId, date);
 
   if (!existingLog?.id) {
     return;
@@ -62,10 +62,7 @@ export async function deleteLogsByExerciseSet(exerciseSetId: string) {
   await db.workoutLogs.where("exerciseSetId").equals(exerciseSetId).delete();
 }
 
-async function listWorkoutLogsByExerciseOnDate(
-  exerciseId: number,
-  date: Date,
-) {
+async function listExerciseHistoryForDay(exerciseId: number, date: Date) {
   const { start, end } = getDayBounds(date);
 
   return db.workoutLogs
@@ -74,10 +71,10 @@ async function listWorkoutLogsByExerciseOnDate(
     .toArray();
 }
 
-async function getWorkoutLogBySetOnDate(
+async function getExerciseSetCompletionForDay(
   exerciseSetId: string,
   date: Date,
-): Promise<IWorkoutSetLog | undefined> {
+): Promise<WorkoutSetLog | undefined> {
   const { start, end } = getDayBounds(date);
   const logs = await db.workoutLogs
     .where("[exerciseSetId+completedAt]")

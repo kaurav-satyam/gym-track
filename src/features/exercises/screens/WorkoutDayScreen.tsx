@@ -1,18 +1,18 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
 import { useParams } from "react-router";
-import { listExercisesByDay } from "../../app/db/repositories/exercise.repository";
-import type { TDay } from "../../app/db/table/exercise.table";
-import AddExercise from "../../components/AddExercise";
-import ExerciseCard from "../../components/ExerciseCard";
-import { EmptyState, PageShell } from "../../components/ui";
+import {
+  listExercisesForDay,
+  moveExerciseTemplate,
+} from "../../../app/db/repositories/exercise.repository";
+import type { WorkoutDay } from "../../../app/db/models/exercise.model";
+import { EmptyState, PageShell } from "../../../shared/ui";
+import AddExerciseForm from "../components/AddExerciseForm";
+import ExerciseCard from "../components/ExerciseCard";
 
-export default function DayScreen() {
-  const { day } = useParams<{
-    day: TDay;
-  }>();
-
-  const [isOpen, setIsOpen] = useState(false);
+export default function WorkoutDayScreen() {
+  const { day } = useParams<{ day: WorkoutDay }>();
+  const [isAddExerciseOpen, setIsAddExerciseOpen] = useState(false);
 
   const exercises = useLiveQuery(
     async () => {
@@ -20,7 +20,7 @@ export default function DayScreen() {
         return [];
       }
 
-      return listExercisesByDay(day);
+      return listExercisesForDay(day);
     },
     [day],
     [],
@@ -38,7 +38,7 @@ export default function DayScreen() {
   }
 
   const exerciseCountLabel = `${exercises.length} exercise${exercises.length === 1 ? "" : "s"}`;
-  const shouldShowAddExerciseForm = exercises.length === 0 || isOpen;
+  const shouldShowAddExerciseForm = exercises.length === 0 || isAddExerciseOpen;
 
   return (
     <PageShell
@@ -50,10 +50,10 @@ export default function DayScreen() {
           : "Start the session by adding the first exercise for this day."
       }
     >
-      <AddExercise
-        isOpen={shouldShowAddExerciseForm}
-        setIsOpen={setIsOpen}
+      <AddExerciseForm
         day={day}
+        isOpen={shouldShowAddExerciseForm}
+        setIsOpen={setIsAddExerciseOpen}
       />
 
       {exercises.length === 0 ? (
@@ -63,8 +63,15 @@ export default function DayScreen() {
         />
       ) : (
         <div className="space-y-3">
-          {exercises.map((exercise) => (
-            <ExerciseCard key={exercise.id} exercise={exercise} />
+          {exercises.map((exercise, index) => (
+            <ExerciseCard
+              key={exercise.id}
+              exercise={exercise}
+              canMoveUp={index > 0}
+              canMoveDown={index < exercises.length - 1}
+              onMoveUp={() => void moveExerciseTemplate(exercise.id!, "up")}
+              onMoveDown={() => void moveExerciseTemplate(exercise.id!, "down")}
+            />
           ))}
         </div>
       )}

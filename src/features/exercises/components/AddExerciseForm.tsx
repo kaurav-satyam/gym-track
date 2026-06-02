@@ -1,17 +1,17 @@
 import { ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
-  createExercise,
-  type ICreateExercisePayload,
-} from "../../app/db/repositories/exercise.repository";
+  createExerciseTemplate,
+  type CreateExercisePayload,
+} from "../../../app/db/repositories/exercise.repository";
 import {
-  ExerciseTimeUnits,
-  ExerciseTypes,
-  ExerciseWeightUnits,
-  type TDay,
-  type TExerciseType,
-  type TExerciseUnitType,
-} from "../../app/db/table/exercise.table";
+  EXERCISE_TIME_UNITS,
+  EXERCISE_TYPES,
+  EXERCISE_WEIGHT_UNITS,
+  type ExerciseType,
+  type ExerciseUnit,
+  type WorkoutDay,
+} from "../../../app/db/models/exercise.model";
 import {
   Button,
   Field,
@@ -20,36 +20,37 @@ import {
   SelectField,
   TextField,
   cn,
-} from "../ui";
+} from "../../../shared/ui";
 
-interface IAddExerciseProps {
-  readonly day: TDay;
+interface IAddExerciseFormProps {
+  readonly day: WorkoutDay;
   isOpen: boolean;
   setIsOpen: (arg: boolean) => void;
 }
 
-const exerciseTypeOptions: Array<{ label: string; value: TExerciseType }> =
-  ExerciseTypes.map((value) => ({
+const exerciseTypeOptions: Array<{ label: string; value: ExerciseType }> =
+  EXERCISE_TYPES.map((value) => ({
     label: value,
     value,
   }));
 
-export default function AddExercise({
+export default function AddExerciseForm({
   day,
   isOpen,
   setIsOpen,
-}: IAddExerciseProps) {
+}: IAddExerciseFormProps) {
   const [title, setTitle] = useState("");
-  const [exerciseType, setExerciseType] = useState<TExerciseType>("reps");
-  const [exerciseUnit, setExerciseUnit] = useState<TExerciseUnitType>("kg");
+  const [exerciseType, setExerciseType] = useState<ExerciseType>("reps");
+  const [exerciseUnit, setExerciseUnit] = useState<ExerciseUnit>("kg");
   const [plannedDurationMin, setPlannedDurationMin] = useState("");
 
   const displayUnits = useMemo(
-    () => (exerciseType === "reps" ? ExerciseWeightUnits : ExerciseTimeUnits),
+    () =>
+      exerciseType === "reps" ? EXERCISE_WEIGHT_UNITS : EXERCISE_TIME_UNITS,
     [exerciseType],
   );
 
-  async function addExercise() {
+  async function handleAddExercise() {
     const normalizedTitle = title.trim();
 
     if (!normalizedTitle) {
@@ -59,7 +60,7 @@ export default function AddExercise({
     const nextPlannedDuration =
       plannedDurationMin === "" ? undefined : Number(plannedDurationMin);
 
-    const data: ICreateExercisePayload = {
+    const payload: CreateExercisePayload = {
       title: normalizedTitle,
       day,
       exerciseType,
@@ -68,7 +69,7 @@ export default function AddExercise({
       exerciseSets: [],
     };
 
-    await createExercise(data);
+    await createExerciseTemplate(payload);
 
     setTitle("");
     setExerciseType("reps");
@@ -112,9 +113,9 @@ export default function AddExercise({
         <div className="overflow-hidden">
           <form
             className="space-y-5 px-5 pb-5 sm:px-6 sm:pb-6"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void addExercise();
+            onSubmit={(event) => {
+              event.preventDefault();
+              void handleAddExercise();
             }}
           >
             <Field label="Exercise name" htmlFor="exercise-name">
@@ -123,7 +124,7 @@ export default function AddExercise({
                 type="text"
                 placeholder="Bench press"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(event) => setTitle(event.target.value)}
               />
             </Field>
 
@@ -145,8 +146,8 @@ export default function AddExercise({
               <SelectField
                 id="exercise-unit"
                 value={exerciseUnit}
-                onChange={(e) =>
-                  setExerciseUnit(e.target.value as TExerciseUnitType)
+                onChange={(event) =>
+                  setExerciseUnit(event.target.value as ExerciseUnit)
                 }
               >
                 {displayUnits.map((unit) => (
@@ -174,7 +175,7 @@ export default function AddExercise({
                 inputMode="numeric"
                 placeholder="15"
                 value={plannedDurationMin}
-                onChange={(e) => setPlannedDurationMin(e.target.value)}
+                onChange={(event) => setPlannedDurationMin(event.target.value)}
               />
             </Field>
 

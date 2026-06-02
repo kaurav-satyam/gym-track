@@ -1,11 +1,11 @@
-import { db } from "..";
-import { WEEKDAYS } from "../../../data/weekday.data";
-import type { IWorkoutSetLog } from "../table/workout-log.table";
-import type { IExerciseTable, TDay } from "../table/exercise.table";
-import { getDayBounds } from "../utils/date";
+import { db } from "../db.client";
+import { WEEKDAYS } from "../../../shared/constants/weekdays";
+import type { ExerciseTemplate, WorkoutDay } from "../models/exercise.model";
+import type { WorkoutSetLog } from "../models/workout-log.model";
+import { getDayBounds } from "../utils/getDayBounds";
 
-export interface IWeekdaySummary {
-  day: TDay;
+export interface WeekPlanSummary {
+  day: WorkoutDay;
   exerciseCount: number;
   plannedDurationMin?: number;
   totalSetsCount: number;
@@ -13,16 +13,16 @@ export interface IWeekdaySummary {
   progress: number;
 }
 
-export async function listWeekdaySummaries() {
-  const [exercises, logs] = await Promise.all([
+export async function listWeekPlanSummaries() {
+  const [exerciseTemplates, workoutLogs] = await Promise.all([
     db.exercises.toArray(),
     db.workoutLogs.toArray(),
   ]);
 
-  const exerciseDayById = new Map<number, TDay>();
-  const exercisesByDay = new Map<TDay, IExerciseTable[]>();
+  const exerciseDayById = new Map<number, WorkoutDay>();
+  const exercisesByDay = new Map<WorkoutDay, ExerciseTemplate[]>();
 
-  for (const exercise of exercises) {
+  for (const exercise of exerciseTemplates) {
     if (exercise.id == null) {
       continue;
     }
@@ -34,10 +34,10 @@ export async function listWeekdaySummaries() {
     exercisesByDay.set(exercise.day, dayExercises);
   }
 
-  const logsByDay = new Map<TDay, IWorkoutSetLog[]>();
-  const latestWorkoutByDay = new Map<TDay, Date>();
+  const logsByDay = new Map<WorkoutDay, WorkoutSetLog[]>();
+  const latestWorkoutByDay = new Map<WorkoutDay, Date>();
 
-  for (const log of logs) {
+  for (const log of workoutLogs) {
     const day = exerciseDayById.get(log.exerciseId);
 
     if (!day) {
@@ -56,7 +56,7 @@ export async function listWeekdaySummaries() {
   }
 
   return WEEKDAYS.map((day) =>
-    buildWeekdaySummary(
+    buildWeekPlanSummary(
       day,
       exercisesByDay.get(day) ?? [],
       logsByDay.get(day) ?? [],
@@ -65,12 +65,12 @@ export async function listWeekdaySummaries() {
   );
 }
 
-function buildWeekdaySummary(
-  day: TDay,
-  exercises: IExerciseTable[],
-  logs: IWorkoutSetLog[],
+function buildWeekPlanSummary(
+  day: WorkoutDay,
+  exercises: ExerciseTemplate[],
+  logs: WorkoutSetLog[],
   latestWorkout?: Date,
-): IWeekdaySummary {
+): WeekPlanSummary {
   const exerciseCount = exercises.length;
   const totalSetsCount = exercises.reduce(
     (sum, exercise) => sum + exercise.exerciseSets.length,
@@ -98,7 +98,7 @@ function buildWeekdaySummary(
   };
 }
 
-function countCompletedSetsForWorkoutDay(logs: IWorkoutSetLog[], workoutDate: Date) {
+function countCompletedSetsForWorkoutDay(logs: WorkoutSetLog[], workoutDate: Date) {
   const { start, end } = getDayBounds(workoutDate);
   const completedSetIds = new Set(
     logs

@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router";
-import DayScreen from "../pages/DayScreen";
-import Home from "../pages/Home";
-import LogScreen from "../pages/LogScreen";
+import ExerciseHistoryScreen from "../features/exercise-history/screens/ExerciseHistoryScreen";
+import WorkoutDayScreen from "../features/exercises/screens/WorkoutDayScreen";
+import WeekPlanScreen from "../features/week-plan/screens/WeekPlanScreen";
 import AppLayout from "./AppLayout";
 
 const AppRouter = createBrowserRouter([
@@ -9,9 +9,12 @@ const AppRouter = createBrowserRouter([
     path: "/",
     element: <AppLayout />,
     children: [
-      { index: true, element: <Home /> },
-      { path: "dayscreen/:day", element: <DayScreen /> },
-      { path: "logscreen/:excid", element: <LogScreen /> },
+      { index: true, element: <WeekPlanScreen /> },
+      { path: "days/:day", element: <WorkoutDayScreen /> },
+      {
+        path: "exercises/:exerciseId/history",
+        element: <ExerciseHistoryScreen />,
+      },
     ],
   },
 ]);
