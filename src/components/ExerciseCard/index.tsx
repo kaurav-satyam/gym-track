@@ -10,8 +10,12 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { addExerciseSet } from "../../app/db/repositories/exercise.repository";
-import { listCompletedSetIdsByExerciseOnDate } from "../../app/db/repositories/workout-log.repository";
+import {
+  listCompletedSetIdsByExerciseOnDate,
+  listWorkoutLogsByExercise,
+} from "../../app/db/repositories/workout-log.repository";
 import type { IExerciseTable } from "../../app/db/table/exercise.table";
+import type { IWorkoutSetLog } from "../../app/db/table/workout-log.table";
 import { Button, IconButton, Panel } from "../ui";
 import SetRow from "./SetRow";
 
@@ -29,7 +33,20 @@ export default function ExerciseCard({ exercise }: IExerciseCardProps) {
     [exerciseId],
     [],
   );
+  const workoutLogs = useLiveQuery(
+    () => listWorkoutLogsByExercise(exerciseId),
+    [exerciseId],
+    [],
+  );
   const completedSetIdSet = new Set(completedSetIds);
+  const latestLogBySetId = new Map<string, IWorkoutSetLog>();
+
+  for (const log of workoutLogs) {
+    if (!latestLogBySetId.has(log.exerciseSetId)) {
+      latestLogBySetId.set(log.exerciseSetId, log);
+    }
+  }
+
   const totalSets = exercise.exerciseSets.length;
 
   return (
@@ -97,7 +114,7 @@ export default function ExerciseCard({ exercise }: IExerciseCardProps) {
               No sets added yet.
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {exercise.exerciseSets.map((set, index) => (
                 <SetRow
                   key={set.id}
@@ -106,6 +123,7 @@ export default function ExerciseCard({ exercise }: IExerciseCardProps) {
                   setNumber={index + 1}
                   exerciseType={exercise.exerciseType}
                   exerciseUnit={exercise.exerciseUnit}
+                  previousLog={latestLogBySetId.get(set.id)}
                   completedToday={completedSetIdSet.has(set.id)}
                 />
               ))}
