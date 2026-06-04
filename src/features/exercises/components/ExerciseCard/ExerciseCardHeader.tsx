@@ -90,7 +90,7 @@ export default function ExerciseCardHeader({
               <Eye size={14} />
             </IconButton>
 
-            <div className="inline-flex items-center rounded-xl border border-(--surface-border) bg-white/3 p-0.5">
+            <div className="inline-flex items-center rounded-xl border border-(--surface-border) bg-white/3">
               <IconButton
                 tone="ghost"
                 size="sm"
@@ -102,6 +102,8 @@ export default function ExerciseCardHeader({
               >
                 <ArrowUp size={14} />
               </IconButton>
+
+              <div className="h-5 w-px bg-(--surface-border)" />
 
               <IconButton
                 tone="ghost"

@@ -1,4 +1,10 @@
-import { Button, RowCard, cn } from "../../../../shared/ui";
+import { Check, X } from "lucide-react";
+import type {
+  ExerciseSet,
+  ExerciseType,
+  ExerciseUnit,
+} from "../../../../app/db/models/exercise.model";
+import type { WorkoutSetLog } from "../../../../app/db/models/workout-log.model";
 import {
   removeExerciseSet,
   updateExerciseTemplateSet,
@@ -7,12 +13,7 @@ import {
   logExerciseSetCompletion,
   removeExerciseSetCompletion,
 } from "../../../../app/db/repositories/workout-log.repository";
-import type {
-  ExerciseSet,
-  ExerciseType,
-  ExerciseUnit,
-} from "../../../../app/db/models/exercise.model";
-import type { WorkoutSetLog } from "../../../../app/db/models/workout-log.model";
+import { Button, RowCard, cn } from "../../../../shared/ui";
 import ExerciseSetCardHeader from "./ExerciseSetCardHeader";
 import ExerciseSetValueInput from "./ExerciseSetValueInput";
 import formatPreviousPerformance from "./formatPreviousPerformance";
@@ -109,7 +110,9 @@ export default function ExerciseSetCard({
             onChange={(event) =>
               updateExerciseTemplateSet(exerciseId, set.id, {
                 time:
-                  event.target.value === "" ? undefined : Number(event.target.value),
+                  event.target.value === ""
+                    ? undefined
+                    : Number(event.target.value),
               })
             }
           />
@@ -118,18 +121,18 @@ export default function ExerciseSetCard({
         {completedToday ? (
           <Button
             tone="secondary"
-            className="min-h-11 min-w-27 shrink-0 rounded-xl border-emerald-400/30 bg-emerald-500/12 px-4 text-sm font-semibold whitespace-nowrap text-emerald-100 hover:bg-emerald-500/18"
+            className="min-h-11 shrink-0 rounded-xl border-emerald-400/30 bg-emerald-500/12 px-4 text-sm font-semibold whitespace-nowrap text-emerald-100 hover:bg-emerald-500/18"
             onClick={() => removeExerciseSetCompletion(set.id)}
           >
-            Undo
+            <X />
           </Button>
         ) : (
           <Button
             tone="primary"
-            className="min-h-11 min-w-27 shrink-0 rounded-xl px-4 text-sm font-semibold whitespace-nowrap"
+            className="min-h-11  shrink-0 rounded-xl px-4 text-sm font-semibold whitespace-nowrap"
             onClick={() => logExerciseSetCompletion(exerciseId, set)}
           >
-            Complete
+            <Check />
           </Button>
         )}
       </div>
