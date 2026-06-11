@@ -6,6 +6,7 @@ import { pathToFileURL } from "node:url";
 
 const projectRoot = process.cwd();
 const outputDir = resolve(projectRoot, "public/screenshots");
+const brandLogoUrl = pathToFileURL(resolve(projectRoot, "public", "logo.svg")).href;
 const tmpDir = mkdtempSync(join(tmpdir(), "gymtrack-pwa-"));
 
 const chromeBinary = [
@@ -138,16 +139,17 @@ const baseStyles = /* html */ `
   .brand-mark {
     width: 34px;
     height: 34px;
-    border-radius: 14px;
-    display: grid;
-    place-items: center;
-    border: 1px solid rgba(244, 236, 220, 0.18);
-    background: rgba(244, 236, 220, 0.08);
-    color: #f4ecdc;
-    font-size: 19px;
-    font-weight: 700;
-    text-transform: none;
-    letter-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    flex: none;
+  }
+
+  .brand-mark img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
   }
 
   .hero {
@@ -741,7 +743,7 @@ const screenshots = [
           <main class="stage portrait-stage">
             <div class="topbar">
               <div class="brand-lockup">
-                <div class="brand-mark">ê</div>
+                <div class="brand-mark"><img src="${brandLogoUrl}" alt="" /></div>
                 <span>GymTrack</span>
               </div>
               <span>Mon 07:30</span>
@@ -810,7 +812,7 @@ const screenshots = [
           <main class="stage portrait-stage">
             <div class="topbar">
               <div class="brand-lockup">
-                <div class="brand-mark">ê</div>
+                <div class="brand-mark"><img src="${brandLogoUrl}" alt="" /></div>
                 <span>GymTrack</span>
               </div>
               <span>Mon 18:40</span>
@@ -900,7 +902,7 @@ const screenshots = [
           <main class="stage wide-stage">
             <div class="topbar">
               <div class="brand-lockup">
-                <div class="brand-mark">ê</div>
+                <div class="brand-mark"><img src="${brandLogoUrl}" alt="" /></div>
                 <span>GymTrack</span>
               </div>
               <span>Desktop overview</span>

@@ -59,6 +59,7 @@ yarn dev
 | `yarn build` | Type-check and build the production bundle |
 | `yarn lint` | Run ESLint |
 | `yarn preview` | Preview the production build locally |
+| `yarn pwa:icons` | Regenerate the favicon and installable app icons from `public/logo.svg` |
 | `yarn pwa:screenshots` | Regenerate the PWA screenshot assets in `public/screenshots` |
 
 > [!NOTE]
