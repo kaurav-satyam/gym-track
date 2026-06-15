@@ -27,6 +27,7 @@ export interface ExerciseTemplate {
   title: string;
   exerciseType: ExerciseType;
   exerciseUnit: ExerciseUnit;
+  muscleTags?: string[];
   plannedDurationMin?: number;
   exerciseSets: ExerciseSet[];
 }

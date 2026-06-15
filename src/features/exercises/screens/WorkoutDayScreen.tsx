@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router";
 import {
   listExercisesForDay,
   moveExerciseTemplate,
+  removeExerciseTemplate,
 } from "../../../app/db/repositories/exercise.repository";
 import { listCompletedSetIdsForExerciseDay } from "../../../app/db/repositories/workout-log.repository";
 import type {
@@ -78,6 +79,22 @@ export default function WorkoutDayScreen() {
   const completionPercent =
     plannedSetCount === 0 ? 0 : (completedSetCount / plannedSetCount) * 100;
 
+  function handleDeleteExercise(exercise: ExerciseTemplate) {
+    if (exercise.id == null) {
+      return;
+    }
+
+    const shouldDelete = window.confirm(
+      "Delete " + exercise.title + "? This also removes its completed set logs.",
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    void removeExerciseTemplate(exercise.id);
+  }
+
   return (
     <PageShell
       eyebrow={isToday ? "Today" : "Workout day"}
@@ -130,6 +147,7 @@ export default function WorkoutDayScreen() {
               canMoveDown={index < exercises.length - 1}
               onMoveUp={() => void moveExerciseTemplate(exercise.id!, "up")}
               onMoveDown={() => void moveExerciseTemplate(exercise.id!, "down")}
+              onDelete={() => handleDeleteExercise(exercise)}
             />
           ))}
         </div>

@@ -6,7 +6,9 @@ import {
   Dumbbell,
   Eye,
   Timer,
+  Trash2,
 } from "lucide-react";
+import type { ReactNode } from "react";
 import { useNavigate } from "react-router";
 import type { ExerciseTemplate } from "../../../../app/db/models/exercise.model";
 import { IconButton, cn } from "../../../../shared/ui";
@@ -21,6 +23,7 @@ interface IExerciseCardHeaderProps {
   canMoveDown: boolean;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  onDelete: () => void;
 }
 
 export default function ExerciseCardHeader({
@@ -33,6 +36,7 @@ export default function ExerciseCardHeader({
   canMoveDown,
   onMoveUp,
   onMoveDown,
+  onDelete,
 }: IExerciseCardHeaderProps) {
   const navigate = useNavigate();
   const expandLabel = `${expanded ? "Collapse" : "Expand"} ${exercise.title}`;
@@ -71,12 +75,32 @@ export default function ExerciseCardHeader({
           {exercise.title}
         </h2>
 
-        <div className="flex flex-wrap items-center gap-2 text-xs text-(--text-muted)">
-          <span>{exercise.exerciseUnit}</span>
-          <span>•</span>
-          <span>
-            {completedSetCount}/{totalSets} sets complete
-          </span>
+        <div className="space-y-2">
+          <div className="space-y-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-(--text-muted)">
+              Config
+            </p>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <ConfigChip>{exercise.exerciseType}</ConfigChip>
+              <ConfigChip>{exercise.exerciseUnit}</ConfigChip>
+              <ConfigChip>
+                {completedSetCount}/{totalSets} sets
+              </ConfigChip>
+            </div>
+          </div>
+
+          {exercise.muscleTags && exercise.muscleTags.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-(--text-muted)">
+                Muscle tags
+              </p>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {exercise.muscleTags.map((tag) => (
+                  <MuscleTagPill key={tag}>{tag}</MuscleTagPill>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -90,6 +114,17 @@ export default function ExerciseCardHeader({
               onClick={() => navigate(`/exercises/${exercise.id}/history`)}
             >
               <Eye size={14} />
+            </IconButton>
+
+            <IconButton
+              tone="danger"
+              size="sm"
+              className="h-9 w-9 rounded-xl"
+              aria-label={"Delete " + exercise.title}
+              title="Delete exercise"
+              onClick={onDelete}
+            >
+              <Trash2 size={14} />
             </IconButton>
 
             <div className="inline-flex items-center rounded-xl border border-(--surface-border) bg-white/3">
@@ -134,5 +169,22 @@ export default function ExerciseCardHeader({
         </div>
       </div>
     </div>
+  );
+}
+
+function ConfigChip({ children }: { children: ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded-md border border-(--surface-border) bg-black/15 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-(--text-soft)">
+      {children}
+    </span>
+  );
+}
+
+function MuscleTagPill({ children }: { children: ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-100">
+      <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+      {children}
+    </span>
   );
 }

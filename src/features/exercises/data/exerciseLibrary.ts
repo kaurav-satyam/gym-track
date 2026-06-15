@@ -8,6 +8,7 @@ export interface ExerciseLibraryItem {
   title: string;
   exerciseType: ExerciseType;
   exerciseUnit: ExerciseUnit;
+  muscleTags?: string[];
   plannedDurationMin?: number;
 }
 
@@ -17,6 +18,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     title: "Bench Press",
     exerciseType: "reps",
     exerciseUnit: "kg",
+    muscleTags: ["Chest", "Triceps", "Shoulders"],
     plannedDurationMin: 15,
   },
   {
@@ -24,6 +26,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     title: "Incline Dumbbell Press",
     exerciseType: "reps",
     exerciseUnit: "kg",
+    muscleTags: ["Chest", "Triceps", "Shoulders"],
     plannedDurationMin: 12,
   },
   {
@@ -31,6 +34,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     title: "Squat",
     exerciseType: "reps",
     exerciseUnit: "kg",
+    muscleTags: ["Legs"],
     plannedDurationMin: 18,
   },
   {
@@ -38,6 +42,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     title: "Deadlift",
     exerciseType: "reps",
     exerciseUnit: "kg",
+    muscleTags: ["Back", "Biceps"],
     plannedDurationMin: 18,
   },
   {
@@ -45,6 +50,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     title: "Overhead Press",
     exerciseType: "reps",
     exerciseUnit: "kg",
+    muscleTags: ["Shoulders", "Triceps"],
     plannedDurationMin: 12,
   },
   {
@@ -52,6 +58,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     title: "Lat Pulldown",
     exerciseType: "reps",
     exerciseUnit: "kg",
+    muscleTags: ["Back", "Biceps"],
     plannedDurationMin: 10,
   },
   {
@@ -59,6 +66,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     title: "Seated Row",
     exerciseType: "reps",
     exerciseUnit: "kg",
+    muscleTags: ["Back", "Biceps"],
     plannedDurationMin: 10,
   },
   {
@@ -66,6 +74,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     title: "Leg Press",
     exerciseType: "reps",
     exerciseUnit: "kg",
+    muscleTags: ["Legs"],
     plannedDurationMin: 12,
   },
   {
@@ -73,6 +82,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     title: "Bicep Curl",
     exerciseType: "reps",
     exerciseUnit: "kg",
+    muscleTags: ["Biceps"],
     plannedDurationMin: 8,
   },
   {
@@ -80,6 +90,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     title: "Triceps Pushdown",
     exerciseType: "reps",
     exerciseUnit: "kg",
+    muscleTags: ["Triceps"],
     plannedDurationMin: 8,
   },
   {
@@ -87,6 +98,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     title: "Plank",
     exerciseType: "time",
     exerciseUnit: "sec",
+    muscleTags: ["Core"],
     plannedDurationMin: 5,
   },
   {
@@ -94,6 +106,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     title: "Treadmill",
     exerciseType: "time",
     exerciseUnit: "min",
+    muscleTags: ["Cardio"],
     plannedDurationMin: 20,
   },
   {
@@ -101,6 +114,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     title: "Cycling",
     exerciseType: "time",
     exerciseUnit: "min",
+    muscleTags: ["Cardio"],
     plannedDurationMin: 20,
   },
   {
@@ -108,6 +122,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     title: "Battle Ropes",
     exerciseType: "time",
     exerciseUnit: "sec",
+    muscleTags: ["Full Body", "Cardio"],
     plannedDurationMin: 8,
   },
 ];

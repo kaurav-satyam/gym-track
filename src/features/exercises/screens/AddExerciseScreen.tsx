@@ -7,7 +7,7 @@ import {
   Search,
   Timer,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   createExerciseTemplate,
@@ -22,7 +22,6 @@ import {
   type WorkoutDay,
 } from "../../../app/db/models/exercise.model";
 import {
-  Badge,
   Button,
   EmptyState,
   Field,
@@ -35,6 +34,7 @@ import {
   cn,
 } from "../../../shared/ui";
 import { WEEKDAYS } from "../../../shared/constants/weekdays";
+import { DEFAULT_MUSCLE_TAGS } from "../../../shared/constants/muscleTags";
 import {
   exerciseLibrary,
   type ExerciseLibraryItem,
@@ -45,6 +45,8 @@ interface IExerciseSetupState {
   exerciseUnit: ExerciseUnit;
   plannedDurationMin: string;
   plannedSetCount: string;
+  muscleTags: string[];
+  customTag: string;
 }
 
 const exerciseTypeOptions = EXERCISE_TYPES.map((value) => ({
@@ -115,6 +117,7 @@ export default function AddExerciseScreen() {
       title,
       exerciseType: "reps",
       exerciseUnit: "kg",
+      muscleTags: [],
       plannedDurationMin: 10,
     };
 
@@ -137,6 +140,7 @@ export default function AddExerciseScreen() {
       day: day!,
       exerciseType: setupState.exerciseType,
       exerciseUnit: setupState.exerciseUnit,
+      muscleTags: setupState.muscleTags,
       plannedDurationMin,
       exerciseSets: Array.from({ length: plannedSetCount }, () => ({
         id: crypto.randomUUID(),
@@ -242,6 +246,15 @@ function ExercisePickerCard({
   const displayUnits = isRepsExercise
     ? EXERCISE_WEIGHT_UNITS
     : EXERCISE_TIME_UNITS;
+  const cardExerciseType = expanded ? setupState.exerciseType : exercise.exerciseType;
+  const cardExerciseUnit = expanded ? setupState.exerciseUnit : exercise.exerciseUnit;
+  const cardSetCount = expanded ? setupState.plannedSetCount : "3";
+  const cardDuration = expanded
+    ? setupState.plannedDurationMin
+    : String(exercise.plannedDurationMin ?? "");
+  const cardMuscleTags = expanded
+    ? setupState.muscleTags
+    : (exercise.muscleTags ?? []);
 
   return (
     <Panel className="overflow-hidden">
@@ -269,9 +282,31 @@ function ExercisePickerCard({
             <h2 className="truncate text-base font-semibold text-(--text-strong)">
               {exercise.title}
             </h2>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge tone="soft">{exercise.exerciseType}</Badge>
-              <Badge tone="soft">{exercise.exerciseUnit}</Badge>
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-(--text-muted)">
+                  Config
+                </p>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <ConfigChip>{cardExerciseType}</ConfigChip>
+                  <ConfigChip>{cardExerciseUnit}</ConfigChip>
+                  <ConfigChip>{cardSetCount || "0"} sets</ConfigChip>
+                  {cardDuration && <ConfigChip>{cardDuration} min</ConfigChip>}
+                </div>
+              </div>
+
+              {cardMuscleTags.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-(--text-muted)">
+                    Muscle tags
+                  </p>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {cardMuscleTags.slice(0, 4).map((tag) => (
+                      <MuscleTagPill key={tag}>{tag}</MuscleTagPill>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -294,6 +329,38 @@ function ExercisePickerCard({
       >
         <div className="overflow-hidden">
           <div className="space-y-4 border-t border-(--surface-border) px-4 pb-4 pt-4 sm:px-5">
+            <Field
+              label="Muscle tags"
+              hint="Choose all muscles this exercise trains. Add a custom tag when needed."
+            >
+              <MuscleTagSelector
+                selectedTags={setupState.muscleTags}
+                customTag={setupState.customTag}
+                setCustomTag={(customTag) =>
+                  setSetupState({ ...setupState, customTag })
+                }
+                onToggleTag={(tag) =>
+                  setSetupState({
+                    ...setupState,
+                    muscleTags: toggleTag(setupState.muscleTags, tag),
+                  })
+                }
+                onAddCustomTag={() => {
+                  const normalizedTag = setupState.customTag.trim();
+
+                  if (!normalizedTag) {
+                    return;
+                  }
+
+                  setSetupState({
+                    ...setupState,
+                    customTag: "",
+                    muscleTags: addUniqueTag(setupState.muscleTags, normalizedTag),
+                  });
+                }}
+              />
+            </Field>
+
             <Field label="Tracking type">
               <SegmentedControl
                 options={exerciseTypeOptions}
@@ -379,11 +446,110 @@ function ExercisePickerCard({
   );
 }
 
+function ConfigChip({ children }: { children: ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded-md border border-(--surface-border) bg-black/15 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-(--text-soft)">
+      {children}
+    </span>
+  );
+}
+
+function MuscleTagPill({ children }: { children: ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-100">
+      <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+      {children}
+    </span>
+  );
+}
+
+function MuscleTagSelector({
+  selectedTags,
+  customTag,
+  setCustomTag,
+  onToggleTag,
+  onAddCustomTag,
+}: {
+  selectedTags: string[];
+  customTag: string;
+  setCustomTag: (customTag: string) => void;
+  onToggleTag: (tag: string) => void;
+  onAddCustomTag: () => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
+        {DEFAULT_MUSCLE_TAGS.map((tag) => {
+          const selected = selectedTags.includes(tag);
+
+          return (
+            <button
+              key={tag}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => onToggleTag(tag)}
+              className={cn(
+                "rounded-full border px-3 py-1.5 text-xs font-medium transition duration-200",
+                selected
+                  ? "border-transparent bg-(--accent) text-(--accent-ink)"
+                  : "border-(--surface-border) bg-white/4 text-(--text-soft) hover:border-(--surface-border-strong) hover:bg-white/8",
+              )}
+            >
+              {tag}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+        <TextField
+          aria-label="Custom muscle tag"
+          placeholder="Add custom tag"
+          value={customTag}
+          onChange={(event) => setCustomTag(event.target.value)}
+        />
+        <Button
+          tone="secondary"
+          leadingIcon={<Plus size={16} />}
+          onClick={onAddCustomTag}
+          disabled={!customTag.trim()}
+        >
+          Add tag
+        </Button>
+      </div>
+
+      {selectedTags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {selectedTags.map((tag) => (
+            <MuscleTagPill key={tag}>{tag}</MuscleTagPill>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function toggleTag(tags: string[], tag: string) {
+  return tags.includes(tag)
+    ? tags.filter((currentTag) => currentTag !== tag)
+    : [...tags, tag];
+}
+
+function addUniqueTag(tags: string[], tag: string) {
+  return tags.some(
+    (currentTag) => currentTag.toLowerCase() === tag.toLowerCase(),
+  )
+    ? tags
+    : [...tags, tag];
+}
+
 function buildSetupState(exercise: ExerciseLibraryItem): IExerciseSetupState {
   return {
     exerciseType: exercise.exerciseType,
     exerciseUnit: exercise.exerciseUnit,
     plannedDurationMin: String(exercise.plannedDurationMin ?? ""),
     plannedSetCount: "3",
+    muscleTags: exercise.muscleTags ?? [],
+    customTag: "",
   };
 }

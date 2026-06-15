@@ -17,6 +17,7 @@ interface IExerciseCardProps {
   canMoveDown: boolean;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  onDelete: () => void;
 }
 
 export default function ExerciseCard({
@@ -25,6 +26,7 @@ export default function ExerciseCard({
   canMoveDown,
   onMoveUp,
   onMoveDown,
+  onDelete,
 }: IExerciseCardProps) {
   const [expanded, setExpanded] = useState(true);
   const exerciseId = exercise.id!;
@@ -54,6 +56,7 @@ export default function ExerciseCard({
         canMoveDown={canMoveDown}
         onMoveUp={onMoveUp}
         onMoveDown={onMoveDown}
+        onDelete={onDelete}
       />
 
       {expanded && (
