@@ -40,7 +40,7 @@ export default function Button({
     <button
       type={type ?? "button"}
       className={cn(
-        "inline-flex items-center justify-center gap-2 border font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex items-center justify-center gap-2 border font-medium transition duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-50",
         toneClasses[tone],
         sizeClasses[size],
         fullWidth && "w-full",

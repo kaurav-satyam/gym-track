@@ -26,7 +26,7 @@ export default function ExerciseCard({
   onMoveUp,
   onMoveDown,
 }: IExerciseCardProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const exerciseId = exercise.id!;
   const completedSetIds = useLiveQuery(
     () => listCompletedSetIdsForExerciseDay(exerciseId),
@@ -49,6 +49,7 @@ export default function ExerciseCard({
         expanded={expanded}
         onToggle={() => setExpanded((prev) => !prev)}
         totalSets={totalSets}
+        completedSetCount={completedSetIdSet.size}
         canMoveUp={canMoveUp}
         canMoveDown={canMoveDown}
         onMoveUp={onMoveUp}

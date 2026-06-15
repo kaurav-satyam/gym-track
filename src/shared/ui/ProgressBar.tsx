@@ -18,7 +18,7 @@ export default function ProgressBar({
 
       <div className="h-2 overflow-hidden rounded-full bg-white/8">
         <div
-          className="h-full rounded-full bg-(--accent) transition-[width] duration-300"
+          className="h-full rounded-full bg-(--accent) transition-[width] duration-500 ease-out"
           style={{ width: `${safeValue}%` }}
         />
       </div>

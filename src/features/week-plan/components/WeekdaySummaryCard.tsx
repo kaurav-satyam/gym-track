@@ -1,6 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import type { WorkoutDay } from "../../../app/db/models/exercise.model";
-import { Badge, Panel, ProgressBar } from "../../../shared/ui";
+import { Badge, Panel, ProgressBar, cn } from "../../../shared/ui";
 
 interface IWeekdaySummaryCardProps {
   readonly day: WorkoutDay;
@@ -11,6 +11,7 @@ interface IWeekdaySummaryCardProps {
   readonly progress?: number;
   readonly progressLabel?: string;
   readonly isRestDay?: boolean;
+  readonly isToday?: boolean;
   readonly onClick?: () => void;
 }
 
@@ -23,6 +24,7 @@ export default function WeekdaySummaryCard({
   progress = 0,
   progressLabel,
   onClick,
+  isToday = false,
 }: IWeekdaySummaryCardProps) {
   const durationLabel = duration ? `${duration}m` : "--";
   const muscleGroupLabel =
@@ -38,7 +40,7 @@ export default function WeekdaySummaryCard({
       type="button"
       interactive
       onClick={onClick}
-      className="w-full space-y-5 p-5 text-left"
+      className={cn("w-full space-y-5 p-5 text-left", isToday && "border-emerald-400/30 bg-emerald-500/8 shadow-[0_20px_60px_rgba(6,78,59,0.18)]")}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
@@ -57,6 +59,7 @@ export default function WeekdaySummaryCard({
         </div>
 
         <div className="flex items-center gap-2">
+          {isToday && <Badge>Today</Badge>}
           {workoutType && <Badge>{workoutType}</Badge>}
 
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-(--surface-border) bg-white/3 text-(--text-soft)">

@@ -20,9 +20,9 @@ export default function Panel<T extends ElementType = "div">({
   return (
     <Component
       className={cn(
-        "rounded-[28px] border border-(--surface-border) bg-(--surface-panel) shadow-[0_20px_60px_rgba(3,7,18,0.32)] backdrop-blur-xl",
+        "motion-surface rounded-[28px] border border-(--surface-border) bg-(--surface-panel) shadow-[0_20px_60px_rgba(3,7,18,0.32)] backdrop-blur-xl",
         interactive &&
-          "transition duration-200 hover:border-(--surface-border-strong) hover:bg-white/4 active:scale-[0.995]",
+          "transition duration-200 hover:-translate-y-0.5 hover:border-(--surface-border-strong) hover:bg-white/4 active:translate-y-0 active:scale-[0.995]",
         className,
       )}
       {...props}

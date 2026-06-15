@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   createExerciseTemplate,
@@ -43,6 +43,7 @@ export default function AddExerciseForm({
   const [exerciseType, setExerciseType] = useState<ExerciseType>("reps");
   const [exerciseUnit, setExerciseUnit] = useState<ExerciseUnit>("kg");
   const [plannedDurationMin, setPlannedDurationMin] = useState("");
+  const [plannedSetCount, setPlannedSetCount] = useState("3");
 
   const displayUnits = useMemo(
     () =>
@@ -60,13 +61,20 @@ export default function AddExerciseForm({
     const nextPlannedDuration =
       plannedDurationMin === "" ? undefined : Number(plannedDurationMin);
 
+    const normalizedSetCount = Math.max(
+      0,
+      Math.min(12, Math.round(Number(plannedSetCount) || 0)),
+    );
+
     const payload: CreateExercisePayload = {
       title: normalizedTitle,
       day,
       exerciseType,
       exerciseUnit,
       plannedDurationMin: nextPlannedDuration,
-      exerciseSets: [],
+      exerciseSets: Array.from({ length: normalizedSetCount }, () => ({
+        id: crypto.randomUUID(),
+      })),
     };
 
     await createExerciseTemplate(payload);
@@ -75,6 +83,7 @@ export default function AddExerciseForm({
     setExerciseType("reps");
     setExerciseUnit("kg");
     setPlannedDurationMin("");
+    setPlannedSetCount("3");
     setIsOpen(false);
   }
 
@@ -90,7 +99,7 @@ export default function AddExerciseForm({
             Add exercise
           </p>
           <h2 className="text-2xl font-semibold text-(--text-strong)">
-            {day}
+            Quick setup
           </h2>
         </div>
 
@@ -179,8 +188,32 @@ export default function AddExerciseForm({
               />
             </Field>
 
-            <Button type="submit" tone="primary" fullWidth>
-              Save exercise
+            <Field
+              label="Starting sets"
+              htmlFor="exercise-sets"
+              hint="Creates empty set rows so you can capture the workout immediately."
+            >
+              <TextField
+                id="exercise-sets"
+                type="number"
+                min="0"
+                max="12"
+                step="1"
+                inputMode="numeric"
+                placeholder="3"
+                value={plannedSetCount}
+                onChange={(event) => setPlannedSetCount(event.target.value)}
+              />
+            </Field>
+
+            <Button
+              type="submit"
+              tone="primary"
+              fullWidth
+              leadingIcon={<Plus size={16} />}
+              disabled={!title.trim()}
+            >
+              Create exercise
             </Button>
           </form>
         </div>

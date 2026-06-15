@@ -16,6 +16,7 @@ interface IExerciseCardHeaderProps {
   expanded: boolean;
   onToggle: () => void;
   totalSets: number;
+  completedSetCount: number;
   canMoveUp: boolean;
   canMoveDown: boolean;
   onMoveUp: () => void;
@@ -27,6 +28,7 @@ export default function ExerciseCardHeader({
   expanded,
   onToggle,
   totalSets,
+  completedSetCount,
   canMoveUp,
   canMoveDown,
   onMoveUp,
@@ -73,7 +75,7 @@ export default function ExerciseCardHeader({
           <span>{exercise.exerciseUnit}</span>
           <span>•</span>
           <span>
-            {totalSets} planned set{totalSets === 1 ? "" : "s"}
+            {completedSetCount}/{totalSets} sets complete
           </span>
         </div>
 

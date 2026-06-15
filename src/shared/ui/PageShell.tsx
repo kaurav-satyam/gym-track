@@ -21,7 +21,7 @@ export default function PageShell({
   contentClassName,
 }: IPageShellProps) {
   return (
-    <section className={cn("mx-auto w-full max-w-4xl px-4 py-5 sm:px-6 sm:py-8", className)}>
+    <section className={cn("motion-page mx-auto w-full max-w-4xl px-4 py-5 sm:px-6 sm:py-8", className)}>
       {(title || eyebrow || description || actions) && (
         <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-2">

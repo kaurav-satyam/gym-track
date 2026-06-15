@@ -58,7 +58,15 @@ export default function TodayAnalyticsScreen() {
     <PageShell
       eyebrow="Analytics"
       title="Today"
-      description={`${today}'s workout progress across every planned exercise.`}
+      description={today + " workout progress across every planned exercise."}
+      actions={
+        <Link
+          className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-(--surface-border) bg-white/4 px-4 text-sm font-medium text-(--text-soft) transition hover:-translate-y-0.5 hover:border-(--surface-border-strong) hover:bg-white/8"
+          to={"/days/" + today}
+        >
+          Open workout
+        </Link>
+      }
     >
       <div className="grid gap-3 sm:grid-cols-3">
         <StatCard
@@ -88,7 +96,7 @@ export default function TodayAnalyticsScreen() {
           description="Add exercises to today's workout and the analytics view will summarize the whole session here."
         />
       ) : (
-        <div className="space-y-3">
+        <div className="motion-list space-y-3">
           {exerciseCompletion.map(({ exercise, completedSetIds }) => (
             <ExerciseAnalyticsCard
               key={exercise.id}

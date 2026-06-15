@@ -35,7 +35,7 @@ export default function IconButton({
     <button
       type={type ?? "button"}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center border transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex shrink-0 items-center justify-center border transition duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-50",
         toneClasses[tone],
         sizeClasses[size],
         className,

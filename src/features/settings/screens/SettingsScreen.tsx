@@ -49,8 +49,40 @@ export default function SettingsScreen() {
             onChange={handleThemePreferenceChange}
           />
         </div>
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <ThemePreview label="System" active={themePreference === "system"} />
+          <ThemePreview label="Dark" active={themePreference === "dark"} tone="dark" />
+          <ThemePreview label="Light" active={themePreference === "light"} tone="light" />
+        </div>
       </Panel>
     </PageShell>
+  );
+}
+
+function ThemePreview({
+  label,
+  active,
+  tone = "system",
+}: {
+  label: string;
+  active: boolean;
+  tone?: "system" | "dark" | "light";
+}) {
+  return (
+    <div className={`rounded-2xl border p-3 transition duration-200 ${
+      active
+        ? "border-(--surface-border-strong) bg-white/8"
+        : "border-(--surface-border) bg-white/3"
+    }`}>
+      <div className={`h-16 rounded-xl border ${
+        tone === "light"
+          ? "border-slate-200 bg-slate-100"
+          : tone === "dark"
+            ? "border-slate-700 bg-slate-950"
+            : "border-sky-300/30 bg-linear-to-br from-slate-950 via-slate-800 to-slate-100"
+      }`} />
+      <p className="mt-2 text-xs font-medium text-(--text-soft)">{label}</p>
+    </div>
   );
 }
 

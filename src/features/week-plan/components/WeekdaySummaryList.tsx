@@ -2,18 +2,20 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useNavigate } from "react-router";
 import { listWeekPlanSummaries } from "../../../app/db/repositories/week-plan.repository";
 import { WEEKDAYS } from "../../../shared/constants/weekdays";
+import getTodayWorkoutDay from "../../../shared/lib/getTodayWorkoutDay";
 import WeekdaySummaryCard from "./WeekdaySummaryCard";
 
 export default function WeekdaySummaryList() {
   const navigate = useNavigate();
   const weekPlanSummaries = useLiveQuery(() => listWeekPlanSummaries(), [], []);
+  const today = getTodayWorkoutDay();
 
   const summaryByDay = new Map(
     weekPlanSummaries.map((summary) => [summary.day, summary]),
   );
 
   return (
-    <div className="space-y-3">
+    <div className="motion-list space-y-3">
       {WEEKDAYS.map((day) => {
         const summary = summaryByDay.get(day);
         const totalSetsCount = summary?.totalSetsCount ?? 0;
@@ -31,7 +33,8 @@ export default function WeekdaySummaryList() {
             duration={summary?.plannedDurationMin}
             progress={summary?.progress ?? 0}
             progressLabel={progressLabel}
-            onClick={() => navigate(`/days/${day}`)}
+            isToday={day === today}
+            onClick={() => navigate("/days/" + day)}
           />
         );
       })}

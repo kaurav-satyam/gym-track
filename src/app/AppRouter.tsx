@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import TodayAnalyticsScreen from "../features/analytics/screens/TodayAnalyticsScreen";
 import ExerciseHistoryScreen from "../features/exercise-history/screens/ExerciseHistoryScreen";
+import AddExerciseScreen from "../features/exercises/screens/AddExerciseScreen";
 import WorkoutDayScreen from "../features/exercises/screens/WorkoutDayScreen";
 import SettingsScreen from "../features/settings/screens/SettingsScreen";
 import WeekPlanScreen from "../features/week-plan/screens/WeekPlanScreen";
@@ -18,6 +19,7 @@ const AppRouter = createBrowserRouter([
       },
       { path: "week", element: <WeekPlanScreen /> },
       { path: "days/:day", element: <WorkoutDayScreen /> },
+      { path: "days/:day/add-exercise", element: <AddExerciseScreen /> },
       { path: "analytics", element: <TodayAnalyticsScreen /> },
       { path: "settings", element: <SettingsScreen /> },
       {
