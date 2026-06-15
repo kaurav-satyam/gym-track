@@ -9,7 +9,7 @@ import {
   Search,
   Timer,
 } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router";
 import type {
   ExerciseLibraryItem,
@@ -33,7 +33,7 @@ import {
   createExerciseTemplate,
   type CreateExercisePayload,
 } from "../../../app/db/repositories/exercise.repository";
-import { DEFAULT_MUSCLE_TAGS } from "../../../shared/constants/muscleTags";
+import { loadDefaultMuscleTags } from "../../../shared/constants/muscleTags";
 import { WEEKDAYS } from "../../../shared/constants/weekdays";
 import {
   Button,
@@ -83,12 +83,6 @@ const exerciseTypeFilterOptions: Array<{
   ...EXERCISE_TYPES.map((value) => ({ label: value, value })),
 ];
 
-const categoryFilterOptions = [
-  ALL_FILTER_VALUE,
-  ...DEFAULT_MUSCLE_TAGS,
-  "Other",
-] as const;
-
 export default function AddExerciseScreen() {
   const { day } = useParams<{ day: WorkoutDay }>();
   const navigate = useNavigate();
@@ -98,21 +92,32 @@ export default function AddExerciseScreen() {
     useState<TExerciseTypeFilter>(ALL_FILTER_VALUE);
   const [resultLimit, setResultLimit] = useState(RESULT_STEP);
   const [seedReady, setSeedReady] = useState(false);
+  const [defaultMuscleTags, setDefaultMuscleTags] = useState<string[]>([]);
   const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(null);
   const [setupState, setSetupState] =
     useState<IExerciseSetupState>(defaultSetupState);
 
   const isValidDay = day != null && WEEKDAYS.includes(day);
   const normalizedQuery = searchQuery.trim().toLowerCase();
+  const categoryFilterOptions = useMemo(
+    () => createMuscleFilterOptions(defaultMuscleTags),
+    [defaultMuscleTags],
+  );
 
   useEffect(() => {
     let mounted = true;
 
     async function seedBuiltInExercises() {
-      const { exerciseLibrary } = await import("../data/exerciseLibrary");
+      const { loadExerciseLibrary } = await import("../data/exerciseLibrary");
+      const [exerciseLibrary, muscleTags] = await Promise.all([
+        loadExerciseLibrary(),
+        loadDefaultMuscleTags(),
+      ]);
+
       await seedExerciseLibrary(exerciseLibrary);
 
       if (mounted) {
+        setDefaultMuscleTags(muscleTags);
         setSeedReady(true);
       }
     }
@@ -254,7 +259,7 @@ export default function AddExerciseScreen() {
         </Button>
       }
     >
-      <Panel className="space-y-4 p-4 sm:p-5">
+      <Panel className="relative z-40 space-y-4 overflow-visible p-4 sm:p-5">
         <div className="relative">
           <Search
             aria-hidden="true"
@@ -272,17 +277,12 @@ export default function AddExerciseScreen() {
 
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Muscle group" htmlFor="exercise-category-filter">
-            <SelectField
+            <SearchableMuscleGroupSelect
               id="exercise-category-filter"
+              options={categoryFilterOptions}
               value={categoryFilter}
-              onChange={(event) => setCategoryFilter(event.target.value)}
-            >
-              {categoryFilterOptions.map((category) => (
-                <option key={category} value={category} className="bg-slate-950 text-white">
-                  {category === ALL_FILTER_VALUE ? "All muscle groups" : category}
-                </option>
-              ))}
-            </SelectField>
+              onChange={setCategoryFilter}
+            />
           </Field>
           <Field label="Type">
             <SegmentedControl
@@ -328,7 +328,7 @@ export default function AddExerciseScreen() {
         <>
           <div
             ref={resultListRef}
-            className="motion-list max-h-[70vh] overflow-auto pr-1 [scrollbar-gutter:stable]"
+            className="motion-list relative z-0 max-h-[70vh] overflow-auto pr-1 [scrollbar-gutter:stable]"
           >
             <div
               className="relative w-full"
@@ -354,6 +354,7 @@ export default function AddExerciseScreen() {
                       expanded={expandedExerciseId === exercise.id}
                       setupState={setupState}
                       setSetupState={setSetupState}
+                      defaultMuscleTags={defaultMuscleTags}
                       onToggle={() => expandExercise(exercise)}
                       onSave={() => void handleSaveExercise(exercise)}
                     />
@@ -383,6 +384,7 @@ function ExercisePickerCard({
   expanded,
   setupState,
   setSetupState,
+  defaultMuscleTags,
   onToggle,
   onSave,
 }: {
@@ -390,6 +392,7 @@ function ExercisePickerCard({
   expanded: boolean;
   setupState: IExerciseSetupState;
   setSetupState: (nextState: IExerciseSetupState) => void;
+  defaultMuscleTags: string[];
   onToggle: () => void;
   onSave: () => void;
 }) {
@@ -453,8 +456,8 @@ function ExercisePickerCard({
                   <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-(--text-muted)">
                     Muscle tags
                   </p>
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {cardMuscleTags.slice(0, 4).map((tag) => (
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 [scrollbar-gutter:stable]">
+                    {cardMuscleTags.map((tag) => (
                       <MuscleTagPill key={tag}>{tag}</MuscleTagPill>
                     ))}
                   </div>
@@ -487,6 +490,7 @@ function ExercisePickerCard({
               hint="Choose all muscles this exercise trains. Add a custom tag when needed."
             >
               <MuscleTagSelector
+                availableTags={defaultMuscleTags}
                 selectedTags={setupState.muscleTags}
                 customTag={setupState.customTag}
                 setCustomTag={(customTag) =>
@@ -505,10 +509,17 @@ function ExercisePickerCard({
                     return;
                   }
 
+                  const existingTag = defaultMuscleTags.find(
+                    (tag) => tag.toLowerCase() === normalizedTag.toLowerCase(),
+                  );
+
                   setSetupState({
                     ...setupState,
                     customTag: "",
-                    muscleTags: addUniqueTag(setupState.muscleTags, normalizedTag),
+                    muscleTags: addUniqueTag(
+                      setupState.muscleTags,
+                      existingTag ?? normalizedTag,
+                    ),
                   });
                 }}
               />
@@ -582,6 +593,87 @@ function ExercisePickerCard({
   );
 }
 
+
+function SearchableMuscleGroupSelect({
+  id,
+  options,
+  value,
+  onChange,
+}: {
+  id: string;
+  options: string[];
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const selectedLabel = getMuscleOptionLabel(value);
+  const filteredOptions = options.filter((option) =>
+    getMuscleOptionLabel(option).toLowerCase().includes(query.trim().toLowerCase()),
+  );
+
+  function selectOption(nextValue: string) {
+    onChange(nextValue);
+    setQuery("");
+    setOpen(false);
+  }
+
+  return (
+    <div className="relative">
+      <TextField
+        id={id}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        autoComplete="off"
+        placeholder={selectedLabel}
+        value={open ? query : selectedLabel}
+        onBlur={() => window.setTimeout(() => setOpen(false), 120)}
+        onChange={(event) => {
+          setQuery(event.target.value);
+          setOpen(true);
+        }}
+        onFocus={() => {
+          setQuery("");
+          setOpen(true);
+        }}
+      />
+
+      {open && (
+        <div
+          className="absolute z-[100] mt-2 max-h-60 w-full overflow-auto rounded-2xl border border-(--surface-border) bg-(--surface-panel) p-1 shadow-2xl shadow-black/30 backdrop-blur"
+          role="listbox"
+        >
+          {filteredOptions.length === 0 ? (
+            <p className="px-3 py-2 text-sm text-(--text-muted)">No muscle group found.</p>
+          ) : (
+            filteredOptions.map((option) => (
+              <button
+                key={option}
+                type="button"
+                className={cn(
+                  "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition hover:bg-white/8",
+                  option === value
+                    ? "bg-white/10 text-(--text-strong)"
+                    : "text-(--text-soft)",
+                )}
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  selectOption(option);
+                }}
+                role="option"
+                aria-selected={option === value}
+              >
+                {getMuscleOptionLabel(option)}
+                {option === value && <Check size={14} />}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ConfigChip({ children }: { children: ReactNode }) {
   return (
     <span className="inline-flex items-center rounded-md border border-(--surface-border) bg-black/15 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-(--text-soft)">
@@ -592,7 +684,7 @@ function ConfigChip({ children }: { children: ReactNode }) {
 
 function MuscleTagPill({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-100">
+    <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-100">
       <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
       {children}
     </span>
@@ -600,47 +692,31 @@ function MuscleTagPill({ children }: { children: ReactNode }) {
 }
 
 function MuscleTagSelector({
+  availableTags,
   selectedTags,
   customTag,
   setCustomTag,
   onToggleTag,
   onAddCustomTag,
 }: {
+  availableTags: string[];
   selectedTags: string[];
   customTag: string;
   setCustomTag: (customTag: string) => void;
   onToggleTag: (tag: string) => void;
   onAddCustomTag: () => void;
 }) {
+  const normalizedSearch = customTag.trim().toLowerCase();
+  const visibleTags = availableTags.filter((tag) =>
+    tag.toLowerCase().includes(normalizedSearch),
+  );
+
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        {DEFAULT_MUSCLE_TAGS.map((tag) => {
-          const selected = selectedTags.includes(tag);
-
-          return (
-            <button
-              key={tag}
-              type="button"
-              aria-pressed={selected}
-              onClick={() => onToggleTag(tag)}
-              className={cn(
-                "rounded-full border px-3 py-1.5 text-xs font-medium transition duration-200",
-                selected
-                  ? "border-transparent bg-(--accent) text-(--accent-ink)"
-                  : "border-(--surface-border) bg-white/4 text-(--text-soft) hover:border-(--surface-border-strong) hover:bg-white/8",
-              )}
-            >
-              {tag}
-            </button>
-          );
-        })}
-      </div>
-
       <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
         <TextField
-          aria-label="Custom muscle tag"
-          placeholder="Add custom tag"
+          aria-label="Search or add muscle tag"
+          placeholder="Search or add muscle tag"
           value={customTag}
           onChange={(event) => setCustomTag(event.target.value)}
         />
@@ -654,8 +730,37 @@ function MuscleTagSelector({
         </Button>
       </div>
 
+      {visibleTags.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-(--surface-border) p-3 text-sm text-(--text-muted)">
+          No default tag matches. Add it as a custom tag.
+        </p>
+      ) : (
+        <div className="flex gap-2 overflow-x-auto pb-2 [scrollbar-gutter:stable]">
+          {visibleTags.map((tag) => {
+            const selected = selectedTags.includes(tag);
+
+            return (
+            <button
+              key={tag}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => onToggleTag(tag)}
+              className={cn(
+                "shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition duration-200",
+                selected
+                  ? "border-transparent bg-(--accent) text-(--accent-ink)"
+                  : "border-(--surface-border) bg-white/4 text-(--text-soft) hover:border-(--surface-border-strong) hover:bg-white/8",
+              )}
+            >
+              {tag}
+            </button>
+            );
+          })}
+        </div>
+      )}
+
       {selectedTags.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-gutter:stable]">
           {selectedTags.map((tag) => (
             <MuscleTagPill key={tag}>{tag}</MuscleTagPill>
           ))}
@@ -663,6 +768,17 @@ function MuscleTagSelector({
       )}
     </div>
   );
+}
+
+
+function createMuscleFilterOptions(tags: string[]) {
+  return [ALL_FILTER_VALUE, ...tags, "Other"].filter(
+    (tag, index, options) => options.indexOf(tag) === index,
+  );
+}
+
+function getMuscleOptionLabel(option: string) {
+  return option === ALL_FILTER_VALUE ? "All muscle groups" : option;
 }
 
 function toggleTag(tags: string[], tag: string) {

@@ -94,7 +94,7 @@ export default function ExerciseCardHeader({
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-(--text-muted)">
                 Muscle tags
               </p>
-              <div className="flex flex-wrap items-center gap-1.5">
+              <div className="flex gap-1.5 overflow-x-auto pb-1 [scrollbar-gutter:stable]">
                 {exercise.muscleTags.map((tag) => (
                   <MuscleTagPill key={tag}>{tag}</MuscleTagPill>
                 ))}
@@ -182,7 +182,7 @@ function ConfigChip({ children }: { children: ReactNode }) {
 
 function MuscleTagPill({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-100">
+    <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-100">
       <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
       {children}
     </span>
