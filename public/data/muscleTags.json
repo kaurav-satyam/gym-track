@@ -1,11 +1,46 @@
-[
-  "Chest",
-  "Back",
-  "Shoulders",
-  "Legs",
-  "Biceps",
-  "Triceps",
-  "Core",
-  "Cardio",
-  "Full Body"
-]
+{
+  "muscleTags": [
+    "Chest",
+    "Upper Chest",
+    "Lower Chest",
+    "Inner Chest",
+
+    "Back",
+    "Lats",
+    "Upper Back",
+    "Lower Back",
+    "Trhomboids",
+    "Traps",
+
+    "Shoulders",
+    "Front Delts",
+    "Side Delts",
+    "Rear Delts",
+
+    "Biceps",
+    "Triceps",
+    "Forearms",
+
+    "Core",
+    "Abs",
+    "Obliques",
+    "Hip Flexors",
+
+    "Legs",
+    "Quads",
+    "Hamstrings",
+    "Glutes",
+    "Calves",
+    "Adductors",
+
+    "Cardio",
+    "Full Body",
+
+    "Neck",
+    "Grip",
+
+    "Mobility",
+    "Functional",
+    "Explosive"
+  ]
+}

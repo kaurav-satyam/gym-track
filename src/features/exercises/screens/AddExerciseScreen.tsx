@@ -328,7 +328,7 @@ export default function AddExerciseScreen() {
         <>
           <div
             ref={resultListRef}
-            className="motion-list relative z-0 max-h-[70vh] overflow-auto pr-1 [scrollbar-gutter:stable]"
+            className="motion-list relative z-0 max-h-[70vh] overflow-auto pr-1 scrollbar-gutter-stable"
           >
             <div
               className="relative w-full"
@@ -456,7 +456,7 @@ function ExercisePickerCard({
                   <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-(--text-muted)">
                     Muscle tags
                   </p>
-                  <div className="flex gap-1.5 overflow-x-auto pb-1 [scrollbar-gutter:stable]">
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-gutter-stable">
                     {cardMuscleTags.map((tag) => (
                       <MuscleTagPill key={tag}>{tag}</MuscleTagPill>
                     ))}
@@ -640,7 +640,7 @@ function SearchableMuscleGroupSelect({
 
       {open && (
         <div
-          className="absolute z-[100] mt-2 max-h-60 w-full overflow-auto rounded-2xl border border-(--surface-border) bg-(--surface-panel) p-1 shadow-2xl shadow-black/30 backdrop-blur"
+          className="absolute z-100 mt-2 max-h-60 w-full overflow-auto rounded-2xl border border-(--surface-border) bg-(--surface-panel) p-1 shadow-2xl shadow-black/30 backdrop-blur"
           role="listbox"
         >
           {filteredOptions.length === 0 ? (
@@ -735,7 +735,7 @@ function MuscleTagSelector({
           No default tag matches. Add it as a custom tag.
         </p>
       ) : (
-        <div className="flex gap-2 overflow-x-auto pb-2 [scrollbar-gutter:stable]">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-gutter-stable">
           {visibleTags.map((tag) => {
             const selected = selectedTags.includes(tag);
 
@@ -760,7 +760,7 @@ function MuscleTagSelector({
       )}
 
       {selectedTags.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-gutter:stable]">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-gutter-stable">
           {selectedTags.map((tag) => (
             <MuscleTagPill key={tag}>{tag}</MuscleTagPill>
           ))}

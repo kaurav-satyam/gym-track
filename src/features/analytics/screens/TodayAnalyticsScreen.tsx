@@ -497,7 +497,7 @@ function ExerciseProgressPanel({ exercises }: { exercises: AnalyticsExerciseStat
                 )}
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-right sm:min-w-[330px]">
+            <div className="grid grid-cols-3 gap-2 text-right sm:min-w-82.5">
               <CompactMetric label="Sets" value={`${exercise.completedSets}/${exercise.plannedSets}`} />
               <CompactMetric label="Output" value={formatExerciseOutput(exercise)} />
               <CompactMetric label="Best" value={formatBestSet(exercise)} />

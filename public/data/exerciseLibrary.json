@@ -1,63 +1,83 @@
 [
   {
-    "id": "bench-press",
-    "title": "Bench Press",
+    "id": "barbell-bench-press",
+    "title": "Barbell Bench Press",
     "exerciseType": "reps",
     "exerciseUnit": "kg",
-    "muscleTags": [
-      "Chest",
-      "Triceps",
-      "Shoulders"
-    ],
+    "muscleTags": ["Chest", "Triceps", "Front Delts"],
     "category": "Chest",
     "plannedDurationMin": 15
   },
   {
-    "id": "incline-dumbbell-press",
-    "title": "Incline Dumbbell Press",
+    "id": "incline-barbell-bench-press",
+    "title": "Incline Barbell Bench Press",
     "exerciseType": "reps",
     "exerciseUnit": "kg",
-    "muscleTags": [
-      "Chest",
-      "Triceps",
-      "Shoulders"
-    ],
+    "muscleTags": ["Upper Chest", "Front Delts", "Triceps"],
+    "category": "Chest",
+    "plannedDurationMin": 14
+  },
+  {
+    "id": "decline-bench-press",
+    "title": "Decline Bench Press",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Lower Chest", "Triceps"],
     "category": "Chest",
     "plannedDurationMin": 12
   },
   {
-    "id": "squat",
-    "title": "Squat",
+    "id": "dumbbell-bench-press",
+    "title": "Dumbbell Bench Press",
     "exerciseType": "reps",
     "exerciseUnit": "kg",
-    "muscleTags": [
-      "Legs"
-    ],
-    "category": "Legs",
-    "plannedDurationMin": 18
+    "muscleTags": ["Chest", "Front Delts", "Triceps"],
+    "category": "Chest",
+    "plannedDurationMin": 12
   },
   {
-    "id": "deadlift",
-    "title": "Deadlift",
+    "id": "push-up",
+    "title": "Push-Up",
     "exerciseType": "reps",
     "exerciseUnit": "kg",
-    "muscleTags": [
-      "Back",
-      "Biceps"
-    ],
+    "muscleTags": ["Chest", "Triceps", "Core"],
+    "category": "Chest",
+    "plannedDurationMin": 10
+  },
+  {
+    "id": "chest-fly-machine",
+    "title": "Chest Fly Machine",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Chest", "Inner Chest"],
+    "category": "Chest",
+    "plannedDurationMin": 8
+  },
+  {
+    "id": "cable-crossover",
+    "title": "Cable Crossover",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Chest", "Inner Chest"],
+    "category": "Chest",
+    "plannedDurationMin": 8
+  },
+  {
+    "id": "pull-up",
+    "title": "Pull-Up",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Lats", "Upper Back", "Biceps", "Forearms"],
     "category": "Back",
-    "plannedDurationMin": 18
+    "plannedDurationMin": 12
   },
   {
-    "id": "overhead-press",
-    "title": "Overhead Press",
+    "id": "chin-up",
+    "title": "Chin-Up",
     "exerciseType": "reps",
     "exerciseUnit": "kg",
-    "muscleTags": [
-      "Shoulders",
-      "Triceps"
-    ],
-    "category": "Shoulders",
+    "muscleTags": ["Lats", "Biceps", "Forearms"],
+    "category": "Back",
     "plannedDurationMin": 12
   },
   {
@@ -65,44 +85,142 @@
     "title": "Lat Pulldown",
     "exerciseType": "reps",
     "exerciseUnit": "kg",
-    "muscleTags": [
-      "Back",
-      "Biceps"
-    ],
+    "muscleTags": ["Lats", "Biceps"],
     "category": "Back",
     "plannedDurationMin": 10
   },
   {
-    "id": "seated-row",
-    "title": "Seated Row",
+    "id": "barbell-row",
+    "title": "Barbell Row",
     "exerciseType": "reps",
     "exerciseUnit": "kg",
-    "muscleTags": [
-      "Back",
-      "Biceps"
-    ],
+    "muscleTags": ["Upper Back", "Lats", "Rear Delts", "Biceps"],
     "category": "Back",
-    "plannedDurationMin": 10
-  },
-  {
-    "id": "leg-press",
-    "title": "Leg Press",
-    "exerciseType": "reps",
-    "exerciseUnit": "kg",
-    "muscleTags": [
-      "Legs"
-    ],
-    "category": "Legs",
     "plannedDurationMin": 12
   },
   {
-    "id": "bicep-curl",
-    "title": "Bicep Curl",
+    "id": "seated-cable-row",
+    "title": "Seated Cable Row",
     "exerciseType": "reps",
     "exerciseUnit": "kg",
-    "muscleTags": [
-      "Biceps"
-    ],
+    "muscleTags": ["Upper Back", "Lats", "Biceps"],
+    "category": "Back",
+    "plannedDurationMin": 10
+  },
+  {
+    "id": "t-bar-row",
+    "title": "T-Bar Row",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Upper Back", "Lats", "Traps"],
+    "category": "Back",
+    "plannedDurationMin": 12
+  },
+  {
+    "id": "deadlift",
+    "title": "Deadlift",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Lower Back", "Glutes", "Hamstrings", "Traps"],
+    "category": "Back",
+    "plannedDurationMin": 18
+  },
+  {
+    "id": "romanian-deadlift",
+    "title": "Romanian Deadlift",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Hamstrings", "Glutes", "Lower Back"],
+    "category": "Legs",
+    "plannedDurationMin": 15
+  },
+  {
+    "id": "rack-pull",
+    "title": "Rack Pull",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Traps", "Lower Back", "Glutes"],
+    "category": "Back",
+    "plannedDurationMin": 14
+  },
+  {
+    "id": "face-pull",
+    "title": "Face Pull",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Rear Delts", "Upper Back", "Traps"],
+    "category": "Shoulders",
+    "plannedDurationMin": 8
+  },
+  {
+    "id": "overhead-press",
+    "title": "Overhead Press",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Front Delts", "Triceps", "Side Delts"],
+    "category": "Shoulders",
+    "plannedDurationMin": 12
+  },
+  {
+    "id": "arnold-press",
+    "title": "Arnold Press",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Front Delts", "Side Delts"],
+    "category": "Shoulders",
+    "plannedDurationMin": 10
+  },
+  {
+    "id": "lateral-raise",
+    "title": "Lateral Raise",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Side Delts"],
+    "category": "Shoulders",
+    "plannedDurationMin": 8
+  },
+  {
+    "id": "front-raise",
+    "title": "Front Raise",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Front Delts"],
+    "category": "Shoulders",
+    "plannedDurationMin": 8
+  },
+  {
+    "id": "rear-delt-fly",
+    "title": "Rear Delt Fly",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Rear Delts", "Upper Back"],
+    "category": "Shoulders",
+    "plannedDurationMin": 8
+  },
+  {
+    "id": "barbell-curl",
+    "title": "Barbell Curl",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Biceps", "Forearms"],
+    "category": "Biceps",
+    "plannedDurationMin": 8
+  },
+  {
+    "id": "hammer-curl",
+    "title": "Hammer Curl",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Biceps", "Forearms", "Grip"],
+    "category": "Biceps",
+    "plannedDurationMin": 8
+  },
+  {
+    "id": "preacher-curl",
+    "title": "Preacher Curl",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Biceps"],
     "category": "Biceps",
     "plannedDurationMin": 8
   },
@@ -111,31 +229,178 @@
     "title": "Triceps Pushdown",
     "exerciseType": "reps",
     "exerciseUnit": "kg",
-    "muscleTags": [
-      "Triceps"
-    ],
+    "muscleTags": ["Triceps"],
     "category": "Triceps",
     "plannedDurationMin": 8
+  },
+  {
+    "id": "skull-crusher",
+    "title": "Skull Crusher",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Triceps"],
+    "category": "Triceps",
+    "plannedDurationMin": 8
+  },
+  {
+    "id": "close-grip-bench-press",
+    "title": "Close Grip Bench Press",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Triceps", "Chest", "Front Delts"],
+    "category": "Triceps",
+    "plannedDurationMin": 10
+  },
+  {
+    "id": "barbell-squat",
+    "title": "Barbell Squat",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Quads", "Glutes", "Core"],
+    "category": "Legs",
+    "plannedDurationMin": 18
+  },
+  {
+    "id": "front-squat",
+    "title": "Front Squat",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Quads", "Core"],
+    "category": "Legs",
+    "plannedDurationMin": 15
+  },
+  {
+    "id": "leg-press",
+    "title": "Leg Press",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Quads", "Glutes"],
+    "category": "Legs",
+    "plannedDurationMin": 12
+  },
+  {
+    "id": "walking-lunge",
+    "title": "Walking Lunge",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Quads", "Glutes", "Hamstrings"],
+    "category": "Legs",
+    "plannedDurationMin": 12
+  },
+  {
+    "id": "bulgarian-split-squat",
+    "title": "Bulgarian Split Squat",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Quads", "Glutes", "Core"],
+    "category": "Legs",
+    "plannedDurationMin": 12
+  },
+  {
+    "id": "leg-extension",
+    "title": "Leg Extension",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Quads"],
+    "category": "Legs",
+    "plannedDurationMin": 8
+  },
+  {
+    "id": "leg-curl",
+    "title": "Leg Curl",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Hamstrings"],
+    "category": "Legs",
+    "plannedDurationMin": 8
+  },
+  {
+    "id": "hip-thrust",
+    "title": "Hip Thrust",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Glutes", "Hamstrings"],
+    "category": "Legs",
+    "plannedDurationMin": 10
+  },
+  {
+    "id": "standing-calf-raise",
+    "title": "Standing Calf Raise",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Calves"],
+    "category": "Legs",
+    "plannedDurationMin": 6
+  },
+  {
+    "id": "seated-calf-raise",
+    "title": "Seated Calf Raise",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Calves"],
+    "category": "Legs",
+    "plannedDurationMin": 6
   },
   {
     "id": "plank",
     "title": "Plank",
     "exerciseType": "time",
     "exerciseUnit": "sec",
-    "muscleTags": [
-      "Core"
-    ],
+    "muscleTags": ["Core", "Abs"],
     "category": "Core",
     "plannedDurationMin": 5
   },
   {
-    "id": "treadmill",
-    "title": "Treadmill",
+    "id": "side-plank",
+    "title": "Side Plank",
+    "exerciseType": "time",
+    "exerciseUnit": "sec",
+    "muscleTags": ["Obliques", "Core"],
+    "category": "Core",
+    "plannedDurationMin": 5
+  },
+  {
+    "id": "crunch",
+    "title": "Crunch",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Abs"],
+    "category": "Core",
+    "plannedDurationMin": 6
+  },
+  {
+    "id": "hanging-leg-raise",
+    "title": "Hanging Leg Raise",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Abs", "Hip Flexors"],
+    "category": "Core",
+    "plannedDurationMin": 6
+  },
+  {
+    "id": "russian-twist",
+    "title": "Russian Twist",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Obliques", "Core"],
+    "category": "Core",
+    "plannedDurationMin": 6
+  },
+  {
+    "id": "mountain-climber",
+    "title": "Mountain Climber",
+    "exerciseType": "time",
+    "exerciseUnit": "sec",
+    "muscleTags": ["Core", "Cardio", "Full Body"],
+    "category": "Core",
+    "plannedDurationMin": 8
+  },
+  {
+    "id": "treadmill-run",
+    "title": "Treadmill Run",
     "exerciseType": "time",
     "exerciseUnit": "min",
-    "muscleTags": [
-      "Cardio"
-    ],
+    "muscleTags": ["Cardio", "Legs"],
     "category": "Cardio",
     "plannedDurationMin": 20
   },
@@ -144,22 +409,80 @@
     "title": "Cycling",
     "exerciseType": "time",
     "exerciseUnit": "min",
-    "muscleTags": [
-      "Cardio"
-    ],
+    "muscleTags": ["Cardio", "Legs"],
     "category": "Cardio",
     "plannedDurationMin": 20
+  },
+  {
+    "id": "jump-rope",
+    "title": "Jump Rope",
+    "exerciseType": "time",
+    "exerciseUnit": "min",
+    "muscleTags": ["Cardio", "Calves", "Full Body"],
+    "category": "Cardio",
+    "plannedDurationMin": 12
+  },
+  {
+    "id": "rowing-machine",
+    "title": "Rowing Machine",
+    "exerciseType": "time",
+    "exerciseUnit": "min",
+    "muscleTags": ["Cardio", "Back", "Legs"],
+    "category": "Cardio",
+    "plannedDurationMin": 15
   },
   {
     "id": "battle-ropes",
     "title": "Battle Ropes",
     "exerciseType": "time",
     "exerciseUnit": "sec",
-    "muscleTags": [
-      "Full Body",
-      "Cardio"
-    ],
-    "category": "Full Body",
+    "muscleTags": ["Full Body", "Cardio", "Shoulders", "Core"],
+    "category": "Functional",
     "plannedDurationMin": 8
+  },
+  {
+    "id": "farmer-carry",
+    "title": "Farmer Carry",
+    "exerciseType": "time",
+    "exerciseUnit": "sec",
+    "muscleTags": ["Grip", "Forearms", "Core", "Traps"],
+    "category": "Functional",
+    "plannedDurationMin": 10
+  },
+  {
+    "id": "burpee",
+    "title": "Burpee",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Full Body", "Cardio", "Legs", "Chest"],
+    "category": "Full Body",
+    "plannedDurationMin": 10
+  },
+  {
+    "id": "kettlebell-swing",
+    "title": "Kettlebell Swing",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Glutes", "Hamstrings", "Core", "Cardio"],
+    "category": "Functional",
+    "plannedDurationMin": 10
+  },
+  {
+    "id": "box-jump",
+    "title": "Box Jump",
+    "exerciseType": "reps",
+    "exerciseUnit": "kg",
+    "muscleTags": ["Explosive", "Quads", "Glutes", "Calves"],
+    "category": "Explosive",
+    "plannedDurationMin": 8
+  },
+  {
+    "id": "sled-push",
+    "title": "Sled Push",
+    "exerciseType": "time",
+    "exerciseUnit": "sec",
+    "muscleTags": ["Legs", "Cardio", "Full Body"],
+    "category": "Functional",
+    "plannedDurationMin": 10
   }
 ]
