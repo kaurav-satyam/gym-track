@@ -1,24 +1,13 @@
-import type {
-  ExerciseType,
-  ExerciseUnit,
-} from "../../../app/db/models/exercise.model";
+import type { ExerciseLibrarySeedItem } from "../../../app/db/models/exercise-library.model";
 
-export interface ExerciseLibraryItem {
-  id: string;
-  title: string;
-  exerciseType: ExerciseType;
-  exerciseUnit: ExerciseUnit;
-  muscleTags?: string[];
-  plannedDurationMin?: number;
-}
-
-export const exerciseLibrary: ExerciseLibraryItem[] = [
+export const exerciseLibrary: ExerciseLibrarySeedItem[] = [
   {
     id: "bench-press",
     title: "Bench Press",
     exerciseType: "reps",
     exerciseUnit: "kg",
     muscleTags: ["Chest", "Triceps", "Shoulders"],
+    category: "Chest",
     plannedDurationMin: 15,
   },
   {
@@ -27,6 +16,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     exerciseType: "reps",
     exerciseUnit: "kg",
     muscleTags: ["Chest", "Triceps", "Shoulders"],
+    category: "Chest",
     plannedDurationMin: 12,
   },
   {
@@ -35,6 +25,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     exerciseType: "reps",
     exerciseUnit: "kg",
     muscleTags: ["Legs"],
+    category: "Legs",
     plannedDurationMin: 18,
   },
   {
@@ -43,6 +34,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     exerciseType: "reps",
     exerciseUnit: "kg",
     muscleTags: ["Back", "Biceps"],
+    category: "Back",
     plannedDurationMin: 18,
   },
   {
@@ -51,6 +43,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     exerciseType: "reps",
     exerciseUnit: "kg",
     muscleTags: ["Shoulders", "Triceps"],
+    category: "Shoulders",
     plannedDurationMin: 12,
   },
   {
@@ -59,6 +52,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     exerciseType: "reps",
     exerciseUnit: "kg",
     muscleTags: ["Back", "Biceps"],
+    category: "Back",
     plannedDurationMin: 10,
   },
   {
@@ -67,6 +61,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     exerciseType: "reps",
     exerciseUnit: "kg",
     muscleTags: ["Back", "Biceps"],
+    category: "Back",
     plannedDurationMin: 10,
   },
   {
@@ -75,6 +70,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     exerciseType: "reps",
     exerciseUnit: "kg",
     muscleTags: ["Legs"],
+    category: "Legs",
     plannedDurationMin: 12,
   },
   {
@@ -83,6 +79,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     exerciseType: "reps",
     exerciseUnit: "kg",
     muscleTags: ["Biceps"],
+    category: "Biceps",
     plannedDurationMin: 8,
   },
   {
@@ -91,6 +88,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     exerciseType: "reps",
     exerciseUnit: "kg",
     muscleTags: ["Triceps"],
+    category: "Triceps",
     plannedDurationMin: 8,
   },
   {
@@ -99,6 +97,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     exerciseType: "time",
     exerciseUnit: "sec",
     muscleTags: ["Core"],
+    category: "Core",
     plannedDurationMin: 5,
   },
   {
@@ -107,6 +106,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     exerciseType: "time",
     exerciseUnit: "min",
     muscleTags: ["Cardio"],
+    category: "Cardio",
     plannedDurationMin: 20,
   },
   {
@@ -115,6 +115,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     exerciseType: "time",
     exerciseUnit: "min",
     muscleTags: ["Cardio"],
+    category: "Cardio",
     plannedDurationMin: 20,
   },
   {
@@ -123,6 +124,7 @@ export const exerciseLibrary: ExerciseLibraryItem[] = [
     exerciseType: "time",
     exerciseUnit: "sec",
     muscleTags: ["Full Body", "Cardio"],
+    category: "Full Body",
     plannedDurationMin: 8,
   },
 ];

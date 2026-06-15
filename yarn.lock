@@ -1332,6 +1332,18 @@
     "@tailwindcss/oxide" "4.3.0"
     tailwindcss "4.3.0"
 
+"@tanstack/react-virtual@^3.14.2":
+  version "3.14.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-virtual/-/react-virtual-3.14.2.tgz#ff1f97cd52f2bf4bda7f6d141bc9af80010daf45"
+  integrity sha512-IpWnmCLvuymRfeeLNVXIzNEYBFLpd3drVIS91sqV78VTZFyldlChkOocZRCPp1B+Wnk09bcLNme8WaMU/9/9bQ==
+  dependencies:
+    "@tanstack/virtual-core" "3.17.0"
+
+"@tanstack/virtual-core@3.17.0":
+  version "3.17.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/virtual-core/-/virtual-core-3.17.0.tgz#2949d4aaeaf73f89bab10bf86e22905f5a668acc"
+  integrity sha512-gOxY/hFkPh/XQYhnThBHzkbkX3Ed+z/iushyz+R+JAr213aXxUDgQoTgTdrDpBSRsjFM73P/KfUyWmaF9WHMkQ==
+
 "@trickfilm400/rollup-plugin-off-main-thread@^3.0.0-pre1":
   version "3.0.0-pre1"
   resolved "https://registry.yarnpkg.com/@trickfilm400/rollup-plugin-off-main-thread/-/rollup-plugin-off-main-thread-3.0.0-pre1.tgz#1ffeab04d8972063de4ad1a948b3e550e11dc745"
@@ -2158,6 +2170,11 @@ functions-have-names@^1.2.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/functions-have-names/-/functions-have-names-1.2.3.tgz#0404fe4ee2ba2f607f0e0ec3c80bae994133b834"
   integrity sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==
+
+fuse.js@^7.4.2:
+  version "7.4.2"
+  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-7.4.2.tgz#a0513219603f1f3f09bbba587c7b919cc3ba6294"
+  integrity sha512-LVbzjD4WA6UP5B1UnP8wuaXJiLnqMdM/E4fiJXTJ5haJ5b/MBNsK29h2fm6swEoQaVQjvYFWKLE2RanyZIoRVQ==
 
 generator-function@^2.0.0:
   version "2.0.1"

@@ -1,6 +1,11 @@
 import Dexie, { type EntityTable } from "dexie";
+import type { ExerciseLibraryItem } from "./models/exercise-library.model";
 import type { ExerciseTemplate } from "./models/exercise.model";
 import type { WorkoutSetLog } from "./models/workout-log.model";
+import {
+  EXERCISE_LIBRARY_SCHEMA,
+  LEGACY_EXERCISE_LIBRARY_SCHEMA,
+} from "./schema/exercise-library.schema";
 import {
   EXERCISE_SCHEMA,
   LEGACY_EXERCISE_SCHEMA,
@@ -9,6 +14,7 @@ import { WORKOUT_SET_LOG_SCHEMA } from "./schema/workout-log.schema";
 
 class GymTrackDatabase extends Dexie {
   exercises!: EntityTable<ExerciseTemplate, "id">;
+  exerciseLibrary!: EntityTable<ExerciseLibraryItem, "id">;
   workoutLogs!: EntityTable<WorkoutSetLog, "id">;
 
   constructor() {
@@ -50,7 +56,34 @@ class GymTrackDatabase extends Dexie {
         }
       });
 
+    this.version(3).stores({
+      exercises: EXERCISE_SCHEMA,
+      exerciseLibrary: LEGACY_EXERCISE_LIBRARY_SCHEMA,
+      workoutlogs: WORKOUT_SET_LOG_SCHEMA,
+    });
+
+    this.version(4)
+      .stores({
+        exercises: EXERCISE_SCHEMA,
+        exerciseLibrary: EXERCISE_LIBRARY_SCHEMA,
+        workoutlogs: WORKOUT_SET_LOG_SCHEMA,
+      })
+      .upgrade(async (transaction) => {
+        const exerciseLibraryTable = transaction.table("exerciseLibrary");
+        const exercises = (await exerciseLibraryTable.toArray()) as Array<{
+          id: string;
+          equipment?: string;
+        }>;
+
+        for (const exercise of exercises) {
+          await exerciseLibraryTable.update(exercise.id, {
+            equipment: undefined,
+          });
+        }
+      });
+
     this.exercises = this.table("exercises");
+    this.exerciseLibrary = this.table("exerciseLibrary");
     this.workoutLogs = this.table("workoutlogs");
   }
 }

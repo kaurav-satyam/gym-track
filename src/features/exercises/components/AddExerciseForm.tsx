@@ -42,7 +42,6 @@ export default function AddExerciseForm({
   const [title, setTitle] = useState("");
   const [exerciseType, setExerciseType] = useState<ExerciseType>("reps");
   const [exerciseUnit, setExerciseUnit] = useState<ExerciseUnit>("kg");
-  const [plannedDurationMin, setPlannedDurationMin] = useState("");
   const [plannedSetCount, setPlannedSetCount] = useState("3");
 
   const displayUnits = useMemo(
@@ -58,9 +57,6 @@ export default function AddExerciseForm({
       return;
     }
 
-    const nextPlannedDuration =
-      plannedDurationMin === "" ? undefined : Number(plannedDurationMin);
-
     const normalizedSetCount = Math.max(
       0,
       Math.min(12, Math.round(Number(plannedSetCount) || 0)),
@@ -71,7 +67,6 @@ export default function AddExerciseForm({
       day,
       exerciseType,
       exerciseUnit,
-      plannedDurationMin: nextPlannedDuration,
       exerciseSets: Array.from({ length: normalizedSetCount }, () => ({
         id: crypto.randomUUID(),
       })),
@@ -82,7 +77,6 @@ export default function AddExerciseForm({
     setTitle("");
     setExerciseType("reps");
     setExerciseUnit("kg");
-    setPlannedDurationMin("");
     setPlannedSetCount("3");
     setIsOpen(false);
   }
@@ -169,23 +163,6 @@ export default function AddExerciseForm({
                   </option>
                 ))}
               </SelectField>
-            </Field>
-
-            <Field
-              label="Planned duration"
-              htmlFor="exercise-duration"
-              hint="Shown on the home screen as the estimated time for this exercise."
-            >
-              <TextField
-                id="exercise-duration"
-                type="number"
-                min="1"
-                step="1"
-                inputMode="numeric"
-                placeholder="15"
-                value={plannedDurationMin}
-                onChange={(event) => setPlannedDurationMin(event.target.value)}
-              />
             </Field>
 
             <Field
