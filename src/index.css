@@ -3,6 +3,7 @@
 :root {
   color-scheme: dark;
   --app-bg: #050816;
+  --app-bg-start: #071120;
   --app-glow-primary: rgba(56, 189, 248, 0.14);
   --app-glow-secondary: rgba(163, 230, 53, 0.08);
   --surface-panel: rgba(8, 15, 30, 0.8);
@@ -16,6 +17,42 @@
   --accent-ink: #020617;
   --success: #22c55e;
   --danger: #ef4444;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --app-bg: #f8fafc;
+  --app-bg-start: #eef6ff;
+  --app-glow-primary: rgba(14, 165, 233, 0.16);
+  --app-glow-secondary: rgba(16, 185, 129, 0.1);
+  --surface-panel: rgba(255, 255, 255, 0.88);
+  --surface-row: rgba(248, 250, 252, 0.9);
+  --surface-border: rgba(15, 23, 42, 0.12);
+  --surface-border-strong: rgba(15, 23, 42, 0.22);
+  --text-strong: #0f172a;
+  --text-soft: #334155;
+  --text-muted: #64748b;
+  --accent: #0f172a;
+  --accent-ink: #ffffff;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --app-bg: #f8fafc;
+    --app-bg-start: #eef6ff;
+    --app-glow-primary: rgba(14, 165, 233, 0.16);
+    --app-glow-secondary: rgba(16, 185, 129, 0.1);
+    --surface-panel: rgba(255, 255, 255, 0.88);
+    --surface-row: rgba(248, 250, 252, 0.9);
+    --surface-border: rgba(15, 23, 42, 0.12);
+    --surface-border-strong: rgba(15, 23, 42, 0.22);
+    --text-strong: #0f172a;
+    --text-soft: #334155;
+    --text-muted: #64748b;
+    --accent: #0f172a;
+    --accent-ink: #ffffff;
+  }
 }
 
 * {
@@ -41,7 +78,7 @@ body {
       var(--app-glow-secondary),
       transparent 22%
     ),
-    linear-gradient(180deg, #071120 0%, var(--app-bg) 100%);
+    linear-gradient(180deg, var(--app-bg-start) 0%, var(--app-bg) 100%);
   color: var(--text-strong);
 }
 
