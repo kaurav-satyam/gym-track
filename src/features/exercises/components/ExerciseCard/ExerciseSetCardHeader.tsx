@@ -23,8 +23,8 @@ export default function ExerciseSetCardHeader({
           className={cn(
             "inline-flex shrink-0 items-center rounded-full border px-3 py-1.5 text-xs font-semibold tracking-[0.08em]",
             completedToday
-              ? "border-emerald-400/35 bg-emerald-500/12 text-emerald-100"
-              : "border-(--surface-border) bg-black/20 text-(--text-strong)",
+              ? "border-(--success-border) bg-(--success-soft) text-(--success-ink)"
+              : "border-(--surface-border) bg-(--surface-inset) text-(--text-strong)",
           )}
         >
           Set {setNumber}

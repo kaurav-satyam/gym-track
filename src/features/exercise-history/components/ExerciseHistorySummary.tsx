@@ -17,7 +17,7 @@ export default function ExerciseHistorySummary({
   return (
     <Panel className="p-5 sm:p-6">
       <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-(--surface-border) bg-white/4 text-(--text-soft)">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-(--surface-border) bg-(--surface-control) text-(--text-soft)">
           <Dumbbell size={20} />
         </div>
 

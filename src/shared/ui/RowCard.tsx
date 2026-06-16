@@ -22,7 +22,7 @@ export default function RowCard<T extends ElementType = "div">({
   return (
     <Component
       className={cn(
-        "motion-surface rounded-2xl border border-(--surface-border) bg-(--surface-row) shadow-[0_10px_30px_rgba(2,6,23,0.18)]",
+        "motion-surface rounded-2xl border border-(--surface-border) bg-(--surface-row) shadow-[var(--shadow-row)]",
         className,
       )}
       {...props}

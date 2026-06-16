@@ -1,6 +1,6 @@
 import { ChevronRight, Share, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { IconButton, Panel } from "../../../shared/ui";
+import { useState } from "react";
+import { AppLogo, IconButton, Panel } from "../../../shared/ui";
 
 const DISMISSED_STORAGE_KEY = "gymtrack-ios-install-prompt-dismissed-v1";
 
@@ -9,17 +9,13 @@ type NavigatorWithStandalone = Navigator & {
 };
 
 export default function IosInstallPrompt() {
-  const [shouldShow, setShouldShow] = useState(false);
-
-  useEffect(() => {
+  const [shouldShow, setShouldShow] = useState(() => {
     if (!isIosInstallEligible()) {
-      return;
+      return false;
     }
 
-    const wasDismissed =
-      window.localStorage.getItem(DISMISSED_STORAGE_KEY) === "1";
-    setShouldShow(!wasDismissed);
-  }, []);
+    return window.localStorage.getItem(DISMISSED_STORAGE_KEY) !== "1";
+  });
 
   function handleDismiss() {
     window.localStorage.setItem(DISMISSED_STORAGE_KEY, "1");
@@ -31,12 +27,10 @@ export default function IosInstallPrompt() {
   }
 
   return (
-    <div className="pointer-events-none fixed inset-x-4 bottom-4 z-50 sm:inset-x-6 sm:bottom-6">
-      <Panel className="pointer-events-auto mx-auto max-w-md border-sky-400/20 bg-[rgba(6,12,24,0.92)] p-4 shadow-[0_28px_70px_rgba(2,6,23,0.48)]">
+    <div className="pointer-events-none fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+5.75rem)] z-50 sm:inset-x-6 md:bottom-6">
+      <Panel className="pointer-events-auto mx-auto max-w-md border-(--accent-border) bg-(--surface-panel) p-4 shadow-[0_28px_70px_rgba(2,6,23,0.34)]">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-sky-400/20 bg-sky-400/10 text-sky-100">
-            <Share size={18} />
-          </div>
+          <AppLogo size="md" className="border-(--accent-border)" />
 
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-3">
@@ -62,11 +56,12 @@ export default function IosInstallPrompt() {
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-(--text-muted)">
-              <span className="rounded-full border border-(--surface-border) bg-white/4 px-2.5 py-1 text-(--text-soft)">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-(--surface-border) bg-(--surface-control) px-2.5 py-1 text-(--text-soft)">
+                <Share size={12} />
                 Share
               </span>
               <ChevronRight size={12} className="text-(--text-muted)" />
-              <span className="rounded-full border border-(--surface-border) bg-white/4 px-2.5 py-1 text-(--text-soft)">
+              <span className="rounded-full border border-(--surface-border) bg-(--surface-control) px-2.5 py-1 text-(--text-soft)">
                 Add to Home Screen
               </span>
             </div>

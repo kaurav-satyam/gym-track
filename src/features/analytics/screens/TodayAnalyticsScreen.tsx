@@ -104,7 +104,7 @@ export default function TodayAnalyticsScreen() {
             onChange={setPeriod}
           />
 
-          <div className="flex items-center justify-between gap-2 rounded-2xl border border-(--surface-border) bg-black/10 p-1">
+          <div className="flex items-center justify-between gap-2 rounded-2xl border border-(--surface-border) bg-(--surface-inset) p-1">
             <IconButton
               aria-label="Previous range"
               tone="secondary"
@@ -262,7 +262,7 @@ function StatCard({
         <p className="text-xs font-medium uppercase tracking-[0.16em] text-(--text-muted)">
           {label}
         </p>
-        <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-(--surface-border) bg-white/4 text-(--text-soft)">
+        <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-(--surface-border) bg-(--surface-control) text-(--text-soft)">
           {icon}
         </span>
       </div>
@@ -294,7 +294,7 @@ function SetTrendChart({ trend }: { trend: AnalyticsTrendPoint[] }) {
         >
           {trend.map((point) => (
             <div key={point.key} className="flex min-w-6 flex-1 flex-col items-center gap-2">
-              <div className="flex h-44 w-full items-end justify-center gap-1.5 rounded-xl border border-(--surface-border) bg-black/10 px-1.5 py-2">
+              <div className="flex h-44 w-full items-end justify-center gap-1.5 rounded-xl border border-(--surface-border) bg-(--surface-inset) px-1.5 py-2">
                 <Bar
                   value={point.plannedSets}
                   max={maxSets}
@@ -304,7 +304,7 @@ function SetTrendChart({ trend }: { trend: AnalyticsTrendPoint[] }) {
                 <Bar
                   value={point.completedSets}
                   max={maxSets}
-                  className="bg-emerald-400"
+                  className="bg-(--success)"
                   title={`${point.label}: ${point.completedSets} completed`}
                 />
               </div>
@@ -317,7 +317,7 @@ function SetTrendChart({ trend }: { trend: AnalyticsTrendPoint[] }) {
       </div>
       <div className="mt-4 flex flex-wrap gap-3 text-xs text-(--text-muted)">
         <LegendDot className="bg-slate-400/45" label="Planned" />
-        <LegendDot className="bg-emerald-400" label="Completed" />
+        <LegendDot className="bg-(--success)" label="Completed" />
       </div>
     </Panel>
   );
@@ -375,9 +375,9 @@ function MuscleBalanceChart({ stats }: { stats: AnalyticsMuscleStat[] }) {
                     {stat.completedSets} sets · {Math.round(percent)}%
                   </span>
                 </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-black/15 ring-1 ring-(--surface-border)">
+                <div className="h-2.5 overflow-hidden rounded-full bg-(--surface-inset) ring-1 ring-(--surface-border)">
                   <div
-                    className="h-full rounded-full bg-emerald-400 transition-all duration-300"
+                    className="h-full rounded-full bg-(--success) transition-all duration-300"
                     style={{ width: `${Math.max(6, (stat.completedSets / maxSets) * 100)}%` }}
                   />
                 </div>
@@ -432,10 +432,10 @@ function TopExercisePanel({ exercises }: { exercises: AnalyticsExerciseStat[] })
             <Link
               key={exercise.exerciseId}
               to={`/exercises/${exercise.exerciseId}/history`}
-              className="flex items-center justify-between gap-3 rounded-2xl border border-(--surface-border) bg-white/4 p-3 transition hover:border-(--surface-border-strong) hover:bg-white/8"
+              className="flex items-center justify-between gap-3 rounded-2xl border border-(--surface-border) bg-(--surface-control) p-3 transition hover:border-(--surface-border-strong) hover:bg-(--surface-control-hover)"
             >
               <div className="flex min-w-0 items-center gap-3">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-black/15 text-xs font-semibold text-(--text-muted)">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-(--surface-inset) text-xs font-semibold text-(--text-muted)">
                   {index + 1}
                 </span>
                 <div className="min-w-0">
@@ -473,7 +473,7 @@ function ExerciseProgressPanel({ exercises }: { exercises: AnalyticsExerciseStat
           <Link
             key={exercise.exerciseId}
             to={`/exercises/${exercise.exerciseId}/history`}
-            className="grid gap-4 px-4 py-4 transition hover:bg-white/4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5"
+            className="grid gap-4 px-4 py-4 transition hover:bg-(--surface-control) sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5"
           >
             <div className="min-w-0 space-y-2">
               <div className="flex min-w-0 items-center gap-2">
@@ -489,7 +489,7 @@ function ExerciseProgressPanel({ exercises }: { exercises: AnalyticsExerciseStat
                   exercise.muscleTags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-100"
+                      className="rounded-full border border-(--tag-border) bg-(--tag-bg) px-2 py-0.5 text-xs font-medium text-(--tag-text)"
                     >
                       {tag}
                     </span>
@@ -520,7 +520,7 @@ function ChartHeader({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-(--surface-border) bg-white/4 text-(--text-soft)">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-(--surface-border) bg-(--surface-control) text-(--text-soft)">
         {icon}
       </span>
       <div className="min-w-0">
@@ -541,7 +541,7 @@ function MetricTile({
   detail: string;
 }) {
   return (
-    <div className="rounded-2xl border border-(--surface-border) bg-white/4 p-3">
+    <div className="rounded-2xl border border-(--surface-border) bg-(--surface-control) p-3">
       <p className="text-xs font-medium uppercase tracking-[0.14em] text-(--text-muted)">
         {label}
       </p>
@@ -553,7 +553,7 @@ function MetricTile({
 
 function CompactMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-(--surface-border) bg-black/10 p-2">
+    <div className="rounded-xl border border-(--surface-border) bg-(--surface-inset) p-2">
       <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-(--text-muted)">
         {label}
       </p>

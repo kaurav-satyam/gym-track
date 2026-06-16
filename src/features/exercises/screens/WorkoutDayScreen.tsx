@@ -180,7 +180,7 @@ function SessionSummaryPanel({
           label="Sets done"
           value={`${completedSetCount}/${plannedSetCount}`}
         />
-        <div className="rounded-2xl border border-(--surface-border) bg-black/10 px-4 py-3">
+        <div className="rounded-2xl border border-(--surface-border) bg-(--surface-inset) px-4 py-3">
           <ProgressBar value={completionPercent} label="Session progress" />
         </div>
       </div>
@@ -198,7 +198,7 @@ function SummaryMetric({
   value: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border border-(--surface-border) bg-black/10 px-4 py-3">
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-(--surface-border) bg-(--surface-inset) px-4 py-3">
       <div>
         <p className="text-xs uppercase tracking-[0.16em] text-(--text-muted)">
           {label}
@@ -207,7 +207,7 @@ function SummaryMetric({
           {value}
         </p>
       </div>
-      <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-(--surface-border) bg-white/4 text-(--text-soft)">
+      <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-(--surface-border) bg-(--surface-control) text-(--text-soft)">
         {icon}
       </span>
     </div>

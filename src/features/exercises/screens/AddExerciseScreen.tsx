@@ -410,17 +410,17 @@ function ExercisePickerCard({
   return (
     <Panel className="overflow-hidden [content-visibility:auto] [contain-intrinsic-size:180px]">
       <button
-        className="flex w-full items-start justify-between gap-4 px-4 py-4 text-left transition duration-200 hover:bg-white/4 sm:px-5"
+        className="flex w-full items-start justify-between gap-4 px-4 py-4 text-left transition duration-200 hover:bg-(--surface-control) sm:px-5"
         type="button"
         onClick={onToggle}
       >
         <div className="flex min-w-0 items-start gap-3">
           <div
             className={cn(
-              "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border bg-black/10",
+              "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border bg-(--surface-inset)",
               exercise.exerciseType === "reps"
-                ? "border-sky-400/25 text-sky-100"
-                : "border-amber-400/25 text-amber-100",
+                ? "border-(--type-reps-border) text-(--type-reps-text)"
+                : "border-(--type-time-border) text-(--type-time-text)",
             )}
           >
             {exercise.exerciseType === "reps" ? (
@@ -469,7 +469,7 @@ function ExercisePickerCard({
 
         <span
           className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-(--surface-border) bg-white/4 text-(--text-soft) transition-transform duration-300",
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-(--surface-border) bg-(--surface-control) text-(--text-soft) transition-transform duration-300",
             expanded && "rotate-180",
           )}
         >
@@ -651,9 +651,9 @@ function SearchableMuscleGroupSelect({
                 key={option}
                 type="button"
                 className={cn(
-                  "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition hover:bg-white/8",
+                  "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition hover:bg-(--surface-control-hover)",
                   option === value
-                    ? "bg-white/10 text-(--text-strong)"
+                    ? "bg-(--surface-active) text-(--text-strong)"
                     : "text-(--text-soft)",
                 )}
                 onMouseDown={(event) => {
@@ -676,7 +676,7 @@ function SearchableMuscleGroupSelect({
 
 function ConfigChip({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-md border border-(--surface-border) bg-black/15 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-(--text-soft)">
+    <span className="inline-flex items-center rounded-md border border-(--surface-border) bg-(--surface-inset) px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-(--text-soft)">
       {children}
     </span>
   );
@@ -684,8 +684,8 @@ function ConfigChip({ children }: { children: ReactNode }) {
 
 function MuscleTagPill({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-100">
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+    <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-(--tag-border) bg-(--tag-bg) px-2.5 py-1 text-xs font-medium text-(--tag-text)">
+      <span className="h-1.5 w-1.5 rounded-full bg-(--success)" />
       {children}
     </span>
   );
@@ -749,7 +749,7 @@ function MuscleTagSelector({
                 "shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition duration-200",
                 selected
                   ? "border-transparent bg-(--accent) text-(--accent-ink)"
-                  : "border-(--surface-border) bg-white/4 text-(--text-soft) hover:border-(--surface-border-strong) hover:bg-white/8",
+                  : "border-(--surface-border) bg-(--surface-control) text-(--text-soft) hover:border-(--surface-border-strong) hover:bg-(--surface-control-hover)",
               )}
             >
               {tag}
