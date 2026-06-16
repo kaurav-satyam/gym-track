@@ -11,7 +11,7 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen text-(--text-strong)">
-      <main className="min-h-screen pb-24 md:pb-0 md:pl-21">
+      <main className="min-h-screen pb-28 md:pb-0 md:pl-21">
         <Outlet />
       </main>
       <AppNavigation />

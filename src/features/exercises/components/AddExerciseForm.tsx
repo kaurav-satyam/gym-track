@@ -86,7 +86,7 @@ export default function AddExerciseForm({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left transition duration-200 hover:bg-white/3 sm:px-6"
+        className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left transition duration-200 hover:bg-(--surface-control) sm:px-6"
       >
         <div className="space-y-2">
           <p className="text-xs font-medium uppercase tracking-[0.22em] text-(--text-muted)">
@@ -99,7 +99,7 @@ export default function AddExerciseForm({
 
         <div
           className={cn(
-            "flex h-11 w-11 items-center justify-center rounded-2xl border border-(--surface-border) bg-white/4 text-(--text-soft) transition-transform duration-300",
+            "flex h-11 w-11 items-center justify-center rounded-2xl border border-(--surface-border) bg-(--surface-control) text-(--text-soft) transition-transform duration-300",
             isOpen && "rotate-180",
           )}
         >

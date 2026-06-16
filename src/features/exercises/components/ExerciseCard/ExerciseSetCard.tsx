@@ -48,7 +48,7 @@ export default function ExerciseSetCard({
       className={cn(
         "p-3 transition-colors sm:p-3.5",
         completedToday &&
-          "border-emerald-400/30 bg-emerald-500/8 shadow-[0_10px_30px_rgba(6,78,59,0.18)]",
+          "border-(--success-border) bg-(--success-soft) shadow-[var(--shadow-row)]",
       )}
     >
       <ExerciseSetCardHeader
@@ -121,7 +121,7 @@ export default function ExerciseSetCard({
         {completedToday ? (
           <Button
             tone="secondary"
-            className="min-h-11 shrink-0 rounded-xl border-emerald-400/30 bg-emerald-500/12 px-4 text-sm font-semibold whitespace-nowrap text-emerald-100 hover:bg-emerald-500/18"
+            className="min-h-11 shrink-0 rounded-xl border-(--success-border) bg-(--success-soft) px-4 text-sm font-semibold whitespace-nowrap text-(--success-ink) hover:bg-(--surface-control-hover)"
             onClick={() => removeExerciseSetCompletion(set.id)}
           >
             <X />

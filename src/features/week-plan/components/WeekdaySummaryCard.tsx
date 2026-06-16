@@ -40,7 +40,7 @@ export default function WeekdaySummaryCard({
       type="button"
       interactive
       onClick={onClick}
-      className={cn("w-full space-y-5 p-5 text-left", isToday && "border-emerald-400/30 bg-emerald-500/8 shadow-[0_20px_60px_rgba(6,78,59,0.18)]")}
+      className={cn("w-full space-y-5 p-5 text-left", isToday && "border-(--success-border) bg-(--success-soft) shadow-[var(--shadow-panel)]")}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
@@ -62,7 +62,7 @@ export default function WeekdaySummaryCard({
           {isToday && <Badge>Today</Badge>}
           {workoutType && <Badge>{workoutType}</Badge>}
 
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-(--surface-border) bg-white/3 text-(--text-soft)">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-(--surface-border) bg-(--surface-control) text-(--text-soft)">
             <ArrowUpRight size={16} />
           </div>
         </div>
@@ -80,7 +80,7 @@ export default function WeekdaySummaryCard({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-(--surface-border) bg-black/10 px-4 py-3">
+    <div className="rounded-2xl border border-(--surface-border) bg-(--surface-inset) px-4 py-3">
       <p className="text-xs uppercase tracking-[0.16em] text-(--text-muted)">
         {label}
       </p>

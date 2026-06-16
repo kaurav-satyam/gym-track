@@ -1,5 +1,7 @@
 const MUSCLE_TAGS_URL = import.meta.env.BASE_URL + "data/muscleTags.json";
 
+type TMuscleTagPayload = string[] | { muscleTags?: unknown };
+
 export async function loadDefaultMuscleTags() {
   const response = await fetch(MUSCLE_TAGS_URL);
 
@@ -7,11 +9,12 @@ export async function loadDefaultMuscleTags() {
     throw new Error("Default muscle tags could not be loaded.");
   }
 
-  const tags = await response.json();
-
-  if (!Array.isArray(tags)) {
-    return [];
-  }
+  const payload = (await response.json()) as TMuscleTagPayload;
+  const tags = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload.muscleTags)
+      ? payload.muscleTags
+      : [];
 
   return tags.filter((tag): tag is string => typeof tag === "string");
 }

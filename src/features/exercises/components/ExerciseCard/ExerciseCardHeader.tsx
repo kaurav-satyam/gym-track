@@ -49,16 +49,16 @@ export default function ExerciseCardHeader({
           className={cn(
             "flex w-full flex-col items-center justify-center gap-2 rounded-[1.35rem] border px-3 py-3 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]",
             isRepsExercise
-              ? "border-sky-400/25 bg-sky-400/10 text-sky-100"
-              : "border-amber-400/25 bg-amber-400/10 text-amber-100",
+              ? "border-(--type-reps-border) bg-(--type-reps-bg) text-(--type-reps-text)"
+              : "border-(--type-time-border) bg-(--type-time-bg) text-(--type-time-text)",
           )}
         >
           <div
             className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-2xl border bg-black/15",
+              "flex h-9 w-9 items-center justify-center rounded-2xl border bg-(--surface-inset)",
               isRepsExercise
-                ? "border-sky-300/20 text-sky-50"
-                : "border-amber-300/20 text-amber-50",
+                ? "border-(--type-reps-border) text-(--type-reps-text)"
+                : "border-(--type-time-border) text-(--type-time-text)",
             )}
           >
             {isRepsExercise ? <Dumbbell size={18} /> : <Timer size={18} />}
@@ -127,7 +127,7 @@ export default function ExerciseCardHeader({
               <Trash2 size={14} />
             </IconButton>
 
-            <div className="inline-flex items-center rounded-xl border border-(--surface-border) bg-white/3">
+            <div className="inline-flex items-center rounded-xl border border-(--surface-border) bg-(--surface-control)">
               <IconButton
                 tone="ghost"
                 size="sm"
@@ -174,7 +174,7 @@ export default function ExerciseCardHeader({
 
 function ConfigChip({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-md border border-(--surface-border) bg-black/15 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-(--text-soft)">
+    <span className="inline-flex items-center rounded-md border border-(--surface-border) bg-(--surface-inset) px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-(--text-soft)">
       {children}
     </span>
   );
@@ -182,8 +182,8 @@ function ConfigChip({ children }: { children: ReactNode }) {
 
 function MuscleTagPill({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-100">
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+    <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-(--tag-border) bg-(--tag-bg) px-2.5 py-1 text-xs font-medium text-(--tag-text)">
+      <span className="h-1.5 w-1.5 rounded-full bg-(--success)" />
       {children}
     </span>
   );

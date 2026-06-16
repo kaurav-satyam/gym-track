@@ -3,55 +3,140 @@
 :root {
   color-scheme: dark;
   --app-bg: #050816;
-  --app-bg-start: #071120;
-  --app-glow-primary: rgba(56, 189, 248, 0.14);
-  --app-glow-secondary: rgba(163, 230, 53, 0.08);
-  --surface-panel: rgba(8, 15, 30, 0.8);
-  --surface-row: rgba(15, 23, 42, 0.72);
+  --app-bg-start: #0a1020;
+  --surface-panel: rgba(8, 15, 30, 0.86);
+  --surface-row: rgba(13, 21, 38, 0.78);
+  --surface-inset: rgba(2, 6, 23, 0.32);
+  --surface-control: rgba(248, 250, 252, 0.055);
+  --surface-control-hover: rgba(248, 250, 252, 0.095);
+  --surface-active: rgba(199, 214, 93, 0.14);
   --surface-border: rgba(148, 163, 184, 0.16);
-  --surface-border-strong: rgba(226, 232, 240, 0.22);
+  --surface-border-strong: rgba(226, 232, 240, 0.24);
   --text-strong: #f8fafc;
   --text-soft: #cbd5e1;
   --text-muted: #94a3b8;
-  --accent: #f8fafc;
-  --accent-ink: #020617;
-  --success: #22c55e;
+  --accent: #d2df77;
+  --accent-hover: #e3ec9a;
+  --accent-ink: #11150a;
+  --accent-soft: rgba(210, 223, 119, 0.13);
+  --accent-border: rgba(210, 223, 119, 0.28);
+  --focus-ring: rgba(210, 223, 119, 0.36);
+  --success: #84a12d;
+  --success-ink: #ecfccb;
+  --success-soft: rgba(132, 161, 45, 0.14);
+  --success-border: rgba(132, 161, 45, 0.32);
+  --tag-bg: rgba(132, 161, 45, 0.12);
+    --tag-border: rgba(132, 161, 45, 0.26);
+    --tag-text: #ecfccb;
+    --type-reps-bg: rgba(56, 189, 248, 0.1);
+    --type-reps-border: rgba(56, 189, 248, 0.26);
+    --type-reps-text: #e0f2fe;
+    --type-time-bg: rgba(245, 158, 11, 0.1);
+    --type-time-border: rgba(245, 158, 11, 0.26);
+    --type-time-text: #fef3c7;
   --danger: #ef4444;
+  --nav-bg: rgba(5, 8, 22, 0.94);
+  --nav-border: rgba(148, 163, 184, 0.14);
+  --nav-item-bg: rgba(248, 250, 252, 0.055);
+  --nav-item-fg: #cbd5e1;
+  --nav-item-hover-bg: rgba(248, 250, 252, 0.1);
+  --nav-item-hover-fg: #f8fafc;
+  --nav-active-bg: var(--accent);
+  --nav-active-fg: var(--accent-ink);
+  --tooltip-bg: #020617;
+  --shadow-panel: 0 20px 60px rgba(3, 7, 18, 0.32);
+  --shadow-row: 0 10px 30px rgba(2, 6, 23, 0.18);
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --app-bg: #f8fafc;
-  --app-bg-start: #eef6ff;
-  --app-glow-primary: rgba(14, 165, 233, 0.16);
-  --app-glow-secondary: rgba(16, 185, 129, 0.1);
-  --surface-panel: rgba(255, 255, 255, 0.88);
-  --surface-row: rgba(248, 250, 252, 0.9);
+  --app-bg: #f7f9f2;
+  --app-bg-start: #eef4ff;
+  --surface-panel: rgba(255, 255, 255, 0.9);
+  --surface-row: rgba(255, 255, 255, 0.78);
+  --surface-inset: rgba(15, 23, 42, 0.045);
+  --surface-control: rgba(15, 23, 42, 0.045);
+  --surface-control-hover: rgba(15, 23, 42, 0.075);
+  --surface-active: rgba(75, 87, 22, 0.1);
   --surface-border: rgba(15, 23, 42, 0.12);
   --surface-border-strong: rgba(15, 23, 42, 0.22);
   --text-strong: #0f172a;
   --text-soft: #334155;
   --text-muted: #64748b;
-  --accent: #0f172a;
-  --accent-ink: #ffffff;
+  --accent: #4b5716;
+  --accent-hover: #3f4912;
+  --accent-ink: #f8fafc;
+  --accent-soft: rgba(75, 87, 22, 0.1);
+  --accent-border: rgba(75, 87, 22, 0.24);
+  --focus-ring: rgba(75, 87, 22, 0.28);
+  --success: #4b5716;
+  --success-ink: #4b5716;
+  --success-soft: rgba(75, 87, 22, 0.1);
+  --success-border: rgba(75, 87, 22, 0.24);
+  --tag-bg: rgba(75, 87, 22, 0.09);
+    --tag-border: rgba(75, 87, 22, 0.2);
+    --tag-text: #4b5716;
+    --type-reps-bg: rgba(14, 165, 233, 0.09);
+    --type-reps-border: rgba(14, 165, 233, 0.22);
+    --type-reps-text: #075985;
+    --type-time-bg: rgba(245, 158, 11, 0.1);
+    --type-time-border: rgba(217, 119, 6, 0.22);
+    --type-time-text: #92400e;
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  --nav-border: rgba(15, 23, 42, 0.12);
+  --nav-item-bg: rgba(15, 23, 42, 0.045);
+  --nav-item-fg: #475569;
+  --nav-item-hover-bg: rgba(15, 23, 42, 0.08);
+  --nav-item-hover-fg: #0f172a;
+  --tooltip-bg: #0f172a;
+  --shadow-panel: 0 18px 48px rgba(15, 23, 42, 0.1);
+  --shadow-row: 0 10px 24px rgba(15, 23, 42, 0.08);
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     color-scheme: light;
-    --app-bg: #f8fafc;
-    --app-bg-start: #eef6ff;
-    --app-glow-primary: rgba(14, 165, 233, 0.16);
-    --app-glow-secondary: rgba(16, 185, 129, 0.1);
-    --surface-panel: rgba(255, 255, 255, 0.88);
-    --surface-row: rgba(248, 250, 252, 0.9);
+    --app-bg: #f7f9f2;
+    --app-bg-start: #eef4ff;
+    --surface-panel: rgba(255, 255, 255, 0.9);
+    --surface-row: rgba(255, 255, 255, 0.78);
+    --surface-inset: rgba(15, 23, 42, 0.045);
+    --surface-control: rgba(15, 23, 42, 0.045);
+    --surface-control-hover: rgba(15, 23, 42, 0.075);
+    --surface-active: rgba(75, 87, 22, 0.1);
     --surface-border: rgba(15, 23, 42, 0.12);
     --surface-border-strong: rgba(15, 23, 42, 0.22);
     --text-strong: #0f172a;
     --text-soft: #334155;
     --text-muted: #64748b;
-    --accent: #0f172a;
-    --accent-ink: #ffffff;
+    --accent: #4b5716;
+    --accent-hover: #3f4912;
+    --accent-ink: #f8fafc;
+    --accent-soft: rgba(75, 87, 22, 0.1);
+    --accent-border: rgba(75, 87, 22, 0.24);
+    --focus-ring: rgba(75, 87, 22, 0.28);
+    --success: #4b5716;
+    --success-ink: #4b5716;
+    --success-soft: rgba(75, 87, 22, 0.1);
+    --success-border: rgba(75, 87, 22, 0.24);
+    --tag-bg: rgba(75, 87, 22, 0.09);
+    --tag-border: rgba(75, 87, 22, 0.2);
+    --tag-text: #4b5716;
+    --type-reps-bg: rgba(14, 165, 233, 0.09);
+    --type-reps-border: rgba(14, 165, 233, 0.22);
+    --type-reps-text: #075985;
+    --type-time-bg: rgba(245, 158, 11, 0.1);
+    --type-time-border: rgba(217, 119, 6, 0.22);
+    --type-time-text: #92400e;
+    --nav-bg: rgba(255, 255, 255, 0.9);
+    --nav-border: rgba(15, 23, 42, 0.12);
+    --nav-item-bg: rgba(15, 23, 42, 0.045);
+    --nav-item-fg: #475569;
+    --nav-item-hover-bg: rgba(15, 23, 42, 0.08);
+    --nav-item-hover-fg: #0f172a;
+    --tooltip-bg: #0f172a;
+    --shadow-panel: 0 18px 48px rgba(15, 23, 42, 0.1);
+    --shadow-row: 0 10px 24px rgba(15, 23, 42, 0.08);
   }
 }
 
@@ -67,18 +152,8 @@ body,
 
 body {
   min-height: 100vh;
-  background:
-    radial-gradient(
-      circle at top left,
-      var(--app-glow-primary),
-      transparent 28%
-    ),
-    radial-gradient(
-      circle at top right,
-      var(--app-glow-secondary),
-      transparent 22%
-    ),
-    linear-gradient(180deg, var(--app-bg-start) 0%, var(--app-bg) 100%);
+  background: linear-gradient(180deg, var(--app-bg-start) 0%, var(--app-bg) 100%);
+  background-attachment: fixed;
   color: var(--text-strong);
 }
 
@@ -91,7 +166,7 @@ textarea {
 }
 
 ::selection {
-  background: rgba(148, 163, 184, 0.28);
+  background: var(--accent-soft);
 }
 
 @keyframes page-in {

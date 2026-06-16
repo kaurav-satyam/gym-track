@@ -17,13 +17,14 @@ export default function IconButton({
   ...props
 }: IIconButtonProps) {
   const toneClasses = {
-    primary: "border-transparent bg-(--accent) text-(--accent-ink) hover:opacity-90",
+    primary:
+      "border-transparent bg-(--accent) text-(--accent-ink) hover:bg-(--accent-hover)",
     secondary:
-      "border-(--surface-border) bg-white/[0.04] text-(--text-soft) hover:border-(--surface-border-strong) hover:bg-white/[0.08]",
+      "border-(--surface-border) bg-(--surface-control) text-(--text-soft) hover:border-(--surface-border-strong) hover:bg-(--surface-control-hover) hover:text-(--text-strong)",
     success: "border-transparent bg-(--success) text-white hover:opacity-90",
     danger: "border-transparent bg-(--danger) text-white hover:opacity-90",
     ghost:
-      "border-(--surface-border) bg-transparent text-(--text-soft) hover:border-(--surface-border-strong) hover:bg-white/[0.04]",
+      "border-(--surface-border) bg-transparent text-(--text-soft) hover:border-(--surface-border-strong) hover:bg-(--surface-control)",
   };
 
   const sizeClasses = {
@@ -35,7 +36,7 @@ export default function IconButton({
     <button
       type={type ?? "button"}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center border transition duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-50",
+        "inline-flex shrink-0 items-center justify-center border transition duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-50",
         toneClasses[tone],
         sizeClasses[size],
         className,

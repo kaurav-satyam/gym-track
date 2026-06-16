@@ -1,27 +1,12 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useLiveQuery } from "dexie-react-hooks";
-import {
-  ArrowLeft,
-  Check,
-  ChevronDown,
-  Dumbbell,
-  Plus,
-  Search,
-  Timer,
-} from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Plus } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import type {
   ExerciseLibraryItem,
 } from "../../../app/db/models/exercise-library.model";
-import {
-  EXERCISE_TIME_UNITS,
-  EXERCISE_TYPES,
-  EXERCISE_WEIGHT_UNITS,
-  type ExerciseType,
-  type ExerciseUnit,
-  type WorkoutDay,
-} from "../../../app/db/models/exercise.model";
+import { type WorkoutDay } from "../../../app/db/models/exercise.model";
 import {
   createCustomExerciseLibraryItem,
   getExerciseLibraryItemByTitle,
@@ -35,53 +20,19 @@ import {
 } from "../../../app/db/repositories/exercise.repository";
 import { loadDefaultMuscleTags } from "../../../shared/constants/muscleTags";
 import { WEEKDAYS } from "../../../shared/constants/weekdays";
+import { Button, EmptyState, PageShell, RowCard } from "../../../shared/ui";
 import {
-  Button,
-  EmptyState,
-  Field,
-  PageShell,
-  Panel,
-  RowCard,
-  SegmentedControl,
-  SelectField,
-  TextField,
-  cn,
-} from "../../../shared/ui";
-
-interface IExerciseSetupState {
-  exerciseType: ExerciseType;
-  exerciseUnit: ExerciseUnit;
-  plannedSetCount: string;
-  muscleTags: string[];
-  customTag: string;
-}
-
-type TAllFilter = "all";
-type TExerciseTypeFilter = ExerciseType | TAllFilter;
-
-const ALL_FILTER_VALUE = "all" as const;
-const RESULT_STEP = 50;
-
-const defaultSetupState: IExerciseSetupState = {
-  exerciseType: "reps",
-  exerciseUnit: "kg",
-  plannedSetCount: "3",
-  muscleTags: [],
-  customTag: "",
-};
-
-const exerciseTypeOptions = EXERCISE_TYPES.map((value) => ({
-  label: value,
-  value,
-}));
-
-const exerciseTypeFilterOptions: Array<{
-  label: string;
-  value: TExerciseTypeFilter;
-}> = [
-  { label: "All", value: ALL_FILTER_VALUE },
-  ...EXERCISE_TYPES.map((value) => ({ label: value, value })),
-];
+  ALL_FILTER_VALUE,
+  AddExerciseResultSummary,
+  AddExerciseToolbar,
+  ExercisePickerCard,
+  RESULT_STEP,
+  buildSetupState,
+  createMuscleFilterOptions,
+  defaultSetupState,
+  type ExerciseSetupState,
+  type ExerciseTypeFilter,
+} from "../components/AddExercise";
 
 export default function AddExerciseScreen() {
   const { day } = useParams<{ day: WorkoutDay }>();
@@ -89,13 +40,15 @@ export default function AddExerciseScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>(ALL_FILTER_VALUE);
   const [exerciseTypeFilter, setExerciseTypeFilter] =
-    useState<TExerciseTypeFilter>(ALL_FILTER_VALUE);
+    useState<ExerciseTypeFilter>(ALL_FILTER_VALUE);
   const [resultLimit, setResultLimit] = useState(RESULT_STEP);
   const [seedReady, setSeedReady] = useState(false);
   const [defaultMuscleTags, setDefaultMuscleTags] = useState<string[]>([]);
-  const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(null);
+  const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(
+    null,
+  );
   const [setupState, setSetupState] =
-    useState<IExerciseSetupState>(defaultSetupState);
+    useState<ExerciseSetupState>(defaultSetupState);
 
   const isValidDay = day != null && WEEKDAYS.includes(day);
   const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -142,13 +95,7 @@ export default function AddExerciseScreen() {
         limit: resultLimit,
       });
     },
-    [
-      seedReady,
-      searchQuery,
-      categoryFilter,
-      exerciseTypeFilter,
-      resultLimit,
-    ],
+    [seedReady, searchQuery, categoryFilter, exerciseTypeFilter, resultLimit],
     [],
   );
 
@@ -165,12 +112,19 @@ export default function AddExerciseScreen() {
 
   const canCreateCustomExercise = normalizedQuery.length > 0 && !exactExercise;
   const shouldShowMore = visibleExercises.length >= resultLimit;
+  const hasActiveFilters =
+    normalizedQuery.length > 0 ||
+    categoryFilter !== ALL_FILTER_VALUE ||
+    exerciseTypeFilter !== ALL_FILTER_VALUE;
+  const resultSummary = seedReady
+    ? `${visibleExercises.length} exercise${visibleExercises.length === 1 ? "" : "s"} shown`
+    : "Preparing library";
   const resultListRef = useRef<HTMLDivElement | null>(null);
   // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Virtual returns measurement callbacks by design.
   const rowVirtualizer = useVirtualizer({
     count: visibleExercises.length,
     estimateSize: (index) =>
-      visibleExercises[index]?.id === expandedExerciseId ? 540 : 190,
+      visibleExercises[index]?.id === expandedExerciseId ? 520 : 92,
     getScrollElement: () => resultListRef.current,
     overscan: 8,
   });
@@ -184,6 +138,26 @@ export default function AddExerciseScreen() {
         />
       </PageShell>
     );
+  }
+
+  function resetResultWindow() {
+    setResultLimit(RESULT_STEP);
+    setExpandedExerciseId(null);
+  }
+
+  function handleSearchQueryChange(value: string) {
+    setSearchQuery(value);
+    resetResultWindow();
+  }
+
+  function handleCategoryFilterChange(value: string) {
+    setCategoryFilter(value);
+    resetResultWindow();
+  }
+
+  function handleExerciseTypeFilterChange(value: ExerciseTypeFilter) {
+    setExerciseTypeFilter(value);
+    resetResultWindow();
   }
 
   function expandExercise(exercise: ExerciseLibraryItem) {
@@ -213,6 +187,14 @@ export default function AddExerciseScreen() {
 
     setExpandedExerciseId(customExercise.id);
     setSetupState(buildSetupState(customExercise));
+  }
+
+  function clearFilters() {
+    setSearchQuery("");
+    setCategoryFilter(ALL_FILTER_VALUE);
+    setExerciseTypeFilter(ALL_FILTER_VALUE);
+    setExpandedExerciseId(null);
+    setResultLimit(RESULT_STEP);
   }
 
   async function handleSaveExercise(exercise: ExerciseLibraryItem) {
@@ -246,53 +228,27 @@ export default function AddExerciseScreen() {
 
   return (
     <PageShell
-      eyebrow="Add exercise"
-      title={day}
-      description="Search the exercise library, filter by muscle group, then confirm how you want to track it."
-      actions={
-        <Button
-          tone="secondary"
-          leadingIcon={<ArrowLeft size={16} />}
-          onClick={() => navigate("/days/" + day)}
-        >
-          Back
-        </Button>
-      }
+      className="max-w-4xl py-3 sm:py-6"
+      contentClassName="space-y-3 sm:space-y-4"
     >
-      <Panel className="relative z-40 space-y-4 overflow-visible p-4 sm:p-5">
-        <div className="relative">
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-(--text-muted)"
-            size={18}
-          />
-          <TextField
-            aria-label="Search exercises"
-            className="pl-11"
-            placeholder="Search exercise name"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-          />
-        </div>
+      <AddExerciseToolbar
+        searchQuery={searchQuery}
+        categoryFilter={categoryFilter}
+        categoryFilterOptions={categoryFilterOptions}
+        exerciseTypeFilter={exerciseTypeFilter}
+        onBack={() => navigate("/days/" + day)}
+        onSearchQueryChange={handleSearchQueryChange}
+        onCategoryFilterChange={handleCategoryFilterChange}
+        onExerciseTypeFilterChange={handleExerciseTypeFilterChange}
+      />
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Muscle group" htmlFor="exercise-category-filter">
-            <SearchableMuscleGroupSelect
-              id="exercise-category-filter"
-              options={categoryFilterOptions}
-              value={categoryFilter}
-              onChange={setCategoryFilter}
-            />
-          </Field>
-          <Field label="Type">
-            <SegmentedControl
-              options={exerciseTypeFilterOptions}
-              value={exerciseTypeFilter}
-              onChange={setExerciseTypeFilter}
-            />
-          </Field>
-        </div>
-      </Panel>
+      <AddExerciseResultSummary
+        resultSummary={resultSummary}
+        categoryFilter={categoryFilter}
+        exerciseTypeFilter={exerciseTypeFilter}
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={clearFilters}
+      />
 
       {canCreateCustomExercise && (
         <RowCard className="flex items-center justify-between gap-3 p-3 sm:p-4">
@@ -328,7 +284,7 @@ export default function AddExerciseScreen() {
         <>
           <div
             ref={resultListRef}
-            className="motion-list relative z-0 max-h-[70vh] overflow-auto pr-1 scrollbar-gutter-stable"
+            className="motion-list relative z-0 h-[calc(100dvh-13.25rem)] min-h-[18rem] overflow-auto pr-1 scrollbar-gutter-stable sm:h-auto sm:max-h-[70vh]"
           >
             <div
               className="relative w-full"
@@ -368,7 +324,9 @@ export default function AddExerciseScreen() {
             <Button
               tone="secondary"
               fullWidth
-              onClick={() => setResultLimit((currentLimit) => currentLimit + RESULT_STEP)}
+              onClick={() =>
+                setResultLimit((currentLimit) => currentLimit + RESULT_STEP)
+              }
             >
               Show more results
             </Button>
@@ -377,430 +335,4 @@ export default function AddExerciseScreen() {
       )}
     </PageShell>
   );
-}
-
-function ExercisePickerCard({
-  exercise,
-  expanded,
-  setupState,
-  setSetupState,
-  defaultMuscleTags,
-  onToggle,
-  onSave,
-}: {
-  exercise: ExerciseLibraryItem;
-  expanded: boolean;
-  setupState: IExerciseSetupState;
-  setSetupState: (nextState: IExerciseSetupState) => void;
-  defaultMuscleTags: string[];
-  onToggle: () => void;
-  onSave: () => void;
-}) {
-  const isRepsExercise = setupState.exerciseType === "reps";
-  const displayUnits = isRepsExercise
-    ? EXERCISE_WEIGHT_UNITS
-    : EXERCISE_TIME_UNITS;
-  const cardExerciseType = expanded ? setupState.exerciseType : exercise.exerciseType;
-  const cardExerciseUnit = expanded ? setupState.exerciseUnit : exercise.exerciseUnit;
-  const cardSetCount = expanded ? setupState.plannedSetCount : "3";
-  const cardMuscleTags = expanded
-    ? setupState.muscleTags
-    : (exercise.muscleTags ?? []);
-
-  return (
-    <Panel className="overflow-hidden [content-visibility:auto] [contain-intrinsic-size:180px]">
-      <button
-        className="flex w-full items-start justify-between gap-4 px-4 py-4 text-left transition duration-200 hover:bg-white/4 sm:px-5"
-        type="button"
-        onClick={onToggle}
-      >
-        <div className="flex min-w-0 items-start gap-3">
-          <div
-            className={cn(
-              "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border bg-black/10",
-              exercise.exerciseType === "reps"
-                ? "border-sky-400/25 text-sky-100"
-                : "border-amber-400/25 text-amber-100",
-            )}
-          >
-            {exercise.exerciseType === "reps" ? (
-              <Dumbbell size={20} />
-            ) : (
-              <Timer size={20} />
-            )}
-          </div>
-          <div className="min-w-0 space-y-2">
-            <div>
-              <h2 className="truncate text-base font-semibold text-(--text-strong)">
-                {exercise.title}
-              </h2>
-              {!exercise.isBuiltIn && (
-                <p className="mt-1 text-xs text-(--text-muted)">Custom exercise</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <div className="space-y-1">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-(--text-muted)">
-                  Config
-                </p>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <ConfigChip>{cardExerciseType}</ConfigChip>
-                  <ConfigChip>{cardExerciseUnit}</ConfigChip>
-                  <ConfigChip>{cardSetCount || "0"} sets</ConfigChip>
-                </div>
-              </div>
-
-              {cardMuscleTags.length > 0 && (
-                <div className="space-y-1">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-(--text-muted)">
-                    Muscle tags
-                  </p>
-                  <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-gutter-stable">
-                    {cardMuscleTags.map((tag) => (
-                      <MuscleTagPill key={tag}>{tag}</MuscleTagPill>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <span
-          className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-(--surface-border) bg-white/4 text-(--text-soft) transition-transform duration-300",
-            expanded && "rotate-180",
-          )}
-        >
-          <ChevronDown size={18} />
-        </span>
-      </button>
-
-      <div
-        className={cn(
-          "grid transition-all duration-300 ease-in-out",
-          expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-        )}
-      >
-        <div className="overflow-hidden">
-          <div className="space-y-4 border-t border-(--surface-border) px-4 pb-4 pt-4 sm:px-5">
-            <Field
-              label="Muscle tags"
-              hint="Choose all muscles this exercise trains. Add a custom tag when needed."
-            >
-              <MuscleTagSelector
-                availableTags={defaultMuscleTags}
-                selectedTags={setupState.muscleTags}
-                customTag={setupState.customTag}
-                setCustomTag={(customTag) =>
-                  setSetupState({ ...setupState, customTag })
-                }
-                onToggleTag={(tag) =>
-                  setSetupState({
-                    ...setupState,
-                    muscleTags: toggleTag(setupState.muscleTags, tag),
-                  })
-                }
-                onAddCustomTag={() => {
-                  const normalizedTag = setupState.customTag.trim();
-
-                  if (!normalizedTag) {
-                    return;
-                  }
-
-                  const existingTag = defaultMuscleTags.find(
-                    (tag) => tag.toLowerCase() === normalizedTag.toLowerCase(),
-                  );
-
-                  setSetupState({
-                    ...setupState,
-                    customTag: "",
-                    muscleTags: addUniqueTag(
-                      setupState.muscleTags,
-                      existingTag ?? normalizedTag,
-                    ),
-                  });
-                }}
-              />
-            </Field>
-
-            <Field label="Tracking type">
-              <SegmentedControl
-                options={exerciseTypeOptions}
-                value={setupState.exerciseType}
-                onChange={(nextType) =>
-                  setSetupState({
-                    ...setupState,
-                    exerciseType: nextType,
-                    exerciseUnit: nextType === "reps" ? "kg" : "sec",
-                  })
-                }
-              />
-            </Field>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Unit" htmlFor={`unit-${exercise.id}`}>
-                <SelectField
-                  id={`unit-${exercise.id}`}
-                  value={setupState.exerciseUnit}
-                  onChange={(event) =>
-                    setSetupState({
-                      ...setupState,
-                      exerciseUnit: event.target.value as ExerciseUnit,
-                    })
-                  }
-                >
-                  {displayUnits.map((unit) => (
-                    <option key={unit} value={unit} className="bg-slate-950 text-white">
-                      {unit}
-                    </option>
-                  ))}
-                </SelectField>
-              </Field>
-
-              <Field label="Starting sets" htmlFor={`sets-${exercise.id}`}>
-                <TextField
-                  id={`sets-${exercise.id}`}
-                  type="number"
-                  min="0"
-                  max="12"
-                  step="1"
-                  inputMode="numeric"
-                  value={setupState.plannedSetCount}
-                  onChange={(event) =>
-                    setSetupState({
-                      ...setupState,
-                      plannedSetCount: event.target.value,
-                    })
-                  }
-                />
-              </Field>
-            </div>
-
-            <Button
-              tone="primary"
-              fullWidth
-              leadingIcon={<Check size={16} />}
-              onClick={onSave}
-            >
-              Add to workout
-            </Button>
-          </div>
-        </div>
-      </div>
-    </Panel>
-  );
-}
-
-
-function SearchableMuscleGroupSelect({
-  id,
-  options,
-  value,
-  onChange,
-}: {
-  id: string;
-  options: string[];
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const selectedLabel = getMuscleOptionLabel(value);
-  const filteredOptions = options.filter((option) =>
-    getMuscleOptionLabel(option).toLowerCase().includes(query.trim().toLowerCase()),
-  );
-
-  function selectOption(nextValue: string) {
-    onChange(nextValue);
-    setQuery("");
-    setOpen(false);
-  }
-
-  return (
-    <div className="relative">
-      <TextField
-        id={id}
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        autoComplete="off"
-        placeholder={selectedLabel}
-        value={open ? query : selectedLabel}
-        onBlur={() => window.setTimeout(() => setOpen(false), 120)}
-        onChange={(event) => {
-          setQuery(event.target.value);
-          setOpen(true);
-        }}
-        onFocus={() => {
-          setQuery("");
-          setOpen(true);
-        }}
-      />
-
-      {open && (
-        <div
-          className="absolute z-100 mt-2 max-h-60 w-full overflow-auto rounded-2xl border border-(--surface-border) bg-(--surface-panel) p-1 shadow-2xl shadow-black/30 backdrop-blur"
-          role="listbox"
-        >
-          {filteredOptions.length === 0 ? (
-            <p className="px-3 py-2 text-sm text-(--text-muted)">No muscle group found.</p>
-          ) : (
-            filteredOptions.map((option) => (
-              <button
-                key={option}
-                type="button"
-                className={cn(
-                  "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition hover:bg-white/8",
-                  option === value
-                    ? "bg-white/10 text-(--text-strong)"
-                    : "text-(--text-soft)",
-                )}
-                onMouseDown={(event) => {
-                  event.preventDefault();
-                  selectOption(option);
-                }}
-                role="option"
-                aria-selected={option === value}
-              >
-                {getMuscleOptionLabel(option)}
-                {option === value && <Check size={14} />}
-              </button>
-            ))
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ConfigChip({ children }: { children: ReactNode }) {
-  return (
-    <span className="inline-flex items-center rounded-md border border-(--surface-border) bg-black/15 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-(--text-soft)">
-      {children}
-    </span>
-  );
-}
-
-function MuscleTagPill({ children }: { children: ReactNode }) {
-  return (
-    <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-100">
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-      {children}
-    </span>
-  );
-}
-
-function MuscleTagSelector({
-  availableTags,
-  selectedTags,
-  customTag,
-  setCustomTag,
-  onToggleTag,
-  onAddCustomTag,
-}: {
-  availableTags: string[];
-  selectedTags: string[];
-  customTag: string;
-  setCustomTag: (customTag: string) => void;
-  onToggleTag: (tag: string) => void;
-  onAddCustomTag: () => void;
-}) {
-  const normalizedSearch = customTag.trim().toLowerCase();
-  const visibleTags = availableTags.filter((tag) =>
-    tag.toLowerCase().includes(normalizedSearch),
-  );
-
-  return (
-    <div className="space-y-3">
-      <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
-        <TextField
-          aria-label="Search or add muscle tag"
-          placeholder="Search or add muscle tag"
-          value={customTag}
-          onChange={(event) => setCustomTag(event.target.value)}
-        />
-        <Button
-          tone="secondary"
-          leadingIcon={<Plus size={16} />}
-          onClick={onAddCustomTag}
-          disabled={!customTag.trim()}
-        >
-          Add tag
-        </Button>
-      </div>
-
-      {visibleTags.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-(--surface-border) p-3 text-sm text-(--text-muted)">
-          No default tag matches. Add it as a custom tag.
-        </p>
-      ) : (
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-gutter-stable">
-          {visibleTags.map((tag) => {
-            const selected = selectedTags.includes(tag);
-
-            return (
-            <button
-              key={tag}
-              type="button"
-              aria-pressed={selected}
-              onClick={() => onToggleTag(tag)}
-              className={cn(
-                "shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition duration-200",
-                selected
-                  ? "border-transparent bg-(--accent) text-(--accent-ink)"
-                  : "border-(--surface-border) bg-white/4 text-(--text-soft) hover:border-(--surface-border-strong) hover:bg-white/8",
-              )}
-            >
-              {tag}
-            </button>
-            );
-          })}
-        </div>
-      )}
-
-      {selectedTags.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-gutter-stable">
-          {selectedTags.map((tag) => (
-            <MuscleTagPill key={tag}>{tag}</MuscleTagPill>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-
-function createMuscleFilterOptions(tags: string[]) {
-  return [ALL_FILTER_VALUE, ...tags, "Other"].filter(
-    (tag, index, options) => options.indexOf(tag) === index,
-  );
-}
-
-function getMuscleOptionLabel(option: string) {
-  return option === ALL_FILTER_VALUE ? "All muscle groups" : option;
-}
-
-function toggleTag(tags: string[], tag: string) {
-  return tags.includes(tag)
-    ? tags.filter((currentTag) => currentTag !== tag)
-    : [...tags, tag];
-}
-
-function addUniqueTag(tags: string[], tag: string) {
-  return tags.some(
-    (currentTag) => currentTag.toLowerCase() === tag.toLowerCase(),
-  )
-    ? tags
-    : [...tags, tag];
-}
-
-function buildSetupState(exercise: ExerciseLibraryItem): IExerciseSetupState {
-  return {
-    exerciseType: exercise.exerciseType,
-    exerciseUnit: exercise.exerciseUnit,
-    plannedSetCount: "3",
-    muscleTags: exercise.muscleTags ?? [],
-    customTag: "",
-  };
 }

@@ -11,7 +11,7 @@ export default function ExerciseSetValueInput({
   ...props
 }: IExerciseSetValueInputProps) {
   return (
-    <div className="flex min-w-0 items-center overflow-hidden rounded-xl border border-(--surface-border) bg-black/20 transition focus-within:border-(--surface-border-strong)">
+    <div className="flex min-w-0 items-center overflow-hidden rounded-xl border border-(--surface-border) bg-(--surface-inset) transition focus-within:border-(--surface-border-strong)">
       <input
         className={cn(
           "h-11 min-w-0 flex-1 bg-transparent px-3 text-center text-sm font-medium text-(--text-strong) outline-none placeholder:text-(--text-muted) [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
@@ -20,7 +20,7 @@ export default function ExerciseSetValueInput({
         inputMode="decimal"
         {...props}
       />
-      <span className="flex h-11 shrink-0 items-center border-l border-(--surface-border) bg-white/3 px-2.5 text-[10px] font-medium uppercase tracking-[0.16em] text-(--text-muted)">
+      <span className="flex h-11 shrink-0 items-center border-l border-(--surface-border) bg-(--surface-control) px-2.5 text-[10px] font-medium uppercase tracking-[0.16em] text-(--text-muted)">
         {suffix}
       </span>
     </div>

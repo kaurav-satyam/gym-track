@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router";
 import getTodayWorkoutDay from "../shared/lib/getTodayWorkoutDay";
-import { cn } from "../shared/ui/cn";
+import { AppLogo, cn } from "../shared/ui";
 
 interface INavigationItem {
   label: string;
@@ -25,10 +25,10 @@ function DesktopNavigationItem({
 }) {
   const Icon = item.icon;
   const className = cn(
-    "group/nav relative flex h-12 w-12 items-center justify-center border transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30",
+    "group/nav relative flex h-12 w-12 items-center justify-center border transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]",
     isActive
-      ? "rounded-2xl border-white/20 bg-white text-slate-950 shadow-[0_14px_34px_rgba(0,0,0,0.28)]"
-      : "rounded-[24px] border-white/[0.06] bg-white/[0.06] text-slate-300 hover:rounded-2xl hover:border-white/20 hover:bg-white hover:text-slate-950",
+      ? "rounded-2xl border-(--accent-border) bg-(--nav-active-bg) text-(--nav-active-fg) shadow-[0_14px_34px_rgba(2,6,23,0.22)]"
+      : "rounded-[24px] border-(--nav-border) bg-(--nav-item-bg) text-(--nav-item-fg) hover:rounded-2xl hover:border-(--surface-border-strong) hover:bg-(--nav-item-hover-bg) hover:text-(--nav-item-hover-fg)",
   );
 
   const content = (
@@ -36,7 +36,7 @@ function DesktopNavigationItem({
       <span
         aria-hidden="true"
         className={cn(
-          "absolute -left-3 rounded-r-full bg-white transition-all duration-200",
+          "absolute -left-3 rounded-r-full bg-(--accent) transition-all duration-200",
           isActive
             ? "h-8 w-1 opacity-100"
             : "h-2 w-1 opacity-0 group-hover/nav:h-5 group-hover/nav:opacity-80",
@@ -44,7 +44,7 @@ function DesktopNavigationItem({
       />
       <Icon aria-hidden="true" size={22} strokeWidth={2.2} />
       <span className="sr-only">{item.label}</span>
-      <span className="pointer-events-none absolute left-14 z-50 rounded-md border border-white/10 bg-slate-950 px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-xl transition duration-150 group-hover/nav:translate-x-1 group-hover/nav:opacity-100">
+      <span className="pointer-events-none absolute left-14 z-50 rounded-md border border-(--surface-border) bg-(--tooltip-bg) px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-xl transition duration-150 group-hover/nav:translate-x-1 group-hover/nav:opacity-100">
         {item.label}
       </span>
     </>
@@ -79,21 +79,23 @@ function MobileNavigationItem({
 }) {
   const Icon = item.icon;
   const className = cn(
-    "relative flex h-12 items-center justify-center rounded-2xl border transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30",
+    "relative flex h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-2xl border px-1 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]",
     isActive
-      ? "border-white/20 bg-white text-slate-950"
-      : "border-white/[0.06] bg-white/[0.05] text-slate-300 active:bg-white/10",
+      ? "border-(--accent-border) bg-(--nav-active-bg) text-(--nav-active-fg)"
+      : "border-(--nav-border) bg-(--nav-item-bg) text-(--nav-item-fg) active:bg-(--nav-item-hover-bg)",
   );
 
   const content = (
     <>
-      <Icon aria-hidden="true" size={22} strokeWidth={2.2} />
-      <span className="sr-only">{item.label}</span>
+      <Icon aria-hidden="true" size={20} strokeWidth={2.25} />
+      <span className="max-w-full truncate text-[10px] font-semibold leading-none">
+        {item.label}
+      </span>
       <span
         aria-hidden="true"
         className={cn(
-          "absolute bottom-1 h-1 rounded-full bg-current transition-all duration-200",
-          isActive ? "w-5 opacity-100" : "w-1 opacity-35",
+          "absolute top-1 h-1 rounded-full bg-current transition-all duration-200",
+          isActive ? "w-5 opacity-100" : "w-1 opacity-30",
         )}
       />
     </>
@@ -155,17 +157,17 @@ export default function AppNavigation() {
     <>
       <nav
         aria-label="Primary navigation"
-        className="fixed inset-y-0 left-0 z-40 hidden w-21 flex-col items-center border-r border-white/8 bg-[#070b13]/95 px-3 py-4 shadow-[16px_0_42px_rgba(0,0,0,0.22)] backdrop-blur-xl md:flex"
+        className="fixed inset-y-0 left-0 z-40 hidden w-21 flex-col items-center border-r border-(--nav-border) bg-(--nav-bg) px-3 py-4 shadow-[16px_0_42px_rgba(2,6,23,0.18)] backdrop-blur-xl md:flex"
       >
         <NavLink
-          aria-label="Gym Track home"
-          className="group/nav relative flex h-13 w-13 items-center justify-center rounded-[18px] border border-emerald-300/30 bg-emerald-400 text-sm font-black tracking-normal text-slate-950 shadow-[0_16px_36px_rgba(16,185,129,0.22)] transition duration-200 hover:rounded-2xl"
+          aria-label="GymTrack home"
+          className="group/nav rounded-[18px] transition duration-200 hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
           to={todayWorkoutPath}
         >
-          GT
+          <AppLogo size="lg" className="border-(--accent-border)" />
         </NavLink>
 
-        <div className="my-4 h-px w-8 bg-white/10" />
+        <div className="my-4 h-px w-8 bg-(--surface-border)" />
 
         <div className="flex flex-1 flex-col items-center gap-3">
           {navigationItems.map((item) => (
@@ -180,9 +182,9 @@ export default function AppNavigation() {
 
       <nav
         aria-label="Primary navigation"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-white/8 bg-[#070b13]/95 px-4 pt-3 shadow-[0_-18px_42px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-(--nav-border) bg-(--nav-bg) px-3 pt-2.5 shadow-[0_-18px_42px_rgba(2,6,23,0.22)] backdrop-blur-xl md:hidden"
       >
-        <div className="mx-auto grid max-w-md grid-cols-4 gap-2 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+        <div className="mx-auto grid max-w-lg grid-cols-4 gap-2 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
           {navigationItems.map((item) => (
             <MobileNavigationItem
               key={item.label}
