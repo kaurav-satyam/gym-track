@@ -8,8 +8,15 @@ import {
   Plus,
   Search,
   Timer,
+  X,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useNavigate, useParams } from "react-router";
 import type {
   ExerciseLibraryItem,
@@ -37,6 +44,7 @@ import { loadDefaultMuscleTags } from "../../../shared/constants/muscleTags";
 import { WEEKDAYS } from "../../../shared/constants/weekdays";
 import {
   Button,
+  IconButton,
   EmptyState,
   Field,
   PageShell,
@@ -165,12 +173,19 @@ export default function AddExerciseScreen() {
 
   const canCreateCustomExercise = normalizedQuery.length > 0 && !exactExercise;
   const shouldShowMore = visibleExercises.length >= resultLimit;
+  const hasActiveFilters =
+    normalizedQuery.length > 0 ||
+    categoryFilter !== ALL_FILTER_VALUE ||
+    exerciseTypeFilter !== ALL_FILTER_VALUE;
+  const resultSummary = seedReady
+    ? `${visibleExercises.length} exercise${visibleExercises.length === 1 ? "" : "s"} shown`
+    : "Preparing library";
   const resultListRef = useRef<HTMLDivElement | null>(null);
   // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Virtual returns measurement callbacks by design.
   const rowVirtualizer = useVirtualizer({
     count: visibleExercises.length,
     estimateSize: (index) =>
-      visibleExercises[index]?.id === expandedExerciseId ? 540 : 190,
+      visibleExercises[index]?.id === expandedExerciseId ? 520 : 92,
     getScrollElement: () => resultListRef.current,
     overscan: 8,
   });
@@ -215,6 +230,14 @@ export default function AddExerciseScreen() {
     setSetupState(buildSetupState(customExercise));
   }
 
+  function clearFilters() {
+    setSearchQuery("");
+    setCategoryFilter(ALL_FILTER_VALUE);
+    setExerciseTypeFilter(ALL_FILTER_VALUE);
+    setExpandedExerciseId(null);
+    setResultLimit(RESULT_STEP);
+  }
+
   async function handleSaveExercise(exercise: ExerciseLibraryItem) {
     const plannedSetCount = Math.max(
       0,
@@ -245,54 +268,83 @@ export default function AddExerciseScreen() {
   }
 
   return (
-    <PageShell
-      eyebrow="Add exercise"
-      title={day}
-      description="Search the exercise library, filter by muscle group, then confirm how you want to track it."
-      actions={
-        <Button
-          tone="secondary"
-          leadingIcon={<ArrowLeft size={16} />}
-          onClick={() => navigate("/days/" + day)}
-        >
-          Back
-        </Button>
-      }
-    >
-      <Panel className="relative z-40 space-y-4 overflow-visible p-4 sm:p-5">
-        <div className="relative">
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-(--text-muted)"
-            size={18}
-          />
-          <TextField
-            aria-label="Search exercises"
-            className="pl-11"
-            placeholder="Search exercise name"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-          />
+    <PageShell className="max-w-4xl py-3 sm:py-6" contentClassName="space-y-3 sm:space-y-4">
+      <div className="sticky top-0 z-30 -mx-4 border-b border-(--surface-border) bg-(--app-bg-start)/95 px-4 pb-2 pt-1.5 backdrop-blur-xl sm:top-3 sm:mx-0 sm:rounded-[26px] sm:border sm:bg-(--surface-panel) sm:p-2.5 sm:shadow-[var(--shadow-panel)]">
+        <div className="flex items-center gap-2">
+          <IconButton
+            tone="secondary"
+            size="sm"
+            aria-label="Back to workout day"
+            title="Back"
+            onClick={() => navigate("/days/" + day)}
+          >
+            <ArrowLeft size={17} />
+          </IconButton>
+
+          <div className="relative min-w-0 flex-1">
+            <Search
+              aria-hidden="true"
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-(--text-muted)"
+              size={18}
+            />
+            <TextField
+              aria-label="Search exercises"
+              className="h-10 rounded-xl py-2 pl-10 text-sm"
+              placeholder="Search exercise"
+              value={searchQuery}
+              onChange={(event) => {
+                setSearchQuery(event.target.value);
+                setResultLimit(RESULT_STEP);
+                setExpandedExerciseId(null);
+              }}
+            />
+          </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Muscle group" htmlFor="exercise-category-filter">
-            <SearchableMuscleGroupSelect
-              id="exercise-category-filter"
-              options={categoryFilterOptions}
-              value={categoryFilter}
-              onChange={setCategoryFilter}
-            />
-          </Field>
-          <Field label="Type">
-            <SegmentedControl
-              options={exerciseTypeFilterOptions}
-              value={exerciseTypeFilter}
-              onChange={setExerciseTypeFilter}
-            />
-          </Field>
+        <div className="mt-1.5 grid grid-cols-2 gap-2">
+          <SearchableMuscleGroupSelect
+            id="exercise-category-filter"
+            options={categoryFilterOptions}
+            value={categoryFilter}
+            onChange={(nextCategory) => {
+              setCategoryFilter(nextCategory);
+              setResultLimit(RESULT_STEP);
+              setExpandedExerciseId(null);
+            }}
+          />
+          <TypeFilterSelect
+            value={exerciseTypeFilter}
+            onChange={(nextType) => {
+              setExerciseTypeFilter(nextType);
+              setResultLimit(RESULT_STEP);
+              setExpandedExerciseId(null);
+            }}
+          />
         </div>
-      </Panel>
+      </div>
+
+      <div className="flex min-h-9 items-center justify-between gap-2 rounded-xl border border-(--surface-border) bg-(--surface-control) px-3 py-1.5 text-xs text-(--text-soft)">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <span className="font-medium text-(--text-strong)">{resultSummary}</span>
+          {categoryFilter !== ALL_FILTER_VALUE && (
+            <FilterPill>{getMuscleOptionLabel(categoryFilter)}</FilterPill>
+          )}
+          {exerciseTypeFilter !== ALL_FILTER_VALUE && (
+            <FilterPill>{exerciseTypeFilter}</FilterPill>
+          )}
+        </div>
+
+        {hasActiveFilters && (
+          <button
+            type="button"
+            className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold text-(--text-soft) transition hover:text-(--text-strong)"
+            onClick={clearFilters}
+          >
+            <X size={13} />
+            Clear
+          </button>
+        )}
+      </div>
 
       {canCreateCustomExercise && (
         <RowCard className="flex items-center justify-between gap-3 p-3 sm:p-4">
@@ -328,7 +380,7 @@ export default function AddExerciseScreen() {
         <>
           <div
             ref={resultListRef}
-            className="motion-list relative z-0 max-h-[70vh] overflow-auto pr-1 scrollbar-gutter-stable"
+            className="motion-list relative z-0 h-[calc(100dvh-13.25rem)] min-h-[18rem] overflow-auto pr-1 scrollbar-gutter-stable sm:h-auto sm:max-h-[70vh]"
           >
             <div
               className="relative w-full"
@@ -410,70 +462,57 @@ function ExercisePickerCard({
   return (
     <Panel className="overflow-hidden [content-visibility:auto] [contain-intrinsic-size:180px]">
       <button
-        className="flex w-full items-start justify-between gap-4 px-4 py-4 text-left transition duration-200 hover:bg-(--surface-control) sm:px-5"
+        className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left transition duration-200 hover:bg-(--surface-control) sm:px-4"
         type="button"
         onClick={onToggle}
       >
-        <div className="flex min-w-0 items-start gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <div
             className={cn(
-              "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border bg-(--surface-inset)",
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-(--surface-inset)",
               exercise.exerciseType === "reps"
                 ? "border-(--type-reps-border) text-(--type-reps-text)"
                 : "border-(--type-time-border) text-(--type-time-text)",
             )}
           >
             {exercise.exerciseType === "reps" ? (
-              <Dumbbell size={20} />
+              <Dumbbell size={17} />
             ) : (
-              <Timer size={20} />
+              <Timer size={17} />
             )}
           </div>
-          <div className="min-w-0 space-y-2">
-            <div>
-              <h2 className="truncate text-base font-semibold text-(--text-strong)">
+
+          <div className="min-w-0 space-y-1">
+            <div className="flex min-w-0 items-center gap-2">
+              <h2 className="truncate text-sm font-semibold text-(--text-strong) sm:text-base">
                 {exercise.title}
               </h2>
               {!exercise.isBuiltIn && (
-                <p className="mt-1 text-xs text-(--text-muted)">Custom exercise</p>
+                <span className="shrink-0 rounded-full border border-(--surface-border) px-2 py-0.5 text-[10px] font-medium text-(--text-muted)">
+                  Custom
+                </span>
               )}
             </div>
 
-            <div className="space-y-2">
-              <div className="space-y-1">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-(--text-muted)">
-                  Config
-                </p>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <ConfigChip>{cardExerciseType}</ConfigChip>
-                  <ConfigChip>{cardExerciseUnit}</ConfigChip>
-                  <ConfigChip>{cardSetCount || "0"} sets</ConfigChip>
-                </div>
-              </div>
+            <p className="truncate text-[11px] font-semibold uppercase tracking-[0.12em] text-(--text-muted)">
+              {cardExerciseType} · {cardExerciseUnit} · {cardSetCount || "0"} sets
+            </p>
 
-              {cardMuscleTags.length > 0 && (
-                <div className="space-y-1">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-(--text-muted)">
-                    Muscle tags
-                  </p>
-                  <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-gutter-stable">
-                    {cardMuscleTags.map((tag) => (
-                      <MuscleTagPill key={tag}>{tag}</MuscleTagPill>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <p className="truncate text-xs text-(--tag-text)">
+              {cardMuscleTags.length > 0
+                ? cardMuscleTags.join(" · ")
+                : "No muscle tags"}
+            </p>
           </div>
         </div>
 
         <span
           className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-(--surface-border) bg-(--surface-control) text-(--text-soft) transition-transform duration-300",
+            "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-(--surface-border) bg-(--surface-control) text-(--text-soft) transition-transform duration-300",
             expanded && "rotate-180",
           )}
         >
-          <ChevronDown size={18} />
+          <ChevronDown size={16} />
         </span>
       </button>
 
@@ -593,6 +632,31 @@ function ExercisePickerCard({
   );
 }
 
+function TypeFilterSelect({
+  value,
+  onChange,
+}: {
+  value: TExerciseTypeFilter;
+  onChange: (value: TExerciseTypeFilter) => void;
+}) {
+  return (
+    <div className="relative">
+      <SelectField
+        aria-label="Exercise type filter"
+        className="h-10 rounded-xl py-2 pl-3 pr-8 text-xs font-medium capitalize"
+        value={value}
+        onChange={(event) => onChange(event.target.value as TExerciseTypeFilter)}
+      >
+        {exerciseTypeFilterOptions.map((option) => (
+          <option key={option.value} value={option.value} className="bg-slate-950 text-white">
+            {option.label === "All" ? "All types" : option.label}
+          </option>
+        ))}
+      </SelectField>
+    </div>
+  );
+}
+
 
 function SearchableMuscleGroupSelect({
   id,
@@ -608,8 +672,9 @@ function SearchableMuscleGroupSelect({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const selectedLabel = getMuscleOptionLabel(value);
+  const normalizedQuery = query.trim().toLowerCase();
   const filteredOptions = options.filter((option) =>
-    getMuscleOptionLabel(option).toLowerCase().includes(query.trim().toLowerCase()),
+    getMuscleOptionLabel(option).toLowerCase().includes(normalizedQuery),
   );
 
   function selectOption(nextValue: string) {
@@ -619,28 +684,39 @@ function SearchableMuscleGroupSelect({
   }
 
   return (
-    <div className="relative">
-      <TextField
-        id={id}
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        autoComplete="off"
-        placeholder={selectedLabel}
-        value={open ? query : selectedLabel}
-        onBlur={() => window.setTimeout(() => setOpen(false), 120)}
-        onChange={(event) => {
-          setQuery(event.target.value);
-          setOpen(true);
-        }}
-        onFocus={() => {
-          setQuery("");
-          setOpen(true);
-        }}
-      />
+    <div className="space-y-2">
+      <div className="relative">
+        <TextField
+          id={id}
+          aria-expanded={open}
+          aria-haspopup="listbox"
+          autoComplete="off"
+          className="h-10 rounded-xl py-2 pr-9 text-xs font-medium"
+          placeholder={selectedLabel}
+          value={open ? query : selectedLabel}
+          onBlur={() => window.setTimeout(() => setOpen(false), 120)}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => {
+            setQuery("");
+            setOpen(true);
+          }}
+        />
+        <ChevronDown
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-(--text-muted) transition-transform duration-200",
+            open && "rotate-180",
+          )}
+          size={17}
+        />
+      </div>
 
       {open && (
         <div
-          className="absolute z-100 mt-2 max-h-60 w-full overflow-auto rounded-2xl border border-(--surface-border) bg-(--surface-panel) p-1 shadow-2xl shadow-black/30 backdrop-blur"
+          className="max-h-64 overflow-auto rounded-xl border border-(--surface-border) bg-(--surface-panel) p-1 shadow-[var(--shadow-row)] scrollbar-gutter-stable"
           role="listbox"
         >
           {filteredOptions.length === 0 ? (
@@ -651,9 +727,9 @@ function SearchableMuscleGroupSelect({
                 key={option}
                 type="button"
                 className={cn(
-                  "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition hover:bg-(--surface-control-hover)",
+                  "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition hover:bg-(--surface-control-hover)",
                   option === value
-                    ? "bg-(--surface-active) text-(--text-strong)"
+                    ? "bg-(--surface-active) font-medium text-(--text-strong)"
                     : "text-(--text-soft)",
                 )}
                 onMouseDown={(event) => {
@@ -674,9 +750,9 @@ function SearchableMuscleGroupSelect({
   );
 }
 
-function ConfigChip({ children }: { children: ReactNode }) {
+function FilterPill({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-md border border-(--surface-border) bg-(--surface-inset) px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-(--text-soft)">
+    <span className="inline-flex items-center rounded-full border border-(--accent-border) bg-(--accent-soft) px-2 py-0.5 text-[11px] font-medium capitalize text-(--text-strong)">
       {children}
     </span>
   );
