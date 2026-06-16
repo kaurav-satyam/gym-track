@@ -63,7 +63,7 @@ export default function SearchableMuscleGroupSelect({
 
       {open && (
         <div
-          className="max-h-64 overflow-auto rounded-xl border border-(--surface-border) bg-(--surface-panel) p-1 shadow-[var(--shadow-row)] scrollbar-gutter-stable"
+          className="max-h-64 overflow-auto rounded-xl border border-(--surface-border) bg-(--surface-panel) p-1 shadow-(--shadow-row) scrollbar-gutter-stable"
           role="listbox"
         >
           {filteredOptions.length === 0 ? (

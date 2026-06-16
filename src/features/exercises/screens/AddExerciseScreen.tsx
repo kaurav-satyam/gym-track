@@ -284,7 +284,7 @@ export default function AddExerciseScreen() {
         <>
           <div
             ref={resultListRef}
-            className="motion-list relative z-0 h-[calc(100dvh-13.25rem)] min-h-[18rem] overflow-auto pr-1 scrollbar-gutter-stable sm:h-auto sm:max-h-[70vh]"
+            className="motion-list relative z-0 h-[calc(100dvh-13.25rem)] min-h-72 overflow-auto pr-1 scrollbar-gutter-stable sm:h-auto sm:max-h-[70vh]"
           >
             <div
               className="relative w-full"

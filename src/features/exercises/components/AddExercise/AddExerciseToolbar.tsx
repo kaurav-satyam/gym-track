@@ -26,7 +26,7 @@ export default function AddExerciseToolbar({
   onExerciseTypeFilterChange,
 }: AddExerciseToolbarProps) {
   return (
-    <div className="sticky top-0 z-30 -mx-4 border-b border-(--surface-border) bg-(--app-bg-start)/95 px-4 pb-2 pt-1.5 backdrop-blur-xl sm:top-3 sm:mx-0 sm:rounded-[26px] sm:border sm:bg-(--surface-panel) sm:p-2.5 sm:shadow-[var(--shadow-panel)]">
+    <div className="sticky top-0 z-30 -mx-4 border-b border-(--surface-border) bg-(--app-bg-start)/95 px-4 pb-2 pt-1.5 backdrop-blur-xl sm:top-3 sm:mx-0 sm:rounded-[26px] sm:border sm:bg-(--surface-panel) sm:p-2.5 sm:shadow-(--shadow-panel)">
       <div className="flex items-center gap-2">
         <IconButton
           tone="secondary"
