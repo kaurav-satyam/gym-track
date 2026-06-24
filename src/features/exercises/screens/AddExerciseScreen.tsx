@@ -124,9 +124,10 @@ export default function AddExerciseScreen() {
   const rowVirtualizer = useVirtualizer({
     count: visibleExercises.length,
     estimateSize: (index) =>
-      visibleExercises[index]?.id === expandedExerciseId ? 520 : 92,
+      visibleExercises[index]?.id === expandedExerciseId ? 560 : 116,
     getScrollElement: () => resultListRef.current,
-    overscan: 8,
+    getItemKey: (index) => visibleExercises[index]?.id ?? index,
+    overscan: 6,
   });
 
   if (!isValidDay) {
@@ -284,7 +285,7 @@ export default function AddExerciseScreen() {
         <>
           <div
             ref={resultListRef}
-            className="motion-list relative z-0 h-[calc(100dvh-13.25rem)] min-h-72 overflow-auto pr-1 scrollbar-gutter-stable sm:h-auto sm:max-h-[70vh]"
+            className="relative z-0 h-[calc(100dvh-13.25rem)] min-h-72 overflow-auto overscroll-y-contain pr-1 scrollbar-gutter-stable [contain:layout_paint] sm:h-auto sm:max-h-[70vh]"
           >
             <div
               className="relative w-full"
@@ -301,7 +302,7 @@ export default function AddExerciseScreen() {
                   <div
                     key={virtualRow.key}
                     ref={rowVirtualizer.measureElement}
-                    className="absolute left-0 top-0 w-full pb-3"
+                    className="absolute left-0 top-0 w-full pb-3 will-change-transform"
                     data-index={virtualRow.index}
                     style={{ transform: `translateY(${virtualRow.start}px)` }}
                   >

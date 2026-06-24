@@ -59,7 +59,7 @@ export default function ExercisePickerCard({
     : (exercise.muscleTags ?? []);
 
   return (
-    <Panel className="overflow-hidden [content-visibility:auto] [contain-intrinsic-size:180px]">
+    <Panel className="overflow-hidden">
       <button
         className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left transition duration-200 hover:bg-(--surface-control) sm:px-4"
         type="button"
