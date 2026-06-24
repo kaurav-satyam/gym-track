@@ -1,13 +1,19 @@
 import { ArrowLeft, Search } from "lucide-react";
-import { IconButton, TextField } from "../../../../shared/ui";
-import type { ExerciseTypeFilter } from "./addExerciseModel";
-import SearchableMuscleGroupSelect from "./SearchableMuscleGroupSelect";
-import TypeFilterSelect from "./TypeFilterSelect";
+import {
+  IconButton,
+  SearchableSelect,
+  type SearchableSelectOption,
+  TextField,
+} from "../../../../shared/ui";
+import {
+  exerciseTypeFilterSelectOptions,
+  type ExerciseTypeFilter,
+} from "./addExerciseModel";
 
 interface AddExerciseToolbarProps {
   searchQuery: string;
   categoryFilter: string;
-  categoryFilterOptions: string[];
+  categoryFilterOptions: SearchableSelectOption[];
   exerciseTypeFilter: ExerciseTypeFilter;
   onBack: () => void;
   onSearchQueryChange: (value: string) => void;
@@ -55,15 +61,25 @@ export default function AddExerciseToolbar({
       </div>
 
       <div className="mt-1.5 grid grid-cols-2 gap-2">
-        <SearchableMuscleGroupSelect
+        <SearchableSelect
           id="exercise-category-filter"
+          ariaLabel="Muscle group filter"
+          searchPlaceholder="Search muscle group"
+          emptyText="No muscle group found."
           options={categoryFilterOptions}
           value={categoryFilter}
           onChange={onCategoryFilterChange}
         />
-        <TypeFilterSelect
+        <SearchableSelect
+          id="exercise-type-filter"
+          ariaLabel="Exercise type filter"
+          searchPlaceholder="Search type"
+          emptyText="No type found."
+          options={exerciseTypeFilterSelectOptions}
           value={exerciseTypeFilter}
-          onChange={onExerciseTypeFilterChange}
+          onChange={(value) =>
+            onExerciseTypeFilterChange(value as ExerciseTypeFilter)
+          }
         />
       </div>
     </div>

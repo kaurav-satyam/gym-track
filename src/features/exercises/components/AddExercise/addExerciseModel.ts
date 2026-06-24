@@ -34,18 +34,30 @@ export const exerciseTypeOptions = EXERCISE_TYPES.map((value) => ({
   value,
 }));
 
-export const exerciseTypeFilterOptions: Array<{
-  label: string;
+/** Option list for the exercise-type filter, shaped for SearchableSelect. */
+export const exerciseTypeFilterSelectOptions: Array<{
   value: ExerciseTypeFilter;
+  label: string;
 }> = [
-  { label: "All", value: ALL_FILTER_VALUE },
-  ...EXERCISE_TYPES.map((value) => ({ label: value, value })),
+  { value: ALL_FILTER_VALUE, label: "All types" },
+  ...EXERCISE_TYPES.map((value) => ({
+    value,
+    label: value.charAt(0).toUpperCase() + value.slice(1),
+  })),
 ];
 
 export function createMuscleFilterOptions(tags: string[]) {
   return [ALL_FILTER_VALUE, ...tags, "Other"].filter(
     (tag, index, options) => options.indexOf(tag) === index,
   );
+}
+
+/** Muscle-group filter options shaped for SearchableSelect. */
+export function createMuscleFilterSelectOptions(tags: string[]) {
+  return createMuscleFilterOptions(tags).map((value) => ({
+    value,
+    label: getMuscleOptionLabel(value),
+  }));
 }
 
 export function getMuscleOptionLabel(option: string) {

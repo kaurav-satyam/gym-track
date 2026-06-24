@@ -9,6 +9,10 @@ export { default as PageShell } from "./PageShell";
 export { default as Panel } from "./Panel";
 export { default as ProgressBar } from "./ProgressBar";
 export { default as RowCard } from "./RowCard";
+export {
+  default as SearchableSelect,
+  type SearchableSelectOption,
+} from "./SearchableSelect";
 export { default as SegmentedControl } from "./SegmentedControl";
 export { default as SelectField } from "./SelectField";
 export { default as TextField } from "./TextField";

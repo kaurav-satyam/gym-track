@@ -28,7 +28,7 @@ import {
   ExercisePickerCard,
   RESULT_STEP,
   buildSetupState,
-  createMuscleFilterOptions,
+  createMuscleFilterSelectOptions,
   defaultSetupState,
   type ExerciseSetupState,
   type ExerciseTypeFilter,
@@ -53,7 +53,7 @@ export default function AddExerciseScreen() {
   const isValidDay = day != null && WEEKDAYS.includes(day);
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const categoryFilterOptions = useMemo(
-    () => createMuscleFilterOptions(defaultMuscleTags),
+    () => createMuscleFilterSelectOptions(defaultMuscleTags),
     [defaultMuscleTags],
   );
 

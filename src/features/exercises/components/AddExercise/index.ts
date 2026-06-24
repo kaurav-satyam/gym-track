@@ -6,6 +6,7 @@ export {
   RESULT_STEP,
   buildSetupState,
   createMuscleFilterOptions,
+  createMuscleFilterSelectOptions,
   defaultSetupState,
   type ExerciseSetupState,
   type ExerciseTypeFilter,
