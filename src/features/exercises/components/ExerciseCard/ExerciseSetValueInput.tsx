@@ -18,6 +18,8 @@ export default function ExerciseSetValueInput({
           className,
         )}
         inputMode="decimal"
+        min={0}
+        step="any"
         {...props}
       />
       <span className="flex h-11 shrink-0 items-center border-l border-(--surface-border) bg-(--surface-control) px-2.5 text-[10px] font-medium uppercase tracking-[0.16em] text-(--text-muted)">

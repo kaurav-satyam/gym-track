@@ -3,10 +3,10 @@ import { useState } from "react";
 import { addExerciseTemplateSet } from "../../../../app/db/repositories/exercise.repository";
 import {
   listCompletedSetIdsForExerciseDay,
-  listExerciseHistory,
+  listLatestLogsBySetId,
 } from "../../../../app/db/repositories/workout-log.repository";
-import type { ExerciseTemplate } from "../../../../app/db/models/exercise.model";
 import type { WorkoutSetLog } from "../../../../app/db/models/workout-log.model";
+import type { ExerciseTemplate } from "../../../../app/db/models/exercise.model";
 import { Button, Panel } from "../../../../shared/ui";
 import ExerciseCardHeader from "./ExerciseCardHeader";
 import ExerciseSetList from "./ExerciseSetList";
@@ -19,6 +19,8 @@ interface IExerciseCardProps {
   onMoveDown: () => void;
   onDelete: () => void;
 }
+
+const EMPTY_LOGS = new Map<string, WorkoutSetLog>();
 
 export default function ExerciseCard({
   exercise,
@@ -35,13 +37,17 @@ export default function ExerciseCard({
     [exerciseId],
     [],
   );
-  const exerciseHistory = useLiveQuery(
-    () => listExerciseHistory(exerciseId),
-    [exerciseId],
-    [],
+  const setIdsKey = exercise.exerciseSets.map((set) => set.id).join(",");
+  const latestLogBySetId = useLiveQuery(
+    () => listLatestLogsBySetId(setIdsKey ? setIdsKey.split(",") : []),
+    [setIdsKey],
+    EMPTY_LOGS,
   );
-  const completedSetIdSet = new Set(completedSetIds);
-  const latestLogBySetId = buildLatestLogBySetId(exerciseHistory);
+  // Logs of deleted template sets stay in history but don't count as progress.
+  const currentSetIds = new Set(exercise.exerciseSets.map((set) => set.id));
+  const completedSetIdSet = new Set(
+    completedSetIds.filter((setId) => currentSetIds.has(setId)),
+  );
   const totalSets = exercise.exerciseSets.length;
 
   return (
@@ -86,16 +92,4 @@ export default function ExerciseCard({
       )}
     </Panel>
   );
-}
-
-function buildLatestLogBySetId(exerciseHistory: WorkoutSetLog[]) {
-  const latestLogBySetId = new Map<string, WorkoutSetLog>();
-
-  for (const log of exerciseHistory) {
-    if (!latestLogBySetId.has(log.exerciseSetId)) {
-      latestLogBySetId.set(log.exerciseSetId, log);
-    }
-  }
-
-  return latestLogBySetId;
 }

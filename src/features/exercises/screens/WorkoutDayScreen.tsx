@@ -39,21 +39,23 @@ export default function WorkoutDayScreen() {
     [],
   );
 
+  // Key on ids only so typing in a set input doesn't re-run this query.
+  const exerciseIdsKey = exercises.map((exercise) => exercise.id).join(",");
   const completedSetIds = useLiveQuery(
     async () => {
-      const persistedExercises = exercises.filter(
-        (exercise): exercise is ExerciseTemplate & { id: number } =>
-          exercise.id != null,
-      );
+      if (!exerciseIdsKey) {
+        return [];
+      }
+
       const completedSetsByExercise = await Promise.all(
-        persistedExercises.map((exercise) =>
-          listCompletedSetIdsForExerciseDay(exercise.id!),
-        ),
+        exerciseIdsKey
+          .split(",")
+          .map((id) => listCompletedSetIdsForExerciseDay(Number(id))),
       );
 
       return completedSetsByExercise.flat();
     },
-    [exercises],
+    [exerciseIdsKey],
     [],
   );
 
@@ -75,7 +77,12 @@ export default function WorkoutDayScreen() {
     (total, exercise) => total + exercise.exerciseSets.length,
     0,
   );
-  const completedSetCount = new Set(completedSetIds).size;
+  const currentSetIds = new Set(
+    exercises.flatMap((exercise) => exercise.exerciseSets.map((set) => set.id)),
+  );
+  const completedSetCount = new Set(
+    completedSetIds.filter((setId) => currentSetIds.has(setId)),
+  ).size;
   const completionPercent =
     plannedSetCount === 0 ? 0 : (completedSetCount / plannedSetCount) * 100;
 

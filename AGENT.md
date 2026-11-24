@@ -31,8 +31,12 @@ GymTrack is a workout-tracking PWA for planning recurring gym days and logging c
 
 ## Current Routes
 
-- `/` - weekly home screen
+- `/` - redirects to today's weekday workout
+- `/week` - weekly plan with week-scoped progress (resets Sunday)
 - `/days/:day` - workout-day planner and template editor
+- `/days/:day/add-exercise` - exercise library picker
+- `/analytics` - analytics
+- `/settings` - settings
 - `/exercises/:exerciseId/history` - exercise history
 
 ## Current Storage Model

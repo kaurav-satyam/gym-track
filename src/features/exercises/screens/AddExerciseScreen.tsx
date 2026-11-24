@@ -75,7 +75,14 @@ export default function AddExerciseScreen() {
       }
     }
 
-    void seedBuiltInExercises();
+    seedBuiltInExercises().catch((error) => {
+      console.error("Exercise library could not be prepared:", error);
+
+      // Fall back to whatever is already stored locally (e.g. offline).
+      if (mounted) {
+        setSeedReady(true);
+      }
+    });
 
     return () => {
       mounted = false;

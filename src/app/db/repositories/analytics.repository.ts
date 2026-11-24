@@ -5,6 +5,20 @@ import type {
   ExerciseType,
 } from "../models/exercise.model";
 import type { WorkoutSetLog } from "../models/workout-log.model";
+import {
+  calculateLoadVolume,
+  calculateTimeSeconds,
+  getBestSetValue,
+} from "../utils/analyticsMath";
+import {
+  addDays,
+  eachDay,
+  endOfDay,
+  formatDate,
+  formatShortDate,
+  startOfWeek,
+  toDateKey,
+} from "../utils/dateRange";
 import { getDayBounds } from "../utils/getDayBounds";
 
 export type AnalyticsPeriod = "day" | "week" | "month";
@@ -287,10 +301,13 @@ function buildExerciseStats(
   const logsByExerciseId = new Map<number, WorkoutSetLog[]>();
 
   for (const log of logs) {
-    logsByExerciseId.set(log.exerciseId, [
-      ...(logsByExerciseId.get(log.exerciseId) ?? []),
-      log,
-    ]);
+    const exerciseLogs = logsByExerciseId.get(log.exerciseId);
+
+    if (exerciseLogs) {
+      exerciseLogs.push(log);
+    } else {
+      logsByExerciseId.set(log.exerciseId, [log]);
+    }
   }
 
   return exercises
@@ -428,85 +445,3 @@ function listExerciseOptions(exercises: ExerciseTemplate[]) {
     .sort((left, right) => left.title.localeCompare(right.title));
 }
 
-function calculateLoadVolume(log: WorkoutSetLog) {
-  return (log.weight ?? 0) * (log.reps ?? 0);
-}
-
-function calculateTimeSeconds(log: WorkoutSetLog, exercise?: ExerciseTemplate) {
-  if (exercise?.exerciseType !== "time") {
-    return 0;
-  }
-
-  const value = log.time ?? 0;
-
-  if (exercise.exerciseUnit === "hr") {
-    return value * 3600;
-  }
-
-  if (exercise.exerciseUnit === "min") {
-    return value * 60;
-  }
-
-  return value;
-}
-
-function getBestSetValue(exercise: ExerciseTemplate, logs: WorkoutSetLog[]) {
-  if (exercise.exerciseType === "time") {
-    return logs.reduce((best, log) => Math.max(best, log.time ?? 0), 0);
-  }
-
-  return logs.reduce((best, log) => Math.max(best, log.weight ?? 0), 0);
-}
-
-function eachDay(start: Date, end: Date) {
-  const days: Date[] = [];
-  const cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-  const finalDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
-
-  while (cursor.getTime() <= finalDate.getTime()) {
-    days.push(new Date(cursor));
-    cursor.setDate(cursor.getDate() + 1);
-  }
-
-  return days;
-}
-
-function startOfWeek(date: Date) {
-  const start = new Date(date);
-  start.setDate(start.getDate() - start.getDay());
-
-  return getDayBounds(start).start;
-}
-
-function addDays(date: Date, days: number) {
-  const nextDate = new Date(date);
-  nextDate.setDate(nextDate.getDate() + days);
-
-  return nextDate;
-}
-
-function endOfDay(date: Date) {
-  const nextDate = new Date(date);
-  nextDate.setHours(23, 59, 59, 999);
-
-  return nextDate;
-}
-
-function toDateKey(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function formatDate(date: Date) {
-  return date.toLocaleDateString([], {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function formatShortDate(date: Date) {
-  return date.toLocaleDateString([], {
-    day: "numeric",
-    month: "short",
-  });
-}

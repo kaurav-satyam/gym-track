@@ -16,16 +16,24 @@ export interface ExerciseLibraryFilters {
 export async function seedExerciseLibrary(
   seedItems: ExerciseLibrarySeedItem[],
 ) {
+  // Only insert missing built-ins so user edits to defaults survive reloads.
+  const existingIds = new Set(
+    (await db.exerciseLibrary.toCollection().primaryKeys()) as string[],
+  );
   const now = new Date();
-  const seededItems: ExerciseLibraryItem[] = seedItems.map((item) => ({
-    ...item,
-    normalizedTitle: normalizeSearchText(item.title),
-    isBuiltIn: true,
-    createdAt: now,
-    updatedAt: now,
-  }));
+  const newItems: ExerciseLibraryItem[] = seedItems
+    .filter((item) => !existingIds.has(item.id))
+    .map((item) => ({
+      ...item,
+      normalizedTitle: normalizeSearchText(item.title),
+      isBuiltIn: true,
+      createdAt: now,
+      updatedAt: now,
+    }));
 
-  await db.exerciseLibrary.bulkPut(seededItems);
+  if (newItems.length > 0) {
+    await db.exerciseLibrary.bulkAdd(newItems);
+  }
 }
 
 export async function listExerciseLibraryItems({
