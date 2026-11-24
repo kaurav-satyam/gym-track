@@ -7,10 +7,8 @@ const VIEW_GAP = 16;
 export interface MuscleFigureProps {
   views: MuscleView[];
   title: string;
-  /** Muscles painted in the primary (red) color. */
+  /** Muscles painted in the highlight (red) color. */
   primary?: readonly MuscleId[];
-  /** Muscles painted in the secondary (orange) color. Primary wins on overlap. */
-  secondary?: readonly MuscleId[];
   /** Sizing classes for the <svg>; defaults to full width. */
   className?: string;
   /** Show "Front"/"Back" captions when the figure has more than one view. */
@@ -22,13 +20,11 @@ export default function MuscleFigure({
   views,
   title,
   primary = [],
-  secondary = [],
   showViewLabels = true,
   className,
 }: MuscleFigureProps) {
   const titleId = useId();
   const primarySet = new Set<MuscleId>(primary);
-  const secondarySet = new Set<MuscleId>(secondary);
   const withLabels = showViewLabels && views.length > 1;
   const width =
     views.reduce((total, view) => total + view.width, 0) +
@@ -43,10 +39,6 @@ export default function MuscleFigure({
   function fillFor(muscle?: MuscleId) {
     if (muscle && primarySet.has(muscle)) {
       return "var(--muscle-primary)";
-    }
-
-    if (muscle && secondarySet.has(muscle)) {
-      return "var(--muscle-secondary)";
     }
 
     return "var(--muscle-idle)";

@@ -1,0 +1,14 @@
+import { defineConfig, mergeConfig } from "vitest/config";
+import viteConfig from "./vite.config";
+
+export default mergeConfig(
+  viteConfig,
+  defineConfig({
+    test: {
+      environment: "node",
+      include: ["src/**/*.test.ts"],
+      // In-memory IndexedDB so repository tests run against real Dexie.
+      setupFiles: ["fake-indexeddb/auto"],
+    },
+  }),
+);

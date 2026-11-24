@@ -1,41 +1,37 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { ChevronLeft } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import {
-  EXERCISE_TIME_UNITS,
-  EXERCISE_TYPES,
-  EXERCISE_WEIGHT_UNITS,
-  type ExerciseTemplate,
-  type ExerciseType,
-} from "../../../app/db/models/exercise.model";
-import {
-  getExerciseById,
   removeExerciseTemplate,
   updateExerciseTemplate,
-} from "../../../app/db/repositories/exercise.repository";
-import { listExerciseHistory } from "../../../app/db/repositories/workout-log.repository";
-import { formatSetValues } from "../../../shared/lib/setFormat";
-import { MuscleTargetsPreview } from "../../../shared/muscle-map";
-import { SegmentedControl } from "../../../shared/ui";
+} from "@/data/repositories/exercise.repository";
+import { formatSessionDate } from "@/domain/history";
+import {
+  EXERCISE_TYPES,
+  defaultUnitFor,
+  unitsFor,
+  type ExerciseTemplate,
+  type ExerciseType,
+  type PersistedExercise,
+} from "@/domain/models/exercise";
+import { formatSetValues } from "@/domain/sets";
+import { MuscleTargetsPreview } from "@/shared/muscle-map";
+import { SegmentedControl } from "@/shared/ui";
 import MuscleTagEditor from "../components/MuscleTagEditor";
-import { formatSessionDate, summarizeHistory } from "../lib/summarizeHistory";
+import { useExercise, useExerciseHistory } from "../hooks/useExerciseDetail";
 
 const SESSIONS_PREVIEW = 8;
 
 export default function ExerciseDetailScreen() {
   const { exerciseId: param } = useParams<{ exerciseId: string }>();
   const exerciseId = Number(param);
-  const exercise = useLiveQuery(
-    async () => (Number.isFinite(exerciseId) ? (await getExerciseById(exerciseId)) ?? null : null),
-    [exerciseId],
-  );
+  const exercise = useExercise(exerciseId);
 
   if (exercise === undefined) {
     return null;
   }
 
-  if (exercise === null || exercise.id == null) {
+  if (exercise === null) {
     return (
       <section className="mx-auto max-w-xl px-4 py-10 text-center text-(--text-muted)">
         This exercise no longer exists.{" "}
@@ -46,18 +42,17 @@ export default function ExerciseDetailScreen() {
     );
   }
 
-  return <ExerciseDetail key={exercise.id} exercise={exercise as ExerciseTemplate & { id: number }} />;
+  return <ExerciseDetail key={exercise.id} exercise={exercise} />;
 }
 
-function ExerciseDetail({ exercise }: { exercise: ExerciseTemplate & { id: number } }) {
+function ExerciseDetail({ exercise }: { exercise: PersistedExercise }) {
   const navigate = useNavigate();
   const [showAllSessions, setShowAllSessions] = useState(false);
   const [titleDraft, setTitleDraft] = useState(exercise.title);
-  const logs = useLiveQuery(() => listExerciseHistory(exercise.id), [exercise.id], []);
-  const { sessions, best } = summarizeHistory(logs, exercise.exerciseType);
+  const { sessions, best } = useExerciseHistory(exercise);
   const visibleSessions = showAllSessions ? sessions : sessions.slice(0, SESSIONS_PREVIEW);
   const unit = exercise.exerciseUnit;
-  const units = exercise.exerciseType === "time" ? EXERCISE_TIME_UNITS : EXERCISE_WEIGHT_UNITS;
+  const units = unitsFor(exercise.exerciseType);
 
   function update(changes: Partial<ExerciseTemplate>) {
     void updateExerciseTemplate(exercise.id, changes);
@@ -75,7 +70,7 @@ function ExerciseDetail({ exercise }: { exercise: ExerciseTemplate & { id: numbe
 
   function changeType(exerciseType: ExerciseType) {
     if (exerciseType !== exercise.exerciseType) {
-      update({ exerciseType, exerciseUnit: exerciseType === "time" ? "sec" : "kg" });
+      update({ exerciseType, exerciseUnit: defaultUnitFor(exerciseType) });
     }
   }
 

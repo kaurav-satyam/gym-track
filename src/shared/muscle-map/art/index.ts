@@ -1,4 +1,4 @@
-import type { MuscleGroup } from "../muscles";
+import type { MuscleGroup } from "@/shared/muscle-map/muscles";
 import { armBack, armFront } from "./arms";
 import { legsBack, legsFront } from "./legs";
 import { neckBack, neckFront } from "./neck";

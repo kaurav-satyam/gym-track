@@ -1,7 +1,7 @@
 import { Activity, Dumbbell, Settings, type LucideIcon } from "lucide-react";
 import { NavLink, useLocation } from "react-router";
-import getTodayWorkoutDay from "../shared/lib/getTodayWorkoutDay";
-import { AppLogo, cn } from "../shared/ui";
+import { getTodayWorkoutDay } from "@/domain/weekdays";
+import { AppLogo, cn } from "@/shared/ui";
 
 interface INavigationItem {
   label: string;

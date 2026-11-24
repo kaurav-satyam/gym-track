@@ -1,19 +1,10 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Link } from "react-router";
-import {
-  getAnalyticsRange,
-  getAnalyticsSummary,
-  shiftAnalyticsDate,
-  type AnalyticsExerciseStat,
-  type AnalyticsPeriod,
-  type AnalyticsTrendPoint,
-} from "../../../app/db/repositories/analytics.repository";
-import { MuscleThumbnail, hasMuscleTargets } from "../../../shared/muscle-map";
-import { SegmentedControl, cn } from "../../../shared/ui";
-
-type ProgressPeriod = Extract<AnalyticsPeriod, "week" | "month">;
+import type { ExerciseStat, ProgressDay, ProgressPeriod } from "@/domain/progress";
+import { MuscleThumbnail, hasMuscleTargets } from "@/shared/muscle-map";
+import { SegmentedControl, cn } from "@/shared/ui";
+import { useProgress } from "../hooks/useProgress";
 
 const PERIOD_OPTIONS: { label: string; value: ProgressPeriod }[] = [
   { label: "Week", value: "week" },
@@ -21,15 +12,8 @@ const PERIOD_OPTIONS: { label: string; value: ProgressPeriod }[] = [
 ];
 
 export default function ProgressScreen() {
-  const [period, setPeriod] = useState<ProgressPeriod>("week");
-  const [anchorDate, setAnchorDate] = useState(() => new Date());
-  const summary = useLiveQuery(
-    () => getAnalyticsSummary({ period, anchorDate }),
-    [period, anchorDate],
-  );
-  const isCurrentRange =
-    getAnalyticsRange(period, anchorDate).label ===
-    getAnalyticsRange(period, new Date()).label;
+  const { period, setPeriod, summary, isCurrent, showPrevious, showNext, showCurrent } =
+    useProgress();
 
   return (
     <section className="motion-page mx-auto w-full max-w-xl space-y-7 px-4 pb-10 pt-5">
@@ -38,22 +22,22 @@ export default function ProgressScreen() {
         <div className="flex items-center justify-between gap-3">
           <SegmentedControl options={PERIOD_OPTIONS} value={period} onChange={setPeriod} />
           <div className="flex items-center">
-            <RangeButton label="Previous" onClick={() => setAnchorDate(shiftAnalyticsDate(anchorDate, period, -1))}>
+            <RangeButton label="Previous" onClick={showPrevious}>
               <ChevronLeft size={18} />
             </RangeButton>
             <button
               type="button"
               className="min-h-10 min-w-24 whitespace-nowrap px-1 text-center text-sm font-medium tabular-nums text-(--text-strong) disabled:cursor-default"
-              title={isCurrentRange ? undefined : "Back to current"}
-              disabled={isCurrentRange}
-              onClick={() => setAnchorDate(new Date())}
+              title={isCurrent ? undefined : "Back to current"}
+              disabled={isCurrent}
+              onClick={showCurrent}
             >
               {summary?.range.label ?? ""}
             </button>
             <RangeButton
               label="Next"
-              disabled={isCurrentRange}
-              onClick={() => setAnchorDate(shiftAnalyticsDate(anchorDate, period, 1))}
+              disabled={isCurrent}
+              onClick={showNext}
             >
               <ChevronRight size={18} />
             </RangeButton>
@@ -72,11 +56,11 @@ export default function ProgressScreen() {
             <Stat label="Active days">{summary.activeDays}</Stat>
           </dl>
 
-          <SetsChart trend={summary.trend} period={period} />
+          <SetsChart days={summary.days} period={period} />
 
           {summary.completedSets === 0 ? (
             <p className="text-center text-sm text-(--text-muted)">
-              No sets logged {isCurrentRange ? `this ${period} yet` : `in this ${period}`}.
+              No sets logged {isCurrent ? `this ${period} yet` : `in this ${period}`}.
             </p>
           ) : (
             <>
@@ -116,13 +100,13 @@ export default function ProgressScreen() {
   );
 }
 
-function SetsChart({ trend, period }: { trend: AnalyticsTrendPoint[]; period: ProgressPeriod }) {
-  const max = Math.max(1, ...trend.map((point) => Math.max(point.plannedSets, point.completedSets)));
+function SetsChart({ days, period }: { days: ProgressDay[]; period: ProgressPeriod }) {
+  const max = Math.max(1, ...days.map((point) => Math.max(point.plannedSets, point.completedSets)));
 
   return (
     <figure aria-label="Sets per day: completed over planned" className="space-y-2">
       <div className={cn("flex h-28 items-end", period === "week" ? "gap-3" : "gap-0.5")}>
-        {trend.map((point) => (
+        {days.map((point) => (
           <div
             key={point.key}
             title={`${point.label}: ${point.completedSets}/${point.plannedSets} sets`}
@@ -140,7 +124,7 @@ function SetsChart({ trend, period }: { trend: AnalyticsTrendPoint[]; period: Pr
         ))}
       </div>
       <div className={cn("flex text-xs text-(--text-muted)", period === "week" ? "gap-3" : "gap-0.5")}>
-        {trend.map((point, index) => (
+        {days.map((point, index) => (
           <span key={point.key} className="flex-1 text-center">
             {period === "week" || index % 5 === 0 ? point.label : ""}
           </span>
@@ -154,7 +138,7 @@ function SetsChart({ trend, period }: { trend: AnalyticsTrendPoint[]; period: Pr
   );
 }
 
-function ExerciseStatRow({ stat }: { stat: AnalyticsExerciseStat }) {
+function ExerciseStatRow({ stat }: { stat: ExerciseStat }) {
   const best =
     stat.bestSetValue > 0 ? ` · best ${formatCompact(stat.bestSetValue)} ${stat.exerciseUnit}` : "";
 

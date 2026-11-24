@@ -3,8 +3,8 @@ import {
   getStoredThemePreference,
   persistThemePreference,
   type ThemePreference,
-} from "../../../app/theme";
-import { SegmentedControl } from "../../../shared/ui";
+} from "@/app/theme";
+import { SegmentedControl } from "@/shared/ui";
 
 const themeOptions: { label: string; value: ThemePreference }[] = [
   { label: "System", value: "system" },

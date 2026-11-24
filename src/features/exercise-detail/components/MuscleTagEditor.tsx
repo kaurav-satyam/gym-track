@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { loadDefaultMuscleTags } from "../../../shared/constants/muscleTags";
-import { cn } from "../../../shared/ui";
+import { loadDefaultMuscleTags } from "@/data/seed/muscle-tags";
+import { cn } from "@/shared/ui";
 
 interface IMuscleTagEditorProps {
   tags: string[];
