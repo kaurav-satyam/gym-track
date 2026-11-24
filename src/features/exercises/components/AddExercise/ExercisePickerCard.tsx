@@ -18,6 +18,11 @@ import {
   cn,
 } from "../../../../shared/ui";
 import {
+  MuscleTargetsPreview,
+  MuscleThumbnail,
+  hasMuscleTargets,
+} from "../../../../shared/muscle-map";
+import {
   addUniqueTag,
   exerciseTypeOptions,
   toggleTag,
@@ -66,20 +71,29 @@ export default function ExercisePickerCard({
         onClick={onToggle}
       >
         <div className="flex min-w-0 items-center gap-3">
-          <div
-            className={cn(
-              "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-(--surface-inset)",
-              exercise.exerciseType === "reps"
-                ? "border-(--type-reps-border) text-(--type-reps-text)"
-                : "border-(--type-time-border) text-(--type-time-text)",
-            )}
-          >
-            {exercise.exerciseType === "reps" ? (
-              <Dumbbell size={17} />
-            ) : (
-              <Timer size={17} />
-            )}
-          </div>
+          {hasMuscleTargets(cardMuscleTags) ? (
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-(--surface-border) bg-(--surface-inset) p-1">
+              <MuscleThumbnail
+                tags={cardMuscleTags}
+                className="h-full w-auto max-w-full"
+              />
+            </div>
+          ) : (
+            <div
+              className={cn(
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-(--surface-inset)",
+                exercise.exerciseType === "reps"
+                  ? "border-(--type-reps-border) text-(--type-reps-text)"
+                  : "border-(--type-time-border) text-(--type-time-text)",
+              )}
+            >
+              {exercise.exerciseType === "reps" ? (
+                <Dumbbell size={17} />
+              ) : (
+                <Timer size={17} />
+              )}
+            </div>
+          )}
 
           <div className="min-w-0 space-y-1">
             <div className="flex min-w-0 items-center gap-2">
@@ -165,6 +179,12 @@ export default function ExercisePickerCard({
                   });
                 }}
               />
+              {hasMuscleTargets(setupState.muscleTags) && (
+                <MuscleTargetsPreview
+                  tags={setupState.muscleTags}
+                  className="mt-3"
+                />
+              )}
             </Field>
 
             <Field label="Tracking type">
