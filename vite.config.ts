@@ -24,9 +24,7 @@ export default defineConfig({
         navigateFallback: "index.html",
       },
       devOptions: {
-        enabled: true,
-        suppressWarnings: true,
-        navigateFallbackAllowlist: [/^\/$/],
+        enabled: false,
       },
       manifest: {
         id: "/",

@@ -5,10 +5,7 @@ import type {
   ExerciseTemplate,
   WorkoutDay,
 } from "../models/exercise.model";
-import {
-  deleteLogsByExercise,
-  deleteLogsByExerciseSet,
-} from "./workout-log.repository";
+import { deleteLogsByExercise } from "./workout-log.repository";
 
 export type CreateExercisePayload = Omit<ExerciseTemplate, "id" | "sortOrder"> & {
   sortOrder?: number;
@@ -90,7 +87,7 @@ export async function updateExerciseTemplateSet(
       set.id === setId
         ? {
             ...set,
-            ...changes,
+            ...sanitizeSetChanges(changes),
           }
         : set,
     ),
@@ -98,15 +95,10 @@ export async function updateExerciseTemplateSet(
 }
 
 export async function removeExerciseSet(exerciseId: number, setId: string) {
-  await db.transaction("rw", db.exercises, db.workoutLogs, async () => {
-    const exercise = await requireExerciseTemplate(exerciseId);
-
-    await db.exercises.update(exerciseId, {
-      exerciseSets: exercise.exerciseSets.filter((set) => set.id !== setId),
-    });
-
-    await deleteLogsByExerciseSet(setId);
-  });
+  // Logs are append-only history: removing a template set keeps its past logs.
+  await updateExerciseTemplateSets(exerciseId, (sets) =>
+    sets.filter((set) => set.id !== setId),
+  );
 }
 
 export async function moveExerciseTemplate(
@@ -203,6 +195,20 @@ async function normalizeExerciseSortOrder(exercises: ExerciseTemplate[]) {
     ...exercise,
     sortOrder: index,
   }));
+}
+
+function sanitizeSetChanges(changes: Partial<ExerciseSet>) {
+  const sanitized = { ...changes };
+
+  for (const key of ["weight", "reps", "time"] as const) {
+    const value = sanitized[key];
+
+    if (typeof value === "number" && (!Number.isFinite(value) || value < 0)) {
+      sanitized[key] = undefined;
+    }
+  }
+
+  return sanitized;
 }
 
 function normalizePlannedDuration(duration?: number) {

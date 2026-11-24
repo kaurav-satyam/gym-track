@@ -1,3 +1,4 @@
+import { Dexie } from "dexie";
 import { db } from "../db.client";
 import type { ExerciseSet } from "../models/exercise.model";
 import type { WorkoutSetLog } from "../models/workout-log.model";
@@ -8,6 +9,24 @@ export async function listExerciseHistory(exerciseId: number) {
 
   return logs.sort(
     (left, right) => right.completedAt.getTime() - left.completedAt.getTime(),
+  );
+}
+
+/** Latest log for each given set, using one indexed lookup per set. */
+export async function listLatestLogsBySetId(exerciseSetIds: string[]) {
+  const entries = await Promise.all(
+    exerciseSetIds.map(async (setId) => {
+      const log = await db.workoutLogs
+        .where("[exerciseSetId+completedAt]")
+        .between([setId, Dexie.minKey], [setId, Dexie.maxKey])
+        .last();
+
+      return [setId, log] as const;
+    }),
+  );
+
+  return new Map(
+    entries.filter((entry): entry is [string, WorkoutSetLog] => entry[1] != null),
   );
 }
 
@@ -25,19 +44,25 @@ export async function logExerciseSetCompletion(
   set: ExerciseSet,
   completedAt = new Date(),
 ) {
-  const existingLog = await getExerciseSetCompletionForDay(set.id, completedAt);
+  // Check + add in one transaction so a double tap can't log a set twice.
+  return db.transaction("rw", db.workoutLogs, async () => {
+    const existingLog = await getExerciseSetCompletionForDay(
+      set.id,
+      completedAt,
+    );
 
-  if (existingLog?.id) {
-    return existingLog.id;
-  }
+    if (existingLog?.id) {
+      return existingLog.id;
+    }
 
-  return db.workoutLogs.add({
-    exerciseId,
-    exerciseSetId: set.id,
-    completedAt,
-    weight: set.weight,
-    reps: set.reps,
-    time: set.time,
+    return db.workoutLogs.add({
+      exerciseId,
+      exerciseSetId: set.id,
+      completedAt,
+      weight: set.weight,
+      reps: set.reps,
+      time: set.time,
+    });
   });
 }
 
@@ -56,10 +81,6 @@ export async function removeExerciseSetCompletion(
 
 export async function deleteLogsByExercise(exerciseId: number) {
   await db.workoutLogs.where("exerciseId").equals(exerciseId).delete();
-}
-
-export async function deleteLogsByExerciseSet(exerciseSetId: string) {
-  await db.workoutLogs.where("exerciseSetId").equals(exerciseSetId).delete();
 }
 
 async function listExerciseHistoryForDay(exerciseId: number, date: Date) {

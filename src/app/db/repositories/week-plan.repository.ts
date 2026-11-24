@@ -2,7 +2,6 @@ import { db } from "../db.client";
 import { WEEKDAYS } from "../../../shared/constants/weekdays";
 import type { ExerciseTemplate, WorkoutDay } from "../models/exercise.model";
 import type { WorkoutSetLog } from "../models/workout-log.model";
-import { getDayBounds } from "../utils/getDayBounds";
 
 export interface WeekPlanSummary {
   day: WorkoutDay;
@@ -13,10 +12,21 @@ export interface WeekPlanSummary {
   progress: number;
 }
 
+/** Start of the current week (Sunday 00:00 local). Progress resets here. */
+export function getWeekStart(date = new Date()) {
+  const start = new Date(date);
+
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - start.getDay());
+
+  return start;
+}
+
 export async function listWeekPlanSummaries() {
+  const weekStart = getWeekStart();
   const [exerciseTemplates, workoutLogs] = await Promise.all([
     db.exercises.toArray(),
-    db.workoutLogs.toArray(),
+    db.workoutLogs.where("completedAt").aboveOrEqual(weekStart).toArray(),
   ]);
 
   const exerciseDayById = new Map<number, WorkoutDay>();
@@ -34,8 +44,7 @@ export async function listWeekPlanSummaries() {
     exercisesByDay.set(exercise.day, dayExercises);
   }
 
-  const logsByDay = new Map<WorkoutDay, WorkoutSetLog[]>();
-  const latestWorkoutByDay = new Map<WorkoutDay, Date>();
+  const completedSetIdsByDay = new Map<WorkoutDay, Set<string>>();
 
   for (const log of workoutLogs) {
     const day = exerciseDayById.get(log.exerciseId);
@@ -44,34 +53,34 @@ export async function listWeekPlanSummaries() {
       continue;
     }
 
-    const dayLogs = logsByDay.get(day) ?? [];
-    dayLogs.push(log);
-    logsByDay.set(day, dayLogs);
-
-    const latestWorkout = latestWorkoutByDay.get(day);
-
-    if (!latestWorkout || log.completedAt.getTime() > latestWorkout.getTime()) {
-      latestWorkoutByDay.set(day, log.completedAt);
-    }
+    addCompletedSet(completedSetIdsByDay, day, log);
   }
 
   return WEEKDAYS.map((day) =>
     buildWeekPlanSummary(
       day,
       exercisesByDay.get(day) ?? [],
-      logsByDay.get(day) ?? [],
-      latestWorkoutByDay.get(day),
+      completedSetIdsByDay.get(day),
     ),
   );
+}
+
+function addCompletedSet(
+  completedSetIdsByDay: Map<WorkoutDay, Set<string>>,
+  day: WorkoutDay,
+  log: WorkoutSetLog,
+) {
+  const setIds = completedSetIdsByDay.get(day) ?? new Set<string>();
+
+  setIds.add(log.exerciseSetId);
+  completedSetIdsByDay.set(day, setIds);
 }
 
 function buildWeekPlanSummary(
   day: WorkoutDay,
   exercises: ExerciseTemplate[],
-  logs: WorkoutSetLog[],
-  latestWorkout?: Date,
+  completedSetIds: Set<string> = new Set(),
 ): WeekPlanSummary {
-  const exerciseCount = exercises.length;
   const totalSetsCount = exercises.reduce(
     (sum, exercise) => sum + exercise.exerciseSets.length,
     0,
@@ -80,35 +89,22 @@ function buildWeekPlanSummary(
     (sum, exercise) => sum + (exercise.plannedDurationMin ?? 0),
     0,
   );
-
-  const completedSetsCount = latestWorkout
-    ? countCompletedSetsForWorkoutDay(logs, latestWorkout)
-    : 0;
+  // Logs of since-deleted template sets stay in history but aren't progress.
+  const clampedCompleted = exercises.reduce(
+    (sum, exercise) =>
+      sum + exercise.exerciseSets.filter((set) => completedSetIds.has(set.id)).length,
+    0,
+  );
 
   return {
     day,
-    exerciseCount,
+    exerciseCount: exercises.length,
     plannedDurationMin: plannedDurationMin > 0 ? plannedDurationMin : undefined,
     totalSetsCount,
-    completedSetsCount,
+    completedSetsCount: clampedCompleted,
     progress:
       totalSetsCount > 0
-        ? Math.round((completedSetsCount / totalSetsCount) * 100)
+        ? Math.round((clampedCompleted / totalSetsCount) * 100)
         : 0,
   };
-}
-
-function countCompletedSetsForWorkoutDay(logs: WorkoutSetLog[], workoutDate: Date) {
-  const { start, end } = getDayBounds(workoutDate);
-  const completedSetIds = new Set(
-    logs
-      .filter(
-        (log) =>
-          log.completedAt.getTime() >= start.getTime() &&
-          log.completedAt.getTime() <= end.getTime(),
-      )
-      .map((log) => log.exerciseSetId),
-  );
-
-  return completedSetIds.size;
 }
