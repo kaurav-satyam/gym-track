@@ -88,15 +88,6 @@ export async function listExerciseLibraryItems({
     .slice(0, limit);
 }
 
-export async function getExerciseLibraryItemByTitle(title: string) {
-  const normalizedTitle = normalizeSearchText(title);
-
-  return db.exerciseLibrary
-    .where("normalizedTitle")
-    .equals(normalizedTitle)
-    .first();
-}
-
 export async function createCustomExerciseLibraryItem(
   payload: Omit<
     ExerciseLibrarySeedItem,
@@ -126,26 +117,41 @@ export async function createCustomExerciseLibraryItem(
   return item;
 }
 
-export async function updateExerciseLibraryItemDefaults(
-  exerciseId: string,
-  changes: Partial<
-    Pick<
-      ExerciseLibraryItem,
-      | "exerciseType"
-      | "exerciseUnit"
-      | "muscleTags"
-      | "category"
-      | "plannedDurationMin"
-    >
-  >,
-) {
-  await db.exerciseLibrary.update(exerciseId, {
-    ...changes,
-    updatedAt: new Date(),
-  });
-}
-
 export function normalizeSearchText(value: string) {
   return value.trim().toLowerCase();
 }
 
+export async function listExerciseLibraryCategories() {
+  return (await db.exerciseLibrary.orderBy("category").uniqueKeys()) as string[];
+}
+
+/** Library items for the exercises most recently put into any day plan. */
+export async function listRecentlyUsedLibraryItems(limit = 6) {
+  const templates = await db.exercises.reverse().toArray();
+  const seen = new Set<string>();
+  const items: ExerciseLibraryItem[] = [];
+
+  for (const template of templates) {
+    const normalizedTitle = normalizeSearchText(template.title);
+
+    if (seen.has(normalizedTitle)) {
+      continue;
+    }
+
+    seen.add(normalizedTitle);
+    const item = await db.exerciseLibrary
+      .where("normalizedTitle")
+      .equals(normalizedTitle)
+      .first();
+
+    if (item) {
+      items.push(item);
+    }
+
+    if (items.length >= limit) {
+      break;
+    }
+  }
+
+  return items;
+}

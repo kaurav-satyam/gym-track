@@ -1,222 +1,198 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { CheckCircle2, ListChecks, Plus } from "lucide-react";
-import { useMemo, type ReactNode } from "react";
-import { useNavigate, useParams } from "react-router";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { Link, useParams } from "react-router";
+import type {
+  ExerciseTemplate,
+  WorkoutDay,
+} from "../../../app/db/models/exercise.model";
+import type { WorkoutSetLog } from "../../../app/db/models/workout-log.model";
 import {
   listExercisesForDay,
   moveExerciseTemplate,
   removeExerciseTemplate,
 } from "../../../app/db/repositories/exercise.repository";
-import { listCompletedSetIdsForExerciseDay } from "../../../app/db/repositories/workout-log.repository";
-import type {
-  ExerciseTemplate,
-  WorkoutDay,
-} from "../../../app/db/models/exercise.model";
 import {
-  Button,
-  EmptyState,
-  PageShell,
-  Panel,
-  ProgressBar,
-} from "../../../shared/ui";
+  listCompletedSetIdsForExerciseDay,
+  listLatestLogsBySetId,
+} from "../../../app/db/repositories/workout-log.repository";
+import { WEEKDAYS } from "../../../shared/constants/weekdays";
 import getTodayWorkoutDay from "../../../shared/lib/getTodayWorkoutDay";
-import ExerciseCard from "../components/ExerciseCard";
+import { cn } from "../../../shared/ui";
+import DayStrip from "../components/workout/DayStrip";
+import ExerciseRow from "../components/workout/ExerciseRow";
+
+type PersistedExercise = ExerciseTemplate & { id: number };
+
+const EMPTY_PROGRESS = {
+  completedSetIds: new Set<string>() as ReadonlySet<string>,
+  latestLogBySetId: new Map<string, WorkoutSetLog>() as ReadonlyMap<string, WorkoutSetLog>,
+};
 
 export default function WorkoutDayScreen() {
-  const { day } = useParams<{ day: WorkoutDay }>();
-  const navigate = useNavigate();
-  const today = useMemo(() => getTodayWorkoutDay(), []);
+  const { day } = useParams<{ day: string }>();
+
+  if (!day || !(WEEKDAYS as readonly string[]).includes(day)) {
+    return (
+      <section className="mx-auto max-w-xl px-4 py-10 text-center text-(--text-muted)">
+        That day doesn't exist. <Link className="text-(--accent)" to="/">Go to today</Link>
+      </section>
+    );
+  }
+
+  // Keyed so expansion/edit state resets when switching days.
+  return <WorkoutDay key={day} day={day as WorkoutDay} />;
+}
+
+function WorkoutDay({ day }: { day: WorkoutDay }) {
+  const today = getTodayWorkoutDay();
+  const [editMode, setEditMode] = useState(false);
+  // undefined = follow the first unfinished exercise automatically.
+  const [manualExpandedId, setManualExpandedId] = useState<number | null>();
 
   const exercises = useLiveQuery(
-    async () => {
-      if (!day) {
-        return [];
-      }
-
-      return listExercisesForDay(day);
-    },
+    async () =>
+      (await listExercisesForDay(day)).filter(
+        (exercise): exercise is PersistedExercise => exercise.id != null,
+      ),
     [day],
-    [],
   );
 
-  // Key on ids only so typing in a set input doesn't re-run this query.
-  const exerciseIdsKey = exercises.map((exercise) => exercise.id).join(",");
-  const completedSetIds = useLiveQuery(
-    async () => {
-      if (!exerciseIdsKey) {
-        return [];
-      }
+  // Re-query only when the exercise/set structure changes, not on value edits.
+  const structureKey = (exercises ?? [])
+    .map((exercise) => `${exercise.id}:${exercise.exerciseSets.map((set) => set.id).join(".")}`)
+    .join("|");
+  const progress =
+    useLiveQuery(async () => {
+      const entries = structureKey ? structureKey.split("|") : [];
+      const exerciseIds = entries.map((entry) => Number(entry.split(":")[0]));
+      const setIds = entries.flatMap((entry) => entry.split(":")[1].split(".").filter(Boolean));
+      const [completed, latestLogBySetId] = await Promise.all([
+        Promise.all(exerciseIds.map((id) => listCompletedSetIdsForExerciseDay(id))),
+        listLatestLogsBySetId(setIds),
+      ]);
 
-      const completedSetsByExercise = await Promise.all(
-        exerciseIdsKey
-          .split(",")
-          .map((id) => listCompletedSetIdsForExerciseDay(Number(id))),
-      );
+      return {
+        completedSetIds: new Set(completed.flat()) as ReadonlySet<string>,
+        latestLogBySetId: latestLogBySetId as ReadonlyMap<string, WorkoutSetLog>,
+      };
+    }, [structureKey]) ?? EMPTY_PROGRESS;
 
-      return completedSetsByExercise.flat();
-    },
-    [exerciseIdsKey],
-    [],
-  );
-
-  if (!day) {
-    return (
-      <PageShell title="Day not found">
-        <EmptyState
-          title="Invalid day"
-          description="Pick one of the weekdays from the week screen and try again."
-        />
-      </PageShell>
-    );
+  if (!exercises) {
+    return null;
   }
 
-  const addExercisePath = "/days/" + day + "/add-exercise";
-  const isToday = day === today;
-  const exerciseCountLabel = `${exercises.length} exercise${exercises.length === 1 ? "" : "s"}`;
-  const plannedSetCount = exercises.reduce(
-    (total, exercise) => total + exercise.exerciseSets.length,
+  const { completedSetIds, latestLogBySetId } = progress;
+  const totalSets = exercises.reduce((sum, exercise) => sum + exercise.exerciseSets.length, 0);
+  const doneSets = exercises.reduce(
+    (sum, exercise) =>
+      sum + exercise.exerciseSets.filter((set) => completedSetIds.has(set.id)).length,
     0,
   );
-  const currentSetIds = new Set(
-    exercises.flatMap((exercise) => exercise.exerciseSets.map((set) => set.id)),
-  );
-  const completedSetCount = new Set(
-    completedSetIds.filter((setId) => currentSetIds.has(setId)),
-  ).size;
-  const completionPercent =
-    plannedSetCount === 0 ? 0 : (completedSetCount / plannedSetCount) * 100;
+  const percent = totalSets === 0 ? 0 : Math.round((doneSets / totalSets) * 100);
+  const firstUnfinishedId = exercises.find((exercise) =>
+    exercise.exerciseSets.some((set) => !completedSetIds.has(set.id)),
+  )?.id;
+  const expandedId =
+    manualExpandedId === undefined ? firstUnfinishedId : manualExpandedId;
+  const addExercisePath = `/days/${day}/add-exercise`;
 
-  function handleDeleteExercise(exercise: ExerciseTemplate) {
-    if (exercise.id == null) {
-      return;
+  function handleDelete(exercise: PersistedExercise) {
+    if (window.confirm(`Delete ${exercise.title}? Its logged sets are removed too.`)) {
+      void removeExerciseTemplate(exercise.id);
     }
-
-    const shouldDelete = window.confirm(
-      "Delete " + exercise.title + "? This also removes its completed set logs.",
-    );
-
-    if (!shouldDelete) {
-      return;
-    }
-
-    void removeExerciseTemplate(exercise.id);
   }
 
   return (
-    <PageShell
-      eyebrow={isToday ? "Today" : "Workout day"}
-      title={isToday ? `${day} workout` : day}
-      description={
-        exercises.length > 0
-          ? `${exerciseCountLabel} planned. Capture each set as you finish it.`
-          : "Start this day by choosing a movement from the exercise library."
-      }
-      actions={
-        exercises.length > 0 ? (
-          <Button
-            tone="primary"
-            leadingIcon={<Plus size={16} />}
-            onClick={() => navigate(addExercisePath)}
-          >
-            Add exercise
-          </Button>
-        ) : undefined
-      }
-    >
-      <SessionSummaryPanel
-        completedSetCount={completedSetCount}
-        exerciseCount={exercises.length}
-        plannedSetCount={plannedSetCount}
-        completionPercent={completionPercent}
-      />
+    <section className="motion-page mx-auto w-full max-w-xl px-4 pb-8 pt-5">
+      <header className="space-y-4">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <p className="text-sm text-(--text-muted)">{day === today ? "Today" : "Plan"}</p>
+            <h1 className="text-3xl font-semibold tracking-tight text-(--text-strong)">{day}</h1>
+          </div>
+          {exercises.length > 0 && (
+            <button
+              type="button"
+              className={cn(
+                "min-h-10 rounded-xl px-3 text-sm font-medium",
+                editMode ? "bg-(--accent) text-(--accent-ink)" : "text-(--text-soft) hover:bg-(--surface-control)",
+              )}
+              onClick={() => setEditMode((current) => !current)}
+            >
+              {editMode ? "Done" : "Edit"}
+            </button>
+          )}
+        </div>
+
+        <DayStrip today={today} />
+
+        {totalSets > 0 && (
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-sm tabular-nums">
+              <span className="text-(--text-soft)">
+                {doneSets}/{totalSets} sets
+              </span>
+              <span className="text-(--text-muted)">{percent}%</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-(--surface-control)">
+              <div
+                className="h-full rounded-full bg-(--accent) transition-[width] duration-500"
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+          </div>
+        )}
+      </header>
 
       {exercises.length === 0 ? (
-        <EmptyState
-          title="No exercises yet"
-          description="Open the exercise library, search a movement, then expand its card to set up tracking details."
-          action={
-            <Button
-              tone="primary"
-              leadingIcon={<Plus size={16} />}
-              onClick={() => navigate(addExercisePath)}
-            >
-              Add exercise
-            </Button>
-          }
-        />
+        <div className="mt-12 space-y-4 text-center">
+          <p className="text-(--text-muted)">Nothing planned for {day}.</p>
+          <AddExerciseLink to={addExercisePath} />
+        </div>
       ) : (
-        <div className="motion-list space-y-3">
-          {exercises.map((exercise, index) => (
-            <ExerciseCard
-              key={exercise.id}
-              exercise={exercise}
-              canMoveUp={index > 0}
-              canMoveDown={index < exercises.length - 1}
-              onMoveUp={() => void moveExerciseTemplate(exercise.id!, "up")}
-              onMoveDown={() => void moveExerciseTemplate(exercise.id!, "down")}
-              onDelete={() => handleDeleteExercise(exercise)}
-            />
-          ))}
-        </div>
+        <>
+          <ul className="mt-5 space-y-2">
+            {exercises.map((exercise, index) => (
+              <ExerciseRow
+                key={exercise.id}
+                exercise={exercise}
+                expanded={expandedId === exercise.id}
+                editMode={editMode}
+                completedSetIds={completedSetIds}
+                latestLogBySetId={latestLogBySetId}
+                canMoveUp={index > 0}
+                canMoveDown={index < exercises.length - 1}
+                onToggle={() =>
+                  setManualExpandedId(expandedId === exercise.id ? null : exercise.id)
+                }
+                // Hand control back to auto mode so the next exercise opens.
+                onFinished={() => setManualExpandedId(undefined)}
+                onMoveUp={() => void moveExerciseTemplate(exercise.id, "up")}
+                onMoveDown={() => void moveExerciseTemplate(exercise.id, "down")}
+                onDelete={() => handleDelete(exercise)}
+              />
+            ))}
+          </ul>
+
+          {!editMode && (
+            <div className="mt-4 flex justify-center">
+              <AddExerciseLink to={addExercisePath} />
+            </div>
+          )}
+        </>
       )}
-    </PageShell>
+    </section>
   );
 }
 
-function SessionSummaryPanel({
-  exerciseCount,
-  plannedSetCount,
-  completedSetCount,
-  completionPercent,
-}: {
-  exerciseCount: number;
-  plannedSetCount: number;
-  completedSetCount: number;
-  completionPercent: number;
-}) {
+function AddExerciseLink({ to }: { to: string }) {
   return (
-    <Panel className="p-4 sm:p-5">
-      <div className="grid gap-3 sm:grid-cols-[1fr_1fr_1.4fr]">
-        <SummaryMetric
-          icon={<ListChecks size={17} />}
-          label="Exercises"
-          value={String(exerciseCount)}
-        />
-        <SummaryMetric
-          icon={<CheckCircle2 size={17} />}
-          label="Sets done"
-          value={`${completedSetCount}/${plannedSetCount}`}
-        />
-        <div className="rounded-2xl border border-(--surface-border) bg-(--surface-inset) px-4 py-3">
-          <ProgressBar value={completionPercent} label="Session progress" />
-        </div>
-      </div>
-    </Panel>
-  );
-}
-
-function SummaryMetric({
-  icon,
-  label,
-  value,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border border-(--surface-border) bg-(--surface-inset) px-4 py-3">
-      <div>
-        <p className="text-xs uppercase tracking-[0.16em] text-(--text-muted)">
-          {label}
-        </p>
-        <p className="mt-1 text-xl font-semibold text-(--text-strong)">
-          {value}
-        </p>
-      </div>
-      <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-(--surface-border) bg-(--surface-control) text-(--text-soft)">
-        {icon}
-      </span>
-    </div>
+    <Link
+      to={to}
+      className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-(--surface-control) px-4 text-sm font-medium text-(--text-strong) hover:bg-(--surface-control-hover)"
+    >
+      <Plus size={16} /> Add exercise
+    </Link>
   );
 }
