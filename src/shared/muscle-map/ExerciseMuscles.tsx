@@ -1,5 +1,5 @@
 import { GROUP_VIEWS } from "./art";
-import { cn } from "../ui/cn";
+import { cn } from "@/shared/ui/cn";
 import MuscleFigure from "./MuscleFigure";
 import {
   MUSCLE_GROUP_LABELS,

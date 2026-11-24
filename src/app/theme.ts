@@ -1,27 +1,25 @@
-export const THEME_STORAGE_KEY = "gym-track-theme";
+import { safeStorage } from "@/shared/lib/storage";
 
-export const THEME_PREFERENCES = ["system", "dark", "light"] as const;
+const THEME_STORAGE_KEY = "gym-track-theme";
+
+const THEME_PREFERENCES = ["system", "dark", "light"] as const;
 export type ThemePreference = (typeof THEME_PREFERENCES)[number];
 
-export function isThemePreference(value: string | null): value is ThemePreference {
+function isThemePreference(value: string | null): value is ThemePreference {
   return THEME_PREFERENCES.some((preference) => preference === value);
 }
 
 export function getStoredThemePreference(): ThemePreference {
-  if (typeof window === "undefined") {
-    return "system";
-  }
+  const stored = safeStorage.get(THEME_STORAGE_KEY);
 
-  const storedPreference = window.localStorage.getItem(THEME_STORAGE_KEY);
-
-  return isThemePreference(storedPreference) ? storedPreference : "system";
+  return isThemePreference(stored) ? stored : "system";
 }
 
+/**
+ * "system" removes the override so the CSS `prefers-color-scheme` rules apply;
+ * "dark"/"light" pin the theme via `data-theme` on <html>.
+ */
 export function applyThemePreference(preference: ThemePreference) {
-  if (typeof document === "undefined") {
-    return;
-  }
-
   const root = document.documentElement;
 
   if (preference === "system") {
@@ -35,14 +33,10 @@ export function applyThemePreference(preference: ThemePreference) {
 }
 
 export function persistThemePreference(preference: ThemePreference) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
   if (preference === "system") {
-    window.localStorage.removeItem(THEME_STORAGE_KEY);
+    safeStorage.remove(THEME_STORAGE_KEY);
   } else {
-    window.localStorage.setItem(THEME_STORAGE_KEY, preference);
+    safeStorage.set(THEME_STORAGE_KEY, preference);
   }
 
   applyThemePreference(preference);

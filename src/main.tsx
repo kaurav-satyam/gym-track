@@ -1,26 +1,17 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router";
-import { registerSW } from "virtual:pwa-register";
-import AppRouter from "./app/AppRouter";
+import { registerServiceWorker } from "@/app/pwa";
+import { router } from "@/app/router";
+import { applyThemePreference, getStoredThemePreference } from "@/app/theme";
 import "./index.css";
 
-registerSW({
-  immediate: true,
-  onOfflineReady() {
-    console.info("GymTrack is ready to work offline.");
-  },
-  onRegisteredSW(swUrl, registration) {
-    console.info("Service worker registered:", swUrl);
-    registration?.update();
-  },
-  onRegisterError(error) {
-    console.error("Service worker registration failed:", error);
-  },
-});
+// Apply the saved theme before the first paint so there's no flash.
+applyThemePreference(getStoredThemePreference());
+registerServiceWorker();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={AppRouter} />
+    <RouterProvider router={router} />
   </StrictMode>,
 );

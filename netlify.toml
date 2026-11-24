@@ -1,16 +1,39 @@
-[build]
-  publish = "dist"
-  command = "npm run build"
+# Netlify deploy config. Connect the repo in Netlify and it uses these
+# settings; no dashboard changes needed. See docs/DEPLOYMENT.md.
 
+[build]
+  # Tests gate the deploy; `yarn build` type-checks and bundles into dist/.
+  command = "yarn test && yarn build"
+  publish = "dist"
+
+[build.environment]
+  # Vite 8 needs Node 20.19+ or 22.12+.
+  NODE_VERSION = "22"
+
+# Single-page app: every unknown path serves index.html and React Router takes
+# over. Real files (assets, manifest, sw.js, data/*.json) are served first.
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
+# --- Security headers (all responses) ---------------------------------------
 [[headers]]
-  for = "/manifest.webmanifest"
+  for = "/*"
   [headers.values]
-    Content-Type = "application/manifest+json"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+    # Everything is self-hosted. 'unsafe-inline' styles are needed for React
+    # style attributes (progress bars, chart heights).
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+
+# --- Caching -----------------------------------------------------------------
+# Must always be revalidated so app updates reach users.
+[[headers]]
+  for = "/index.html"
+  [headers.values]
     Cache-Control = "no-cache"
 
 [[headers]]
@@ -19,24 +42,18 @@
     Cache-Control = "no-cache"
 
 [[headers]]
-  for = "/index.html"
+  for = "/manifest.webmanifest"
   [headers.values]
+    Content-Type = "application/manifest+json"
     Cache-Control = "no-cache"
 
+# Content-hashed build output: cache forever.
 [[headers]]
   for = "/assets/*"
   [headers.values]
-    Cache-Control = '''
-    public,
-    max-age=31536000,
-    immutable
-    '''
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/workbox-*.js"
   [headers.values]
-    Cache-Control = '''
-    public,
-    max-age=31536000,
-    immutable
-    '''
+    Cache-Control = "public, max-age=31536000, immutable"

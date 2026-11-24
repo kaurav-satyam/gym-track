@@ -1,4 +1,4 @@
-import type { MuscleId } from "../muscles";
+import type { MuscleId } from "@/shared/muscle-map/muscles";
 
 export interface MuscleShape {
   d: string;

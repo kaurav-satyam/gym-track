@@ -1,6 +1,7 @@
 import { ChevronRight, Share, X } from "lucide-react";
 import { useState } from "react";
-import { AppLogo, IconButton, Panel } from "../../../shared/ui";
+import { safeStorage } from "@/shared/lib/storage";
+import { AppLogo, IconButton, Panel } from "@/shared/ui";
 
 const DISMISSED_STORAGE_KEY = "gymtrack-ios-install-prompt-dismissed-v1";
 
@@ -14,11 +15,11 @@ export default function IosInstallPrompt() {
       return false;
     }
 
-    return window.localStorage.getItem(DISMISSED_STORAGE_KEY) !== "1";
+    return safeStorage.get(DISMISSED_STORAGE_KEY) !== "1";
   });
 
   function handleDismiss() {
-    window.localStorage.setItem(DISMISSED_STORAGE_KEY, "1");
+    safeStorage.set(DISMISSED_STORAGE_KEY, "1");
     setShouldShow(false);
   }
 
@@ -44,8 +45,6 @@ export default function IosInstallPrompt() {
               </div>
 
               <IconButton
-                tone="ghost"
-                size="sm"
                 className="h-8 w-8 rounded-lg"
                 aria-label="Dismiss install instructions"
                 title="Dismiss"

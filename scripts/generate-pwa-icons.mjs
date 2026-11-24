@@ -3,24 +3,17 @@ import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { findChrome } from "./lib/chrome.mjs";
 
 const projectRoot = process.cwd();
 const publicDir = resolve(projectRoot, "public");
 const logoPath = resolve(publicDir, "logo.svg");
 const tmpDir = mkdtempSync(join(tmpdir(), "gymtrack-icons-"));
 
-const chromeBinary = [
-  "/usr/bin/google-chrome",
-  "/usr/bin/chromium-browser",
-  "/usr/bin/chromium",
-].find((candidate) => existsSync(candidate));
+const chromeBinary = findChrome();
 
 if (!existsSync(logoPath)) {
   throw new Error(`Logo source not found at ${logoPath}`);
-}
-
-if (!chromeBinary) {
-  throw new Error("No supported Chrome binary found. Expected google-chrome or chromium.");
 }
 
 const logoUrl = pathToFileURL(logoPath).href;

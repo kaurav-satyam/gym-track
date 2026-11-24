@@ -58,10 +58,3 @@ export const MUSCLE_LABELS: Record<MuscleId, string> = {
   neckFront: "Neck (front)",
   neckBack: "Neck (back)",
 };
-
-export function isMuscleInGroup<G extends MuscleGroup>(
-  group: G,
-  muscle: string,
-): muscle is MuscleOf<G> {
-  return (MUSCLE_GROUPS[group] as readonly string[]).includes(muscle);
-}

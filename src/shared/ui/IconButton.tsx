@@ -1,44 +1,19 @@
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "./cn";
 
-type TIconButtonTone = "primary" | "secondary" | "success" | "danger" | "ghost";
-type TIconButtonSize = "sm" | "md";
-
-interface IIconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  tone?: TIconButtonTone;
-  size?: TIconButtonSize;
-}
-
+/** Small square, outlined icon button. Always pass an `aria-label`. */
 export default function IconButton({
   className,
-  tone = "secondary",
-  size = "md",
   type,
   ...props
-}: IIconButtonProps) {
-  const toneClasses = {
-    primary:
-      "border-transparent bg-(--accent) text-(--accent-ink) hover:bg-(--accent-hover)",
-    secondary:
-      "border-(--surface-border) bg-(--surface-control) text-(--text-soft) hover:border-(--surface-border-strong) hover:bg-(--surface-control-hover) hover:text-(--text-strong)",
-    success: "border-transparent bg-(--success) text-white hover:opacity-90",
-    danger: "border-transparent bg-(--danger) text-white hover:opacity-90",
-    ghost:
-      "border-(--surface-border) bg-transparent text-(--text-soft) hover:border-(--surface-border-strong) hover:bg-(--surface-control)",
-  };
-
-  const sizeClasses = {
-    sm: "h-9 w-9 rounded-xl",
-    md: "h-10 w-10 rounded-2xl",
-  };
-
+}: ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       type={type ?? "button"}
       className={cn(
         "inline-flex shrink-0 items-center justify-center border transition duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-50",
-        toneClasses[tone],
-        sizeClasses[size],
+        "border-(--surface-border) bg-transparent text-(--text-soft) hover:border-(--surface-border-strong) hover:bg-(--surface-control)",
+        "h-9 w-9 rounded-xl",
         className,
       )}
       {...props}
