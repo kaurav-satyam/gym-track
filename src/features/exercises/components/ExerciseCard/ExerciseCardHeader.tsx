@@ -12,6 +12,10 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router";
 import type { ExerciseTemplate } from "../../../../app/db/models/exercise.model";
 import { IconButton, cn } from "../../../../shared/ui";
+import {
+  MuscleThumbnail,
+  hasMuscleTargets,
+} from "../../../../shared/muscle-map";
 
 interface IExerciseCardHeaderProps {
   exercise: ExerciseTemplate;
@@ -41,6 +45,7 @@ export default function ExerciseCardHeader({
   const navigate = useNavigate();
   const expandLabel = `${expanded ? "Collapse" : "Expand"} ${exercise.title}`;
   const isRepsExercise = exercise.exerciseType === "reps";
+  const showMuscleThumbnail = hasMuscleTargets(exercise.muscleTags);
 
   return (
     <div className="flex items-start gap-3 px-4 py-4 sm:px-5">
@@ -53,16 +58,23 @@ export default function ExerciseCardHeader({
               : "border-(--type-time-border) bg-(--type-time-bg) text-(--type-time-text)",
           )}
         >
-          <div
-            className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-2xl border bg-(--surface-inset)",
-              isRepsExercise
-                ? "border-(--type-reps-border) text-(--type-reps-text)"
-                : "border-(--type-time-border) text-(--type-time-text)",
-            )}
-          >
-            {isRepsExercise ? <Dumbbell size={18} /> : <Timer size={18} />}
-          </div>
+          {showMuscleThumbnail ? (
+            <MuscleThumbnail
+              tags={exercise.muscleTags}
+              className="h-12 w-auto max-w-full"
+            />
+          ) : (
+            <div
+              className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-2xl border bg-(--surface-inset)",
+                isRepsExercise
+                  ? "border-(--type-reps-border) text-(--type-reps-text)"
+                  : "border-(--type-time-border) text-(--type-time-text)",
+              )}
+            >
+              {isRepsExercise ? <Dumbbell size={18} /> : <Timer size={18} />}
+            </div>
+          )}
 
           <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">
             {exercise.exerciseType}

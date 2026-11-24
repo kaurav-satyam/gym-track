@@ -7,6 +7,7 @@ import {
 } from "../../../../app/db/repositories/workout-log.repository";
 import type { WorkoutSetLog } from "../../../../app/db/models/workout-log.model";
 import type { ExerciseTemplate } from "../../../../app/db/models/exercise.model";
+import { MuscleTargetsPreview, hasMuscleTargets } from "../../../../shared/muscle-map";
 import { Button, Panel } from "../../../../shared/ui";
 import ExerciseCardHeader from "./ExerciseCardHeader";
 import ExerciseSetList from "./ExerciseSetList";
@@ -67,6 +68,15 @@ export default function ExerciseCard({
 
       {expanded && (
         <div className="border-t border-(--surface-border) px-4 pb-4 pt-3 sm:px-5">
+          {hasMuscleTargets(exercise.muscleTags) && (
+            <div className="mb-3 space-y-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-(--text-muted)">
+                Muscles worked
+              </p>
+              <MuscleTargetsPreview tags={exercise.muscleTags} />
+            </div>
+          )}
+
           {totalSets === 0 ? (
             <div className="rounded-2xl border border-dashed border-(--surface-border) px-4 py-5 text-center text-sm text-(--text-muted)">
               No sets added yet.
