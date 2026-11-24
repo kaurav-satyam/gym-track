@@ -1,10 +1,9 @@
 import { createBrowserRouter, Navigate } from "react-router";
-import TodayAnalyticsScreen from "../features/analytics/screens/TodayAnalyticsScreen";
-import ExerciseHistoryScreen from "../features/exercise-history/screens/ExerciseHistoryScreen";
+import ExerciseDetailScreen from "../features/exercise-detail/screens/ExerciseDetailScreen";
 import AddExerciseScreen from "../features/exercises/screens/AddExerciseScreen";
 import WorkoutDayScreen from "../features/exercises/screens/WorkoutDayScreen";
+import ProgressScreen from "../features/progress/screens/ProgressScreen";
 import SettingsScreen from "../features/settings/screens/SettingsScreen";
-import WeekPlanScreen from "../features/week-plan/screens/WeekPlanScreen";
 import getTodayWorkoutDay from "../shared/lib/getTodayWorkoutDay";
 import AppLayout from "./AppLayout";
 
@@ -17,14 +16,18 @@ const AppRouter = createBrowserRouter([
         index: true,
         element: <Navigate to={"/days/" + getTodayWorkoutDay()} replace />,
       },
-      { path: "week", element: <WeekPlanScreen /> },
       { path: "days/:day", element: <WorkoutDayScreen /> },
       { path: "days/:day/add-exercise", element: <AddExerciseScreen /> },
-      { path: "analytics", element: <TodayAnalyticsScreen /> },
+      { path: "progress", element: <ProgressScreen /> },
+      // Retired routes: the week view lives in the day strip, analytics is Progress.
+      { path: "week", element: <Navigate to="/" replace /> },
+      { path: "analytics", element: <Navigate to="/progress" replace /> },
       { path: "settings", element: <SettingsScreen /> },
+      { path: "exercises/:exerciseId", element: <ExerciseDetailScreen /> },
+      // Old history URL now lives on the detail page.
       {
         path: "exercises/:exerciseId/history",
-        element: <ExerciseHistoryScreen />,
+        element: <Navigate to=".." relative="path" replace />,
       },
     ],
   },

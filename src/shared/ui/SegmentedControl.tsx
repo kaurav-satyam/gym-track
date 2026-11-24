@@ -21,7 +21,7 @@ export default function SegmentedControl<T extends string>({
   return (
     <div
       className={cn(
-        "grid gap-1.5 rounded-[22px] border border-(--surface-border) bg-(--surface-inset) p-1.5",
+        "inline-grid gap-1 rounded-xl bg-(--surface-control) p-1",
         className,
       )}
       style={{
@@ -38,10 +38,10 @@ export default function SegmentedControl<T extends string>({
             aria-pressed={isActive}
             onClick={() => onChange(option.value)}
             className={cn(
-              "min-h-10 rounded-2xl px-3 py-2 text-sm font-medium capitalize transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]",
+              "min-h-9 min-w-14 rounded-lg px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]",
               isActive
-                ? "bg-(--accent) text-(--accent-ink) shadow-[var(--shadow-row)]"
-                : "text-(--text-soft) hover:bg-(--surface-control-hover) hover:text-(--text-strong)",
+                ? "bg-(--accent) font-medium text-(--accent-ink)"
+                : "text-(--text-soft) hover:text-(--text-strong)",
             )}
           >
             {option.label}

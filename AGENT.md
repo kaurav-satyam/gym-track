@@ -25,19 +25,21 @@ GymTrack is a workout-tracking PWA for planning recurring gym days and logging c
 - A set can be completed at most once per local calendar day.
 - Completing a set stores a snapshot of the current values at that moment.
 - Old logs must not change when template values change later.
-- Home-screen progress is intended to be week-scoped and reset every Sunday.
+- Day-strip progress dots are week-scoped and reset every Sunday.
 - Exercise order is day-scoped and persisted.
 - Set reorder does not exist yet.
 
 ## Current Routes
 
+Bottom navigation has three tabs: Today, Progress, Settings.
+
 - `/` - redirects to today's weekday workout
-- `/week` - weekly plan with week-scoped progress (resets Sunday)
-- `/days/:day` - workout-day planner and template editor
-- `/days/:day/add-exercise` - exercise library picker
-- `/analytics` - analytics
-- `/settings` - settings
-- `/exercises/:exerciseId/history` - exercise history
+- `/days/:day` - workout day: day strip (doubles as the week overview), one-tap set logging, edit mode for reorder/delete
+- `/days/:day/add-exercise` - search + one-tap add from the exercise library
+- `/exercises/:exerciseId` - exercise details: muscles, stats, history, settings (`/history` redirects here)
+- `/progress` - week/month stats, sets-per-day chart, muscles, exercises
+- `/settings` - theme
+- `/week` and `/analytics` are retired and redirect to `/` and `/progress`
 
 ## Current Storage Model
 

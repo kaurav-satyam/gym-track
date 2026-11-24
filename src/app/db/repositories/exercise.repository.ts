@@ -29,6 +29,44 @@ export async function createExerciseTemplate(payload: CreateExercisePayload) {
   });
 }
 
+const DEFAULT_SET_COUNT = 3;
+
+/**
+ * Adds a library exercise to a day with sensible defaults. If the exercise was
+ * planned before (on any day), its latest set values are reused.
+ */
+export async function addLibraryExerciseToDay(
+  day: WorkoutDay,
+  item: Pick<
+    ExerciseTemplate,
+    "title" | "exerciseType" | "exerciseUnit" | "muscleTags" | "plannedDurationMin"
+  >,
+) {
+  const normalizedTitle = item.title.trim().toLowerCase();
+  const previous = (await db.exercises.reverse().toArray()).find(
+    (exercise) => exercise.title.trim().toLowerCase() === normalizedTitle,
+  );
+  const sourceSets: Partial<ExerciseSet>[] =
+    previous && previous.exerciseSets.length > 0
+      ? previous.exerciseSets
+      : Array.from({ length: DEFAULT_SET_COUNT }, () => ({}));
+
+  return createExerciseTemplate({
+    day,
+    title: item.title,
+    exerciseType: previous?.exerciseType ?? item.exerciseType,
+    exerciseUnit: previous?.exerciseUnit ?? item.exerciseUnit,
+    muscleTags: previous?.muscleTags ?? item.muscleTags ?? [],
+    plannedDurationMin: item.plannedDurationMin,
+    exerciseSets: sourceSets.map((set) => ({
+      id: crypto.randomUUID(),
+      weight: set.weight,
+      reps: set.reps,
+      time: set.time,
+    })),
+  });
+}
+
 export async function getExerciseById(exerciseId: number) {
   return db.exercises.get(exerciseId);
 }
@@ -68,11 +106,18 @@ export async function removeExerciseTemplate(exerciseId: number) {
   });
 }
 
-export async function addExerciseTemplateSet(exerciseId: number) {
+/** Adds a set, prefilled from `copyFrom` (usually the last set) if given. */
+export async function addExerciseTemplateSet(
+  exerciseId: number,
+  copyFrom?: ExerciseSet,
+) {
   await updateExerciseTemplateSets(exerciseId, (sets) => [
     ...sets,
     {
       id: crypto.randomUUID(),
+      weight: copyFrom?.weight,
+      reps: copyFrom?.reps,
+      time: copyFrom?.time,
     },
   ]);
 }
