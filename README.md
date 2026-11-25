@@ -18,11 +18,14 @@
 
 ## Features
 
-- **One-tap logging.** Sets are prefilled from your plan. Tap ✓ to log one, or tap the numbers to adjust them with +/− steppers. When an exercise is done, the next one opens automatically.
-- **Weekly plan.** Each weekday has its own exercises, and the S–M–T–W–T–F–S strip doubles as this week's progress overview.
+- **One-tap logging.** Sets are prefilled from your plan, with last time's numbers underneath. Tap ✓ to log one, or tap the numbers to adjust them with +/− steppers. When an exercise is done, the next one opens automatically.
+- **Rest timer.** Starts after every logged set and buzzes when rest is over (60s to 3m, or off). The screen stays awake mid-workout.
+- **Weekly plan.** Each weekday has its own exercises, and the S–M–T–W–T–F–S strip doubles as this week's progress overview. Copy a whole day to another in one tap.
 - **Exercise library.** Search 54 built-in exercises, add one with a single tap, or create your own. Re-adding an exercise reuses your last weights.
 - **Muscle maps.** Every exercise shows the muscles it targets on a body diagram.
-- **Progress.** Weekly and monthly sets done, volume, active days, the muscles you trained, and your best set per exercise.
+- **Progress.** Each week's sets done, active days, the muscles you trained, and your best set per exercise.
+- **Undo instead of "Are you sure?".** Deletes are instant, with a few seconds to undo.
+- **Backup.** Export everything to a file and import it on another phone.
 - **Honest history.** Each completed set is stored as an immutable snapshot, so changing your plan never rewrites the past.
 - **Works offline and installs like an app** on Android, iOS and desktop. There's no account and no server.
 
@@ -93,7 +96,7 @@ Connect the repo in Netlify and deploy; no settings or environment variables are
 
 ## Data and privacy
 
-All data is stored in your browser's IndexedDB (database `GymTrack`) and never leaves the device. Clearing site data, uninstalling the app or switching browsers starts fresh. There's no export or sync yet.
+All data is stored in your browser's IndexedDB (database `GymTrack`) and never leaves the device. Clearing site data, uninstalling the app or switching browsers starts fresh, so use **Settings → Export** to keep a backup file. There's no sync.
 
 ## Contributing
 

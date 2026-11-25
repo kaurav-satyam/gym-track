@@ -16,6 +16,7 @@ import type { WorkoutSetLog } from "@/domain/models/workout-log";
 import {
   addExerciseTemplateSet,
   removeExerciseSet,
+  restoreExerciseSet,
   updateExerciseTemplateSet,
 } from "@/data/repositories/exercise.repository";
 import {
@@ -26,6 +27,8 @@ import {
   MuscleThumbnail,
   hasMuscleTargets,
 } from "@/shared/muscle-map";
+import { startRestTimer } from "@/features/rest-timer";
+import { showToast } from "@/shared/lib/toast";
 import { cn } from "@/shared/ui";
 import SetRow from "./SetRow";
 
@@ -80,20 +83,34 @@ export default function ExerciseRow({
     setEditingSetId(null);
     await logExerciseSetCompletion(exercise.id, set);
     navigator.vibrate?.(15);
+    startRestTimer();
 
     if (doneCount + 1 === sets.length) {
       onFinished();
     }
   }
 
+  async function removeSet(setId: string, setNumber: number) {
+    setEditingSetId(null);
+    const removed = await removeExerciseSet(exercise.id, setId);
+
+    if (removed) {
+      showToast({
+        message: `Set ${setNumber} removed`,
+        actionLabel: "Undo",
+        onAction: () => void restoreExerciseSet(exercise.id, removed.set, removed.index),
+      });
+    }
+  }
+
   return (
     <li
       className={cn(
-        "overflow-hidden rounded-3xl bg-(--surface-panel) transition-colors",
-        isComplete && !expanded && !editMode && "opacity-70",
+        "overflow-hidden rounded-3xl border bg-(--surface-card) shadow-(--shadow-card) transition-colors",
+        showBody ? "border-(--accent-border)" : "border-(--surface-card-border)",
       )}
     >
-      <div className="flex items-center gap-3 p-3">
+      <div className="flex items-center gap-3 p-3.5">
         <button
           type="button"
           className="flex min-w-0 flex-1 items-center gap-3 text-left"
@@ -101,23 +118,41 @@ export default function ExerciseRow({
           disabled={editMode}
           onClick={onToggle}
         >
-          <ExerciseIcon exercise={exercise} />
+          {!editMode && <ExerciseIcon exercise={exercise} />}
           <span className="min-w-0 flex-1">
-            <span className="block truncate font-semibold text-(--text-strong)">
+            <span
+              className={cn(
+                "block truncate text-[15px] font-semibold",
+                isComplete && !showBody ? "text-(--text-muted)" : "text-(--text-strong)",
+              )}
+            >
               {exercise.title}
             </span>
             {!editMode && (
-              <span className="block text-sm tabular-nums text-(--text-muted)">
-                {sets.length === 0
-                  ? "No sets"
-                  : `${doneCount}/${sets.length} sets`}
+              <span className="mt-1.5 flex items-center gap-2">
+                {sets.length > 0 && (
+                  <span className="flex gap-1" aria-hidden="true">
+                    {sets.map((set) => (
+                      <span
+                        key={set.id}
+                        className={cn(
+                          "h-1.5 w-4 rounded-full transition-colors",
+                          completedSetIds.has(set.id) ? "bg-(--success)" : "bg-(--surface-control-hover)",
+                        )}
+                      />
+                    ))}
+                  </span>
+                )}
+                <span className="text-xs font-medium tabular-nums text-(--text-muted)">
+                  {sets.length === 0 ? "No sets" : `${doneCount}/${sets.length}`}
+                </span>
               </span>
             )}
           </span>
         </button>
 
         {editMode ? (
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1.5">
             <RowAction label={`Move ${exercise.title} up`} disabled={!canMoveUp} onClick={onMoveUp}>
               <ArrowUp size={16} />
             </RowAction>
@@ -129,22 +164,21 @@ export default function ExerciseRow({
             </RowAction>
           </div>
         ) : isComplete ? (
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--success) text-white">
-            <Check size={16} strokeWidth={3} />
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--success-soft) text-(--success)">
+            <Check size={18} strokeWidth={3} />
           </span>
         ) : (
-          <ChevronDown
-            size={18}
-            className={cn(
-              "shrink-0 text-(--text-muted) transition-transform",
-              showBody && "rotate-180",
-            )}
-          />
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--surface-control) text-(--text-muted)">
+            <ChevronDown
+              size={18}
+              className={cn("transition-transform duration-200", showBody && "rotate-180")}
+            />
+          </span>
         )}
       </div>
 
       {showBody && (
-        <div className="px-2 pb-2">
+        <div className="border-t border-(--surface-card-border) px-2 pb-2 pt-2">
           <ul className="space-y-1">
             {sets.map((set, index) => (
               <SetRow
@@ -164,25 +198,22 @@ export default function ExerciseRow({
                   void updateExerciseTemplateSet(exercise.id, set.id, changes)
                 }
                 onToggleDone={() => void toggleDone(set.id)}
-                onRemove={() => {
-                  setEditingSetId(null);
-                  void removeExerciseSet(exercise.id, set.id);
-                }}
+                onRemove={() => void removeSet(set.id, index + 1)}
               />
             ))}
           </ul>
 
-          <div className="mt-1 flex items-center justify-between px-1">
+          <div className="mt-2 flex items-center justify-between gap-2 px-1">
             <button
               type="button"
-              className="flex min-h-10 items-center gap-1.5 rounded-xl px-2 text-sm font-medium text-(--text-soft)"
+              className="flex min-h-10 items-center gap-1.5 rounded-full bg-(--surface-control) px-4 text-sm font-semibold text-(--text-soft) transition active:scale-95 hover:bg-(--surface-control-hover)"
               onClick={() => void addExerciseTemplateSet(exercise.id, sets.at(-1))}
             >
               <Plus size={16} /> Add set
             </button>
             <Link
               to={`/exercises/${exercise.id}`}
-              className="flex min-h-10 items-center gap-1.5 rounded-xl px-2 text-sm text-(--text-muted)"
+              className="flex min-h-10 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-(--text-muted) transition-colors hover:text-(--text-strong)"
             >
               <Info size={15} /> Details
             </Link>
@@ -195,7 +226,7 @@ export default function ExerciseRow({
 
 function ExerciseIcon({ exercise }: { exercise: ExerciseTemplate }) {
   return (
-    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-(--surface-inset) p-1 text-(--text-soft)">
+    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-(--surface-inset) p-1.5 text-(--text-soft)">
       {hasMuscleTargets(exercise.muscleTags) ? (
         <MuscleThumbnail tags={exercise.muscleTags} className="h-full w-auto max-w-full" />
       ) : exercise.exerciseType === "time" ? (
@@ -227,8 +258,8 @@ function RowAction({
       title={label}
       disabled={disabled}
       className={cn(
-        "flex h-10 w-10 items-center justify-center rounded-xl bg-(--surface-control) disabled:opacity-30",
-        danger ? "text-(--danger)" : "text-(--text-soft)",
+        "flex h-10 w-10 items-center justify-center rounded-full transition active:scale-90 disabled:opacity-30",
+        danger ? "bg-(--danger-soft) text-(--danger)" : "bg-(--surface-control) text-(--text-soft)",
       )}
       onClick={onClick}
     >

@@ -1,97 +1,125 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { BarChart3, ChevronLeft, ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router";
-import type { ExerciseStat, ProgressDay, ProgressPeriod } from "@/domain/progress";
+import { toDateKey } from "@/domain/dates";
+import type { ExerciseStat, ProgressDay } from "@/domain/progress";
 import { MuscleThumbnail, hasMuscleTargets } from "@/shared/muscle-map";
-import { SegmentedControl, cn } from "@/shared/ui";
+import {
+  Card,
+  ProgressRing,
+  ScreenHeader,
+  SectionTitle,
+  cn,
+} from "@/shared/ui";
 import { useProgress } from "../hooks/useProgress";
 
-const PERIOD_OPTIONS: { label: string; value: ProgressPeriod }[] = [
-  { label: "Week", value: "week" },
-  { label: "Month", value: "month" },
-];
-
 export default function ProgressScreen() {
-  const { period, setPeriod, summary, isCurrent, showPrevious, showNext, showCurrent } =
-    useProgress();
+  const { summary, isCurrent, showPrevious, showNext, showCurrent } = useProgress();
+  const completion =
+    summary && summary.plannedSets > 0
+      ? Math.round((summary.completedSets / summary.plannedSets) * 100)
+      : 0;
 
   return (
-    <section className="motion-page mx-auto w-full max-w-xl space-y-7 px-4 pb-10 pt-5">
-      <header className="space-y-4">
-        <h1 className="text-3xl font-semibold tracking-tight text-(--text-strong)">Progress</h1>
-        <div className="flex items-center justify-between gap-3">
-          <SegmentedControl options={PERIOD_OPTIONS} value={period} onChange={setPeriod} />
-          <div className="flex items-center">
-            <RangeButton label="Previous" onClick={showPrevious}>
+    <section className="motion-page mx-auto w-full max-w-xl space-y-6 px-4 pb-10 pt-4">
+      <header className="space-y-5">
+        <ScreenHeader eyebrow={isCurrent ? "This week" : "Past week"} title="Progress" />
+
+        <div className="flex items-center justify-between rounded-full bg-(--surface-control) p-1">
+            <RangeButton label="Previous week" onClick={showPrevious}>
               <ChevronLeft size={18} />
             </RangeButton>
             <button
               type="button"
-              className="min-h-10 min-w-24 whitespace-nowrap px-1 text-center text-sm font-medium tabular-nums text-(--text-strong) disabled:cursor-default"
-              title={isCurrent ? undefined : "Back to current"}
+              className="min-h-9 flex-1 whitespace-nowrap px-2 text-center text-sm font-semibold tabular-nums text-(--text-strong) disabled:cursor-default"
+              title={isCurrent ? undefined : "Back to this week"}
               disabled={isCurrent}
               onClick={showCurrent}
             >
               {summary?.range.label ?? ""}
             </button>
-            <RangeButton
-              label="Next"
-              disabled={isCurrent}
-              onClick={showNext}
-            >
+            <RangeButton label="Next week" disabled={isCurrent} onClick={showNext}>
               <ChevronRight size={18} />
             </RangeButton>
-          </div>
         </div>
       </header>
 
       {summary && (
         <>
-          <dl className="grid grid-cols-3 gap-3">
-            <Stat label="Sets done">
-              {summary.completedSets}
-              <span className="text-(--text-muted)">/{summary.plannedSets}</span>
-            </Stat>
-            <Stat label="Volume">{formatCompact(summary.loadVolume)}</Stat>
-            <Stat label="Active days">{summary.activeDays}</Stat>
-          </dl>
+          <Card className="space-y-5 p-5">
+            <div className="flex items-center gap-4">
+              <ProgressRing value={completion} size={72} strokeWidth={7}>
+                <span className="text-base font-bold tabular-nums text-(--text-strong)">
+                  {completion}%
+                </span>
+              </ProgressRing>
+              <div className="min-w-0">
+                <p className="text-2xl font-bold tabular-nums tracking-tight text-(--text-strong)">
+                  {summary.completedSets}
+                  <span className="text-(--text-muted)"> / {summary.plannedSets}</span>
+                </p>
+                <p className="text-sm text-(--text-muted)">planned sets completed</p>
+              </div>
+            </div>
 
-          <SetsChart days={summary.days} period={period} />
+            <dl className="grid grid-cols-2 gap-3">
+              <Stat label="Exercises done">
+                {summary.exerciseStats.filter((stat) => stat.completedSets > 0).length}
+              </Stat>
+              <Stat label="Active days">{summary.activeDays}</Stat>
+            </dl>
+
+            <SetsChart days={summary.days} />
+          </Card>
 
           {summary.completedSets === 0 ? (
-            <p className="text-center text-sm text-(--text-muted)">
-              No sets logged {isCurrent ? `this ${period} yet` : `in this ${period}`}.
-            </p>
+            <Card className="flex flex-col items-center px-6 py-10 text-center">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-(--accent-soft) text-(--accent)">
+                <BarChart3 size={26} />
+              </span>
+              <p className="mt-4 font-semibold text-(--text-strong)">No sets logged yet</p>
+              <p className="mt-1 text-sm text-(--text-muted)">
+                {isCurrent
+                  ? "Finish a set and your week fills in here."
+                  : "Nothing was logged that week."}
+              </p>
+            </Card>
           ) : (
             <>
-              <Section title="Muscles">
-                <ul className="space-y-2.5">
+              <section>
+                <SectionTitle>Muscles trained</SectionTitle>
+                <Card className="space-y-3 p-4">
                   {summary.muscleStats.slice(0, 8).map((stat) => (
-                    <li key={stat.tag} className="grid grid-cols-[7rem_1fr_2rem] items-center gap-3 text-sm">
-                      <span className="truncate text-(--text-soft)">{stat.tag}</span>
-                      <span className="h-1.5 overflow-hidden rounded-full bg-(--surface-control)">
+                    <div key={stat.tag} className="grid grid-cols-[6.5rem_1fr_2rem] items-center gap-3">
+                      <span className="truncate text-sm font-medium text-(--text-soft)">{stat.tag}</span>
+                      <span className="h-2 overflow-hidden rounded-full bg-(--surface-control)">
                         <span
-                          className="block h-full rounded-full bg-(--accent)"
+                          className="block h-full rounded-full bg-(--accent) transition-[width] duration-700"
                           style={{
                             width: `${(stat.completedSets / summary.muscleStats[0].completedSets) * 100}%`,
                           }}
                         />
                       </span>
-                      <span className="text-right tabular-nums text-(--text-muted)">{stat.completedSets}</span>
-                    </li>
+                      <span className="text-right text-sm font-semibold tabular-nums text-(--text-strong)">
+                        {stat.completedSets}
+                      </span>
+                    </div>
                   ))}
-                </ul>
-              </Section>
+                </Card>
+              </section>
 
-              <Section title="Exercises">
-                <ul>
-                  {summary.exerciseStats
-                    .filter((stat) => stat.completedSets > 0)
-                    .map((stat) => (
-                      <ExerciseStatRow key={stat.exerciseId} stat={stat} />
-                    ))}
-                </ul>
-              </Section>
+              <section>
+                <SectionTitle>Exercises</SectionTitle>
+                <Card className="overflow-hidden">
+                  <ul className="divide-y divide-(--surface-card-border)">
+                    {summary.exerciseStats
+                      .filter((stat) => stat.completedSets > 0)
+                      .map((stat) => (
+                        <ExerciseStatRow key={stat.exerciseId} stat={stat} />
+                      ))}
+                  </ul>
+                </Card>
+              </section>
             </>
           )}
         </>
@@ -100,12 +128,14 @@ export default function ProgressScreen() {
   );
 }
 
-function SetsChart({ days, period }: { days: ProgressDay[]; period: ProgressPeriod }) {
+function SetsChart({ days }: { days: ProgressDay[] }) {
   const max = Math.max(1, ...days.map((point) => Math.max(point.plannedSets, point.completedSets)));
+  const todayKey = toDateKey(new Date());
+  const gap = "gap-2.5";
 
   return (
     <figure aria-label="Sets per day: completed over planned" className="space-y-2">
-      <div className={cn("flex h-28 items-end", period === "week" ? "gap-3" : "gap-0.5")}>
+      <div className={cn("flex h-32 items-end", gap)}>
         {days.map((point) => (
           <div
             key={point.key}
@@ -113,53 +143,60 @@ function SetsChart({ days, period }: { days: ProgressDay[]; period: ProgressPeri
             className="relative h-full flex-1"
           >
             <span
-              className="absolute inset-x-0 bottom-0 rounded-md bg-(--surface-control)"
+              className="absolute inset-x-0 bottom-0 rounded-lg bg-(--surface-control)"
               style={{ height: `${(point.plannedSets / max) * 100}%` }}
             />
             <span
-              className="absolute inset-x-0 bottom-0 rounded-md bg-(--accent) transition-[height] duration-500"
+              className="absolute inset-x-0 bottom-0 rounded-lg bg-(--accent) transition-[height] duration-700"
               style={{ height: `${(point.completedSets / max) * 100}%` }}
             />
           </div>
         ))}
       </div>
-      <div className={cn("flex text-xs text-(--text-muted)", period === "week" ? "gap-3" : "gap-0.5")}>
-        {days.map((point, index) => (
-          <span key={point.key} className="flex-1 text-center">
-            {period === "week" || index % 5 === 0 ? point.label : ""}
+      <div className={cn("flex text-[11px] font-medium text-(--text-muted)", gap)}>
+        {days.map((point) => (
+          <span
+            key={point.key}
+            className={cn(
+              "flex-1 text-center",
+              point.key === todayKey && "font-bold text-(--accent)",
+            )}
+          >
+            {point.label}
           </span>
         ))}
       </div>
-      <figcaption className="flex gap-4 text-xs text-(--text-muted)">
+      <figcaption className="flex gap-4 pt-1 text-xs text-(--text-muted)">
         <Legend className="bg-(--accent)">Done</Legend>
-        <Legend className="bg-(--surface-control)">Planned</Legend>
+        <Legend className="bg-(--surface-control-hover)">Planned</Legend>
       </figcaption>
     </figure>
   );
 }
 
 function ExerciseStatRow({ stat }: { stat: ExerciseStat }) {
+  const sets = `${stat.completedSets} ${stat.completedSets === 1 ? "set" : "sets"}`;
   const best =
-    stat.bestSetValue > 0 ? ` · best ${formatCompact(stat.bestSetValue)} ${stat.exerciseUnit}` : "";
+    stat.bestSetValue > 0 ? `Best ${formatCompact(stat.bestSetValue)} ${stat.exerciseUnit}` : "";
 
   return (
     <li>
       <Link
         to={`/exercises/${stat.exerciseId}`}
-        className="flex items-center gap-3 rounded-2xl py-2 hover:bg-(--surface-control)"
+        className="flex items-center gap-3 px-4 py-3 transition-colors active:bg-(--surface-control) hover:bg-(--surface-control)"
       >
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-(--surface-inset) p-1">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-(--surface-inset) p-1.5">
           {hasMuscleTargets(stat.muscleTags) && (
             <MuscleThumbnail tags={stat.muscleTags} className="h-full w-auto max-w-full" />
           )}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate font-medium text-(--text-strong)">{stat.title}</span>
+          <span className="block truncate font-semibold text-(--text-strong)">{stat.title}</span>
           <span className="block text-sm tabular-nums text-(--text-muted)">
-            {stat.completedSets} sets{best}
+            {[sets, best].filter(Boolean).join(" · ")}
           </span>
         </span>
-        <ChevronRight size={16} className="shrink-0 text-(--text-muted)" />
+        <ChevronRight size={18} className="shrink-0 text-(--text-muted)" />
       </Link>
     </li>
   );
@@ -181,7 +218,7 @@ function RangeButton({
       type="button"
       aria-label={label}
       disabled={disabled}
-      className="flex h-10 w-10 items-center justify-center rounded-xl text-(--text-soft) hover:bg-(--surface-control) disabled:opacity-30"
+      className="flex h-8 w-8 items-center justify-center rounded-full text-(--text-soft) transition active:scale-90 hover:bg-(--surface-control-hover) disabled:opacity-30"
       onClick={onClick}
     >
       {children}
@@ -189,28 +226,24 @@ function RangeButton({
   );
 }
 
-function Stat({ label, children }: { label: string; children: ReactNode }) {
+function Stat({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
-    <div>
-      <dt className="text-xs text-(--text-muted)">{label}</dt>
-      <dd className="mt-0.5 text-2xl font-semibold tabular-nums text-(--text-strong)">{children}</dd>
+    <div className="rounded-2xl bg-(--surface-inset) px-4 py-3">
+      <dt className="text-xs font-medium text-(--text-muted)">
+        {label}
+        {hint && <span className="opacity-70"> · {hint}</span>}
+      </dt>
+      <dd className="mt-1 text-xl font-bold tabular-nums tracking-tight text-(--text-strong)">
+        {children}
+      </dd>
     </div>
-  );
-}
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section>
-      <h2 className="mb-3 text-sm font-semibold text-(--text-soft)">{title}</h2>
-      {children}
-    </section>
   );
 }
 
 function Legend({ className, children }: { className: string; children: ReactNode }) {
   return (
     <span className="flex items-center gap-1.5">
-      <span className={cn("h-2 w-2 rounded-sm", className)} />
+      <span className={cn("h-2.5 w-2.5 rounded-full", className)} />
       {children}
     </span>
   );

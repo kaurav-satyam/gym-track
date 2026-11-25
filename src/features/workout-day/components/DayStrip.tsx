@@ -14,7 +14,10 @@ export default function DayStrip({ today }: { today: WorkoutDay }) {
   const progressByDay = useWeekProgress();
 
   return (
-    <nav aria-label="Workout days" className="grid grid-cols-7 gap-1">
+    <nav
+      aria-label="Workout days"
+      className="grid grid-cols-7 gap-1 rounded-[1.25rem] bg-(--surface-control) p-1"
+    >
       {WEEKDAYS.map((day) => {
         const summary = progressByDay.get(day);
 
@@ -26,12 +29,12 @@ export default function DayStrip({ today }: { today: WorkoutDay }) {
             aria-label={describeDay(day, today, summary)}
             className={({ isActive }) =>
               cn(
-                "flex h-12 flex-col items-center justify-center gap-1 rounded-2xl text-sm font-semibold transition-colors",
+                "flex h-12 flex-col items-center justify-center gap-1 rounded-2xl text-sm font-semibold transition-all active:scale-95",
                 isActive
-                  ? "bg-(--accent) text-(--accent-ink)"
+                  ? "bg-(--accent) text-(--accent-ink) shadow-[0_4px_14px_var(--accent-soft)]"
                   : day === today
                     ? "text-(--accent) hover:bg-(--surface-control)"
-                    : "text-(--text-soft) hover:bg-(--surface-control)",
+                    : "text-(--text-muted) hover:bg-(--surface-control) hover:text-(--text-strong)",
               )
             }
           >

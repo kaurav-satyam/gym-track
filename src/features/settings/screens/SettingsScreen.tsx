@@ -4,7 +4,9 @@ import {
   persistThemePreference,
   type ThemePreference,
 } from "@/app/theme";
-import { SegmentedControl } from "@/shared/ui";
+import { RestTimeSetting } from "@/features/rest-timer";
+import { AppLogo, Card, ScreenHeader, SectionTitle, SegmentedControl } from "@/shared/ui";
+import BackupSection from "../components/BackupSection";
 
 const themeOptions: { label: string; value: ThemePreference }[] = [
   { label: "System", value: "system" },
@@ -23,20 +25,55 @@ export default function SettingsScreen() {
   }
 
   return (
-    <section className="motion-page mx-auto w-full max-w-xl space-y-7 px-4 pb-10 pt-5">
-      <h1 className="text-3xl font-semibold tracking-tight text-(--text-strong)">Settings</h1>
+    <section className="motion-page mx-auto w-full max-w-xl space-y-6 px-4 pb-10 pt-4">
+      <ScreenHeader eyebrow="Preferences" title="Settings" />
 
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="font-medium text-(--text-strong)">Theme</p>
-          <p className="text-sm text-(--text-muted)">System follows your device.</p>
-        </div>
-        <SegmentedControl
-          options={themeOptions}
-          value={themePreference}
-          onChange={handleThemeChange}
-        />
-      </div>
+      <section>
+        <SectionTitle>Appearance</SectionTitle>
+        <Card className="space-y-3 p-4">
+          <div>
+            <p className="font-semibold text-(--text-strong)">Theme</p>
+            <p className="text-sm text-(--text-muted)">System follows your device setting.</p>
+          </div>
+          <SegmentedControl
+            className="w-full"
+            options={themeOptions}
+            value={themePreference}
+            onChange={handleThemeChange}
+          />
+        </Card>
+      </section>
+
+      <section>
+        <SectionTitle>Workout</SectionTitle>
+        <Card className="space-y-3 p-4">
+          <div>
+            <p className="font-semibold text-(--text-strong)">Rest timer</p>
+            <p className="text-sm text-(--text-muted)">
+              Starts after every logged set and buzzes when it's time to go again.
+            </p>
+          </div>
+          <RestTimeSetting />
+        </Card>
+      </section>
+
+      <section>
+        <SectionTitle>Your data</SectionTitle>
+        <BackupSection />
+      </section>
+
+      <section>
+        <SectionTitle>About</SectionTitle>
+        <Card className="flex items-center gap-4 p-4">
+          <AppLogo size="md" />
+          <div className="min-w-0">
+            <p className="font-semibold text-(--text-strong)">GymTrack</p>
+            <p className="text-sm text-(--text-muted)">
+              Simple, offline workout tracking.
+            </p>
+          </div>
+        </Card>
+      </section>
     </section>
   );
 }

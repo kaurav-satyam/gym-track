@@ -1,4 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks";
+import { isBuiltInExercise } from "@/data/repositories/exercise-library.repository";
 import { getExerciseById } from "@/data/repositories/exercise.repository";
 import { listExerciseHistory } from "@/data/repositories/workout-log.repository";
 import { summarizeHistory } from "@/domain/history";
@@ -21,4 +22,12 @@ export function useExerciseHistory(exercise: PersistedExercise) {
   const logs = useLiveQuery(() => listExerciseHistory(exercise.id), [exercise.id], []);
 
   return summarizeHistory(logs, exercise.exerciseType);
+}
+
+/**
+ * Built-in library exercises come with correct muscle tags, so the editor is
+ * only offered for custom ones. `undefined` while checking.
+ */
+export function useIsBuiltIn(title: string) {
+  return useLiveQuery(() => isBuiltInExercise(title), [title]);
 }

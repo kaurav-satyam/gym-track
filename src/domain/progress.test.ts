@@ -1,30 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { at, exercise, log, set } from "@/test/fixtures";
-import { buildProgressSummary, getProgressRange, isCurrentRange, shiftAnchorDate } from "./progress";
+import { buildProgressSummary, getWeekRange, isCurrentWeek, shiftWeek } from "./progress";
 
 // Week of Sun 22 Nov – Sat 28 Nov 2026.
 const anchor = at(2026, 11, 24);
 
-describe("progress ranges", () => {
+describe("week ranges", () => {
   it("weeks run Sunday to Saturday", () => {
-    const range = getProgressRange("week", anchor);
+    const range = getWeekRange(anchor);
 
     expect(range.start).toEqual(at(2026, 11, 22, 0));
     expect(range.end.getDate()).toBe(28);
   });
 
-  it("months cover the calendar month", () => {
-    const range = getProgressRange("month", anchor);
-
-    expect(range.start).toEqual(at(2026, 11, 1, 0));
-    expect(range.end.getDate()).toBe(30);
-  });
-
-  it("shifts and recognises the current range", () => {
-    expect(shiftAnchorDate(anchor, "week", -1)).toEqual(at(2026, 11, 17));
-    expect(shiftAnchorDate(anchor, "month", 1).getMonth()).toBe(11);
-    expect(isCurrentRange("week", at(2026, 11, 28), anchor)).toBe(true);
-    expect(isCurrentRange("week", at(2026, 11, 21), anchor)).toBe(false);
+  it("shifts and recognises the current week", () => {
+    expect(shiftWeek(anchor, -1)).toEqual(at(2026, 11, 17));
+    expect(isCurrentWeek(at(2026, 11, 28), anchor)).toBe(true);
+    expect(isCurrentWeek(at(2026, 11, 21), anchor)).toBe(false);
   });
 });
 
@@ -44,13 +36,12 @@ describe("buildProgressSummary", () => {
     // Exercise that no longer exists: ignored.
     { exerciseId: 99, exerciseSetId: "gone", completedAt: at(2026, 11, 23), weight: 10, reps: 10 },
   ];
-  const summary = buildProgressSummary({ period: "week", anchorDate: anchor, exercises: [squat, curl], logs });
+  const summary = buildProgressSummary({ anchorDate: anchor, exercises: [squat, curl], logs });
 
   it("totals planned vs completed sets", () => {
     expect(summary.plannedSets).toBe(3); // 2 on Sunday + 1 on Tuesday
     expect(summary.completedSets).toBe(2);
     expect(summary.activeDays).toBe(1);
-    expect(summary.loadVolume).toBe(100 * 5 + 110 * 5);
   });
 
   it("has one entry per day with planned and done counts", () => {

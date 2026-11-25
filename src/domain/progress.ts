@@ -2,7 +2,6 @@ import {
   addDays,
   eachDay,
   endOfDay,
-  formatMonth,
   formatShortDate,
   getDayBounds,
   startOfWeek,
@@ -18,13 +17,11 @@ import type { WorkoutSetLog } from "@/domain/models/workout-log";
 import { WEEKDAYS } from "@/domain/weekdays";
 
 /**
- * Pure progress statistics for the Progress tab. The repository loads
+ * Pure weekly statistics for the Progress tab. The repository loads
  * exercises and logs; everything here is plain data in, plain data out.
  */
 
-export type ProgressPeriod = "week" | "month";
-
-export interface ProgressRange {
+export interface WeekRange {
   start: Date;
   end: Date;
   label: string;
@@ -49,132 +46,87 @@ export interface ExerciseStat {
   exerciseUnit: ExerciseUnit;
   plannedSets: number;
   completedSets: number;
-  loadVolume: number;
   /** Heaviest weight, or longest time for timed exercises. 0 when nothing is logged. */
   bestSetValue: number;
 }
 
 export interface ProgressSummary {
-  range: ProgressRange;
+  range: WeekRange;
   plannedSets: number;
   completedSets: number;
-  /** Sum of weight × reps across logged sets. */
-  loadVolume: number;
   activeDays: number;
   days: ProgressDay[];
   muscleStats: MuscleStat[];
   exerciseStats: ExerciseStat[];
 }
 
-export function getProgressRange(period: ProgressPeriod, anchorDate: Date): ProgressRange {
-  if (period === "week") {
-    const start = startOfWeek(anchorDate);
-    const end = endOfDay(addDays(start, 6));
+/** Sunday–Saturday week containing `anchorDate`. */
+export function getWeekRange(anchorDate: Date): WeekRange {
+  const start = startOfWeek(anchorDate);
+  const end = endOfDay(addDays(start, 6));
 
-    return { start, end, label: `${formatShortDate(start)} - ${formatShortDate(end)}` };
-  }
-
-  const start = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 1);
-  const end = endOfDay(new Date(anchorDate.getFullYear(), anchorDate.getMonth() + 1, 0));
-
-  return { start, end, label: formatMonth(start) };
+  return { start, end, label: `${formatShortDate(start)} - ${formatShortDate(end)}` };
 }
 
-/** Moves the anchor one week or one month back (-1) or forward (1). */
-export function shiftAnchorDate(date: Date, period: ProgressPeriod, direction: -1 | 1) {
-  const next = new Date(date);
-
-  if (period === "week") {
-    next.setDate(next.getDate() + direction * 7);
-  } else {
-    next.setMonth(next.getMonth() + direction);
-  }
-
-  return next;
+/** Moves the anchor one week back (-1) or forward (1). */
+export function shiftWeek(date: Date, direction: -1 | 1) {
+  return addDays(date, direction * 7);
 }
 
-export function isCurrentRange(period: ProgressPeriod, anchorDate: Date, now = new Date()) {
-  return getProgressRange(period, anchorDate).start.getTime() === getProgressRange(period, now).start.getTime();
+export function isCurrentWeek(anchorDate: Date, now = new Date()) {
+  return startOfWeek(anchorDate).getTime() === startOfWeek(now).getTime();
 }
 
 /**
- * Builds the summary for one period.
+ * Builds the summary for the week around `anchorDate`.
  *
- * - Planned sets: every day in the range counts the sets of exercises
- *   scheduled on that weekday (current templates).
- * - Completed sets: logs inside the range whose exercise still exists.
+ * - Planned sets: every day counts the sets of exercises scheduled on that
+ *   weekday (current templates).
+ * - Completed sets: logs inside the week whose exercise still exists.
  */
 export function buildProgressSummary({
-  period,
   anchorDate,
   exercises,
   logs,
 }: {
-  period: ProgressPeriod;
   anchorDate: Date;
   exercises: ExerciseTemplate[];
   logs: WorkoutSetLog[];
 }): ProgressSummary {
-  const range = getProgressRange(period, anchorDate);
+  const range = getWeekRange(anchorDate);
   const persisted = exercises.filter(isPersisted);
   const exercisesById = new Map(persisted.map((exercise) => [exercise.id, exercise]));
-  const rangeLogs = logs.filter(
+  const weekLogs = logs.filter(
     (log) =>
       exercisesById.has(log.exerciseId) &&
       log.completedAt >= range.start &&
       log.completedAt <= range.end,
   );
-  const days = eachDay(range.start, range.end).map((date) =>
-    buildDay(date, period, persisted, rangeLogs),
-  );
+  const days = eachDay(range.start, range.end).map((date) => buildDay(date, persisted, weekLogs));
 
   return {
     range,
     plannedSets: sum(days.map((day) => day.plannedSets)),
-    completedSets: rangeLogs.length,
-    loadVolume: sum(rangeLogs.map(calculateLoadVolume)),
-    activeDays: new Set(rangeLogs.map((log) => toDateKey(log.completedAt))).size,
+    completedSets: weekLogs.length,
+    activeDays: new Set(weekLogs.map((log) => toDateKey(log.completedAt))).size,
     days,
-    muscleStats: buildMuscleStats(rangeLogs, exercisesById),
-    exerciseStats: buildExerciseStats(persisted, rangeLogs, range),
+    muscleStats: buildMuscleStats(weekLogs, exercisesById),
+    exerciseStats: buildExerciseStats(persisted, weekLogs),
   };
 }
 
-function calculateLoadVolume(log: WorkoutSetLog) {
-  return (log.weight ?? 0) * (log.reps ?? 0);
-}
-
-function buildDay(
-  date: Date,
-  period: ProgressPeriod,
-  exercises: PersistedExercise[],
-  logs: WorkoutSetLog[],
-): ProgressDay {
+function buildDay(date: Date, exercises: PersistedExercise[], logs: WorkoutSetLog[]): ProgressDay {
   const { start, end } = getDayBounds(date);
+  const weekday = WEEKDAYS[date.getDay()];
 
   return {
     key: toDateKey(date),
-    label:
-      period === "week"
-        ? date.toLocaleDateString([], { weekday: "short" })
-        : String(date.getDate()),
-    plannedSets: countPlannedSets(exercises, date, date),
+    label: date.toLocaleDateString([], { weekday: "short" }),
+    plannedSets: sum(
+      exercises.filter((exercise) => exercise.day === weekday).map((exercise) => exercise.exerciseSets.length),
+    ),
     completedSets: logs.filter((log) => log.completedAt >= start && log.completedAt <= end).length,
   };
-}
-
-function countPlannedSets(exercises: ExerciseTemplate[], start: Date, end: Date) {
-  return sum(
-    eachDay(start, end).map((date) => {
-      const weekday = WEEKDAYS[date.getDay()];
-
-      return sum(
-        exercises
-          .filter((exercise) => exercise.day === weekday)
-          .map((exercise) => exercise.exerciseSets.length),
-      );
-    }),
-  );
 }
 
 function buildMuscleStats(logs: WorkoutSetLog[], exercisesById: Map<number, ExerciseTemplate>) {
@@ -196,7 +148,6 @@ function buildMuscleStats(logs: WorkoutSetLog[], exercisesById: Map<number, Exer
 function buildExerciseStats(
   exercises: PersistedExercise[],
   logs: WorkoutSetLog[],
-  range: ProgressRange,
 ): ExerciseStat[] {
   const logsByExercise = new Map<number, WorkoutSetLog[]>();
 
@@ -220,18 +171,16 @@ function buildExerciseStats(
         title: exercise.title,
         muscleTags: exercise.muscleTags ?? [],
         exerciseUnit: exercise.exerciseUnit,
-        plannedSets: countPlannedSets([exercise], range.start, range.end),
+        // Each exercise is scheduled on one weekday.
+        plannedSets: exercise.exerciseSets.length,
         completedSets: exerciseLogs.length,
-        loadVolume: sum(exerciseLogs.map(calculateLoadVolume)),
         bestSetValue: Math.max(0, ...exerciseLogs.map((log) => log[field] ?? 0)),
       };
     })
     .filter((stat) => stat.plannedSets > 0 || stat.completedSets > 0)
     .sort(
       (left, right) =>
-        right.completedSets - left.completedSets ||
-        right.loadVolume - left.loadVolume ||
-        left.title.localeCompare(right.title),
+        right.completedSets - left.completedSets || left.title.localeCompare(right.title),
     );
 }
 

@@ -1,21 +1,17 @@
 import { db } from "@/data/db";
 import { startOfWeek } from "@/domain/dates";
-import {
-  buildProgressSummary,
-  getProgressRange,
-  type ProgressPeriod,
-} from "@/domain/progress";
+import { buildProgressSummary, getWeekRange } from "@/domain/progress";
 import { summarizeWeek } from "@/domain/week-progress";
 
-/** Stats for the Progress tab: one week or month around `anchorDate`. */
-export async function getProgressSummary(period: ProgressPeriod, anchorDate: Date) {
-  const { start, end } = getProgressRange(period, anchorDate);
+/** Stats for the Progress tab: the Sunday–Saturday week around `anchorDate`. */
+export async function getProgressSummary(anchorDate: Date) {
+  const { start, end } = getWeekRange(anchorDate);
   const [exercises, logs] = await Promise.all([
     db.exercises.toArray(),
     db.workoutLogs.where("completedAt").between(start, end, true, true).toArray(),
   ]);
 
-  return buildProgressSummary({ period, anchorDate, exercises, logs });
+  return buildProgressSummary({ anchorDate, exercises, logs });
 }
 
 /** This week's per-day progress (resets every Sunday) for the day strip. */

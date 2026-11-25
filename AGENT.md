@@ -27,14 +27,15 @@ shared ← domain ← data ← features ← app
 - `src/features/<name>/` contains `screens/` (lazy route targets), `components/` and `hooks/`.
   - Reads go through a feature hook that wraps `useLiveQuery`.
   - Writes call repository functions from event handlers.
-  - Features don't import each other's internals.
+  - Features don't import each other's internals; use the other feature's `index.ts` (e.g. `@/features/rest-timer`).
+  - App-wide UI state (toasts, rest timer) uses `shared/lib/createStore.ts`; call `showToast()` / `startRestTimer()` from anywhere.
 - Imports use `@/…` across modules and relative paths within a module or feature.
 
 ## Product rules (don't break these)
 
 - `workoutlogs` are immutable snapshots. Completing a set copies its values; template edits never change old logs.
 - A set is completed at most once per local calendar day (transactional check in `logExerciseSetCompletion`).
-- Deleting a set keeps its logs. Deleting an exercise deletes its logs (the UI warns about this).
+- Deleting a set keeps its logs. Deleting an exercise deletes its logs. Deletes are instant with an Undo toast (no confirm dialogs).
 - Weeks run Sunday to Saturday in local time (`startOfWeek`). Day-strip progress resets on Sunday.
 - `sortOrder` orders exercises within a day.
 - Seeding the library only inserts missing ids and never overwrites user edits.

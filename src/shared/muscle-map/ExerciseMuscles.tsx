@@ -65,23 +65,23 @@ export function MuscleTargetsPreview({ tags, className }: IExerciseMusclesProps)
   }
 
   return (
-    <div className={cn("flex gap-3 overflow-x-auto pb-1", className)}>
+    <div className={cn("grid grid-cols-[repeat(auto-fit,minmax(6.5rem,1fr))] gap-2", className)}>
       {groups.map(({ group, muscles }) => (
         <figure
           key={group}
-          className="flex w-28 shrink-0 flex-col items-center gap-1.5 rounded-2xl border border-(--surface-border) bg-(--surface-inset) px-2 pb-2 pt-3"
+          className="flex min-w-0 flex-col items-center gap-2 rounded-2xl bg-(--surface-inset) px-2 pb-2.5 pt-3"
         >
-          <div className="flex h-24 w-full items-center justify-center">
+          <div className="flex h-28 w-full items-center justify-center">
             <MuscleFigure
               views={GROUP_VIEWS[group]}
               primary={muscles}
               title={`${MUSCLE_GROUP_LABELS[group]}: ${muscles
                 .map((muscle) => MUSCLE_LABELS[muscle])
                 .join(", ")}`}
-              className="max-h-24 w-auto max-w-full"
+              className="max-h-28 w-auto max-w-full"
             />
           </div>
-          <figcaption className="text-[10px] font-semibold uppercase tracking-[0.14em] text-(--text-muted)">
+          <figcaption className="text-[11px] font-semibold uppercase tracking-[0.12em] text-(--text-muted)">
             {MUSCLE_GROUP_LABELS[group]}
           </figcaption>
         </figure>

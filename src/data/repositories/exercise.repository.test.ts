@@ -4,11 +4,15 @@ import { resetDatabaseBeforeEach } from "@/test/db";
 import {
   addExerciseTemplateSet,
   addLibraryExerciseToDay,
+  copyDay,
   createExerciseTemplate,
   listExercisesForDay,
   moveExerciseTemplate,
   removeExerciseSet,
   removeExerciseTemplate,
+  removeExerciseTemplates,
+  restoreExercise,
+  restoreExerciseSet,
   updateExerciseTemplateSet,
 } from "./exercise.repository";
 import { logExerciseSetCompletion } from "./workout-log.repository";
@@ -91,5 +95,52 @@ describe("exercise repository", () => {
 
     expect(second.exerciseSets[0]).toMatchObject({ weight: 100, reps: 5 });
     expect(second.exerciseSets[0].id).not.toBe(first.exerciseSets[0].id);
+  });
+});
+
+describe("undo and copy", () => {
+  it("restores a deleted exercise with its logs, id and position", async () => {
+    const id = await create("Bench");
+    await create("Row");
+    const [first] = (await db.exercises.get(id))!.exerciseSets;
+    await logExerciseSetCompletion(id, first);
+
+    const deleted = await removeExerciseTemplate(id);
+    expect(await db.exercises.count()).toBe(1);
+
+    await restoreExercise(deleted!);
+    expect((await listExercisesForDay("Monday")).map((item) => [item.id, item.title])).toEqual([
+      [id, "Bench"],
+      [expect.any(Number), "Row"],
+    ]);
+    expect(await db.workoutLogs.count()).toBe(1);
+  });
+
+  it("restores a removed set at its old position", async () => {
+    const id = await create("Bench");
+    const [first] = (await db.exercises.get(id))!.exerciseSets;
+    await addExerciseTemplateSet(id, first);
+    await addExerciseTemplateSet(id, first);
+    const before = (await db.exercises.get(id))!.exerciseSets.map((set) => set.id);
+
+    const removed = await removeExerciseSet(id, before[1]);
+    await restoreExerciseSet(id, removed!.set, removed!.index);
+
+    expect((await db.exercises.get(id))!.exerciseSets.map((set) => set.id)).toEqual(before);
+  });
+
+  it("copies a day's exercises with fresh set ids, and the copy can be undone", async () => {
+    const id = await create("Bench");
+    await create("Row");
+
+    const copied = await copyDay("Monday", "Tuesday");
+    const tuesday = await listExercisesForDay("Tuesday");
+
+    expect(tuesday.map((item) => item.title)).toEqual(["Bench", "Row"]);
+    expect(tuesday[0].exerciseSets[0]).toMatchObject({ weight: 50, reps: 10 });
+    expect(tuesday[0].exerciseSets[0].id).not.toBe((await db.exercises.get(id))!.exerciseSets[0].id);
+
+    await removeExerciseTemplates(copied);
+    expect(await listExercisesForDay("Tuesday")).toEqual([]);
   });
 });

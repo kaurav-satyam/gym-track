@@ -133,3 +133,13 @@ export async function listRecentlyUsedLibraryItems(limit = 6) {
 
   return items;
 }
+
+/** Whether `title` is one of the app's built-in library exercises. */
+export async function isBuiltInExercise(title: string) {
+  const item = await db.exerciseLibrary
+    .where("normalizedTitle")
+    .equals(normalizeSearchText(title))
+    .first();
+
+  return item?.isBuiltIn ?? false;
+}

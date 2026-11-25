@@ -2,90 +2,110 @@
 
 :root {
   color-scheme: dark;
-  --app-bg: #050816;
-  --app-bg-start: #0a1020;
-  --surface-panel: rgba(8, 15, 30, 0.86);
-  --surface-inset: rgba(2, 6, 23, 0.32);
-  --surface-control: rgba(248, 250, 252, 0.055);
-  --surface-control-hover: rgba(248, 250, 252, 0.095);
+  --app-bg: #060a16;
+  --app-bg-start: #0b1226;
+  --surface-card: #0e1527;
+  --surface-card-border: rgba(148, 163, 184, 0.1);
+  --surface-panel: rgba(14, 21, 39, 0.92);
+  --surface-inset: rgba(2, 6, 23, 0.45);
+  --surface-control: rgba(248, 250, 252, 0.06);
+  --surface-control-hover: rgba(248, 250, 252, 0.1);
   --surface-border: rgba(148, 163, 184, 0.16);
   --surface-border-strong: rgba(226, 232, 240, 0.24);
   --text-strong: #f8fafc;
   --text-soft: #cbd5e1;
-  --text-muted: #94a3b8;
+  --text-muted: #8b97ad;
   --accent: #d2df77;
   --accent-hover: #e3ec9a;
   --accent-ink: #11150a;
-  --accent-soft: rgba(210, 223, 119, 0.13);
-  --accent-border: rgba(210, 223, 119, 0.28);
+  --accent-on-inverse: #556316;
+  --accent-soft: rgba(210, 223, 119, 0.12);
+  --accent-border: rgba(210, 223, 119, 0.3);
   --focus-ring: rgba(210, 223, 119, 0.36);
-  --success: #84a12d;
-  --danger: #ef4444;
-  --nav-bg: rgba(5, 8, 22, 0.94);
-  --nav-border: rgba(148, 163, 184, 0.14);
+  --success: #8fb339;
+  --success-soft: rgba(143, 179, 57, 0.16);
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.12);
+  --nav-bg: rgba(8, 12, 26, 0.88);
+  --nav-border: rgba(148, 163, 184, 0.12);
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 12px 32px rgba(0, 0, 0, 0.28);
   --shadow-panel: 0 20px 60px rgba(3, 7, 18, 0.32);
   --shadow-row: 0 10px 30px rgba(2, 6, 23, 0.18);
-  --muscle-idle: #3b4763;
-  --muscle-outline: #0b1222;
-  --muscle-primary: #ef4444;
+  --muscle-idle: #33405c;
+  --muscle-outline: #0a1020;
+  --muscle-primary: #f05252;
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --app-bg: #f7f9f2;
-  --app-bg-start: #eef4ff;
-  --surface-panel: rgba(255, 255, 255, 0.9);
-  --surface-inset: rgba(15, 23, 42, 0.045);
-  --surface-control: rgba(15, 23, 42, 0.045);
-  --surface-control-hover: rgba(15, 23, 42, 0.075);
-  --surface-border: rgba(15, 23, 42, 0.12);
-  --surface-border-strong: rgba(15, 23, 42, 0.22);
+  --app-bg: #f3f5f1;
+  --app-bg-start: #f7f8f4;
+  --surface-card: #ffffff;
+  --surface-card-border: rgba(15, 23, 42, 0.07);
+  --surface-panel: rgba(255, 255, 255, 0.96);
+  --surface-inset: rgba(15, 23, 42, 0.04);
+  --surface-control: rgba(15, 23, 42, 0.05);
+  --surface-control-hover: rgba(15, 23, 42, 0.08);
+  --surface-border: rgba(15, 23, 42, 0.1);
+  --surface-border-strong: rgba(15, 23, 42, 0.2);
   --text-strong: #0f172a;
   --text-soft: #334155;
-  --text-muted: #64748b;
-  --accent: #4b5716;
-  --accent-hover: #3f4912;
-  --accent-ink: #f8fafc;
-  --accent-soft: rgba(75, 87, 22, 0.1);
-  --accent-border: rgba(75, 87, 22, 0.24);
-  --focus-ring: rgba(75, 87, 22, 0.28);
-  --success: #4b5716;
+  --text-muted: #6b7686;
+  --accent: #556316;
+  --accent-hover: #46520f;
+  --accent-ink: #fbfdf2;
+  --accent-on-inverse: #d2df77;
+  --accent-soft: rgba(85, 99, 22, 0.09);
+  --accent-border: rgba(85, 99, 22, 0.28);
+  --focus-ring: rgba(85, 99, 22, 0.28);
+  --success: #5f8a1c;
+  --success-soft: rgba(95, 138, 28, 0.12);
+  --danger: #dc2626;
+  --danger-soft: rgba(220, 38, 38, 0.08);
   --nav-bg: rgba(255, 255, 255, 0.9);
-  --nav-border: rgba(15, 23, 42, 0.12);
+  --nav-border: rgba(15, 23, 42, 0.08);
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.05);
   --shadow-panel: 0 18px 48px rgba(15, 23, 42, 0.1);
   --shadow-row: 0 10px 24px rgba(15, 23, 42, 0.08);
-  --muscle-idle: #c3cbe2;
-  --muscle-outline: #3a4160;
+  --muscle-idle: #ccd3e4;
+  --muscle-outline: #4a5270;
   --muscle-primary: #e11d48;
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     color-scheme: light;
-    --app-bg: #f7f9f2;
-    --app-bg-start: #eef4ff;
-    --surface-panel: rgba(255, 255, 255, 0.9);
-    --surface-inset: rgba(15, 23, 42, 0.045);
-    --surface-control: rgba(15, 23, 42, 0.045);
-    --surface-control-hover: rgba(15, 23, 42, 0.075);
-    --surface-border: rgba(15, 23, 42, 0.12);
-    --surface-border-strong: rgba(15, 23, 42, 0.22);
+    --app-bg: #f3f5f1;
+    --app-bg-start: #f7f8f4;
+    --surface-card: #ffffff;
+    --surface-card-border: rgba(15, 23, 42, 0.07);
+    --surface-panel: rgba(255, 255, 255, 0.96);
+    --surface-inset: rgba(15, 23, 42, 0.04);
+    --surface-control: rgba(15, 23, 42, 0.05);
+    --surface-control-hover: rgba(15, 23, 42, 0.08);
+    --surface-border: rgba(15, 23, 42, 0.1);
+    --surface-border-strong: rgba(15, 23, 42, 0.2);
     --text-strong: #0f172a;
     --text-soft: #334155;
-    --text-muted: #64748b;
-    --accent: #4b5716;
-    --accent-hover: #3f4912;
-    --accent-ink: #f8fafc;
-    --accent-soft: rgba(75, 87, 22, 0.1);
-    --accent-border: rgba(75, 87, 22, 0.24);
-    --focus-ring: rgba(75, 87, 22, 0.28);
-    --success: #4b5716;
+    --text-muted: #6b7686;
+    --accent: #556316;
+    --accent-hover: #46520f;
+    --accent-ink: #fbfdf2;
+  --accent-on-inverse: #d2df77;
+    --accent-soft: rgba(85, 99, 22, 0.09);
+    --accent-border: rgba(85, 99, 22, 0.28);
+    --focus-ring: rgba(85, 99, 22, 0.28);
+    --success: #5f8a1c;
+    --success-soft: rgba(95, 138, 28, 0.12);
+    --danger: #dc2626;
+    --danger-soft: rgba(220, 38, 38, 0.08);
     --nav-bg: rgba(255, 255, 255, 0.9);
-    --nav-border: rgba(15, 23, 42, 0.12);
+    --nav-border: rgba(15, 23, 42, 0.08);
+    --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.05);
     --shadow-panel: 0 18px 48px rgba(15, 23, 42, 0.1);
     --shadow-row: 0 10px 24px rgba(15, 23, 42, 0.08);
-    --muscle-idle: #c3cbe2;
-    --muscle-outline: #3a4160;
+    --muscle-idle: #ccd3e4;
+    --muscle-outline: #4a5270;
     --muscle-primary: #e11d48;
   }
 }
@@ -112,7 +132,15 @@ button,
 input,
 select,
 textarea {
-  font-family: "Inter", "Segoe UI", sans-serif;
+  font-family:
+    "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* No grey flash when tapping on iOS/Android; we draw our own pressed states. */
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
 }
 
 ::selection {

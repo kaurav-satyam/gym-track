@@ -6,6 +6,7 @@ import {
   type ExerciseTemplate,
   type WorkoutDay,
 } from "@/domain/models/exercise";
+import type { WorkoutSetLog } from "@/domain/models/workout-log";
 import { deleteLogsByExercise } from "./workout-log.repository";
 
 type CreateExercisePayload = Omit<ExerciseTemplate, "id" | "sortOrder"> & {
@@ -83,11 +84,67 @@ export async function updateExerciseTemplate(
   await db.exercises.update(exerciseId, changes);
 }
 
-export async function removeExerciseTemplate(exerciseId: number) {
-  await db.transaction("rw", db.exercises, db.workoutLogs, async () => {
+/** Everything removed with an exercise, so the delete can be undone. */
+export interface DeletedExercise {
+  exercise: ExerciseTemplate;
+  logs: WorkoutSetLog[];
+}
+
+/** Deletes an exercise and its logs; returns them for `restoreExercise`. */
+export async function removeExerciseTemplate(
+  exerciseId: number,
+): Promise<DeletedExercise | undefined> {
+  return db.transaction("rw", db.exercises, db.workoutLogs, async () => {
+    const exercise = await db.exercises.get(exerciseId);
+
+    if (!exercise) {
+      return undefined;
+    }
+
+    const logs = await db.workoutLogs.where("exerciseId").equals(exerciseId).toArray();
+
     await deleteLogsByExercise(exerciseId);
     await db.exercises.delete(exerciseId);
+
+    return { exercise, logs };
   });
+}
+
+/** Puts back an exercise (same id and position) and its logs. */
+export async function restoreExercise({ exercise, logs }: DeletedExercise) {
+  await db.transaction("rw", db.exercises, db.workoutLogs, async () => {
+    await db.exercises.put(exercise);
+    await db.workoutLogs.bulkPut(logs);
+  });
+}
+
+/**
+ * Appends copies of every exercise on `from` to the end of `to`, with fresh
+ * set ids (history isn't copied). Returns the new exercise ids.
+ */
+export async function copyDay(from: WorkoutDay, to: WorkoutDay): Promise<number[]> {
+  const source = await listExercisesForDay(from);
+  const created: number[] = [];
+
+  for (const exercise of source) {
+    created.push(
+      await createExerciseTemplate({
+        day: to,
+        title: exercise.title,
+        exerciseType: exercise.exerciseType,
+        exerciseUnit: exercise.exerciseUnit,
+        muscleTags: exercise.muscleTags,
+        exerciseSets: exercise.exerciseSets.map((set) => ({ ...set, id: crypto.randomUUID() })),
+      }),
+    );
+  }
+
+  return created;
+}
+
+/** Removes exercises that have no history yet (used to undo a copy). */
+export async function removeExerciseTemplates(exerciseIds: number[]) {
+  await db.exercises.bulkDelete(exerciseIds);
 }
 
 /** Adds a set, prefilled from `copyFrom` (usually the last set) if given. */
@@ -123,11 +180,33 @@ export async function updateExerciseTemplateSet(
   );
 }
 
+/**
+ * Removes a set from the template and returns it with its position, for
+ * `restoreExerciseSet`. Logs are append-only history, so past logs stay.
+ */
 export async function removeExerciseSet(exerciseId: number, setId: string) {
-  // Logs are append-only history: removing a template set keeps its past logs.
-  await updateExerciseTemplateSets(exerciseId, (sets) =>
-    sets.filter((set) => set.id !== setId),
-  );
+  let removed: { set: ExerciseSet; index: number } | undefined;
+
+  await updateExerciseTemplateSets(exerciseId, (sets) => {
+    const index = sets.findIndex((set) => set.id === setId);
+
+    if (index >= 0) {
+      removed = { set: sets[index], index };
+    }
+
+    return sets.filter((set) => set.id !== setId);
+  });
+
+  return removed;
+}
+
+/** Re-inserts a removed set at its old position. */
+export async function restoreExerciseSet(exerciseId: number, set: ExerciseSet, index: number) {
+  await updateExerciseTemplateSets(exerciseId, (sets) => [
+    ...sets.slice(0, index),
+    set,
+    ...sets.slice(index),
+  ]);
 }
 
 export async function moveExerciseTemplate(
