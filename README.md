@@ -18,7 +18,7 @@
 
 ## Features
 
-- **One-tap logging.** Sets are prefilled from your plan, with last time's numbers underneath. Tap ✓ to log one, or tap the numbers to adjust them with +/− steppers. When an exercise is done, the next one opens automatically.
+- **One-tap logging.** Sets are prefilled from your plan, with last time's numbers underneath. Tap the empty circle to log a set (it fills green with a ✓), or tap the numbers to adjust them with +/− steppers. When an exercise is done, the next one opens automatically.
 - **Rest timer.** Starts after every logged set and buzzes when rest is over (60s to 3m, or off). The screen stays awake mid-workout.
 - **Weekly plan.** Each weekday has its own exercises, and the S–M–T–W–T–F–S strip doubles as this week's progress overview. Copy a whole day to another in one tap.
 - **Exercise library.** Search 54 built-in exercises, add one with a single tap, or create your own. Re-adding an exercise reuses your last weights.
@@ -59,7 +59,7 @@ yarn dev            # http://localhost:5173
 flowchart LR
   A[Plan a weekday] --> B[Add exercises<br/>from the library]
   B --> C[Exercise template<br/>with planned sets]
-  C --> D[Tap ✓ on a set]
+  C --> D[Tap a set to log it]
   D --> E[(Snapshot log)]
   E --> F[Progress & history]
   C -. values reused next week .-> D
