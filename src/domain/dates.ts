@@ -64,7 +64,3 @@ export function toDateKey(date: Date) {
 export function formatShortDate(date: Date) {
   return date.toLocaleDateString([], { day: "numeric", month: "short" });
 }
-
-export function formatMonth(date: Date) {
-  return date.toLocaleDateString([], { month: "long", year: "numeric" });
-}

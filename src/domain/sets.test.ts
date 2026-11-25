@@ -6,6 +6,8 @@ describe("sets", () => {
     expect(formatSetValues({ weight: 62.5, reps: 8 }, "reps", "kg")).toBe("62.5 kg × 8");
     expect(formatSetValues({ time: 90 }, "time", "sec")).toBe("90 sec");
     expect(formatSetValues({}, "reps", "lb")).toBe("– lb × –");
+    expect(formatSetValues({ reps: 12 }, "reps", "kg")).toBe("BW × 12");
+    expect(formatSetValues({ weight: 0, reps: 8 }, "reps", "kg")).toBe("BW × 8");
   });
 
   it("rounds away floating point noise", () => {

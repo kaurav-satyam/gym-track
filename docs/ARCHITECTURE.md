@@ -27,7 +27,7 @@ shared  ←  domain  ←  data  ←  features  ←  app
 | **shared** | `src/shared/` | Reusable UI primitives (`ui/`), the muscle-map SVG components (`muscle-map/`) and tiny helpers (`lib/`) | Know about workouts, the database or routes |
 | **domain** | `src/domain/` | Types (`models/`) and pure logic: dates, set formatting, history, progress maths | Import React, Dexie or anything with side effects |
 | **data** | `src/data/` | The Dexie database, its schema and migrations, repositories, and seed loaders | Import React or UI code |
-| **features** | `src/features/*` | Screens, feature components and the hooks that connect them to data | Import another feature's internals |
+| **features** | `src/features/*` | Screens, feature components and the hooks that connect them to data | Import another feature's internals (only its `index.ts`, e.g. `@/features/rest-timer`) |
 | **app** | `src/app/` | Router, layout, navigation, theme, service-worker registration | Contain feature logic |
 
 Why it's split this way:
@@ -62,10 +62,11 @@ src/
 │  ├─ history.ts               Logs → sessions per day + best set
 │  ├─ workout-day.ts           Day completion status
 │  ├─ week-progress.ts         Per-weekday progress for the day strip
-│  ├─ progress.ts              Progress tab statistics
+│  ├─ progress.ts              Progress tab statistics (Sunday–Saturday weeks)
 │  └─ search.ts                Title normalisation
 ├─ data/
 │  ├─ db.ts                    Dexie database + versioned migrations
+│  ├─ backup.ts                Export / validate / restore the whole database as JSON
 │  ├─ schema.ts                Index definitions
 │  ├─ repositories/            The only API for reading/writing data
 │  └─ seed/                    Loaders for public/data/*.json
@@ -73,13 +74,17 @@ src/
 │  ├─ workout-day/             Today screen: day strip, exercise rows, set logging
 │  ├─ add-exercise/            Library search + one-tap add
 │  ├─ exercise-detail/         Muscles, stats, history, settings for one exercise
-│  ├─ progress/                Week/month statistics
-│  ├─ settings/                Theme
+│  ├─ progress/                Weekly statistics
+│  ├─ rest-timer/              Countdown after each logged set (public API: index.ts)
+│  ├─ settings/                Theme, rest time, backup export/import
 │  └─ pwa/                     iOS "Add to Home Screen" helper
 ├─ shared/
-│  ├─ ui/                      AppLogo, IconButton, Panel, SegmentedControl, cn
+│  ├─ ui/                      AppLogo, Card, IconButton, Panel, ProgressRing,
+│  │                           ScreenHeader, SectionTitle, SegmentedControl, cn
 │  ├─ muscle-map/              Body-map SVGs (see "Muscle map" below)
-│  └─ lib/storage.ts           localStorage that never throws
+│  └─ lib/                     storage.ts (localStorage that never throws),
+│                              createStore.ts + toast.ts (app-wide UI state),
+│                              useWakeLock.ts (keep the screen on mid-workout)
 └─ test/                       Test fixtures and the fresh-DB helper
 ```
 
@@ -117,6 +122,8 @@ flowchart LR
 
 **Writes are plain async calls.** Event handlers call repository functions directly, for example `logExerciseSetCompletion(exerciseId, set)`. The live queries pick up the change, so the UI never updates "optimistically" by hand.
 
+**App-wide UI state** that isn't stored (the current toast, the running rest timer) lives in tiny module-level stores built with `shared/lib/createStore.ts` and read through `useSyncExternalStore`. Any code can call `showToast(...)` or `startRestTimer()`, and the bottom dock in `AppLayout` renders them, even across navigation.
+
 **Derived data is computed by domain functions,** called from repositories (when they need the database to answer) or from hooks (when it's view state). One example is `getWorkoutDayStatus(exercises, completedSetIds)`.
 
 Here's a concrete trace of completing a set:
@@ -136,7 +143,7 @@ Here's a concrete trace of completing a set:
 | `useWeekProgress()` | workout-day | `Map<weekday, {totalSets, completedSets}>` for this week |
 | `useExercisePicker(day)` | add-exercise | query/category state, results, recent, `add`, `createAndAdd` |
 | `useExercise(id)` / `useExerciseHistory(ex)` | exercise-detail | the exercise (`undefined` loading, `null` missing); sessions + best set |
-| `useProgress()` | progress | period/range navigation + `ProgressSummary` |
+| `useProgress()` | progress | week navigation + `ProgressSummary` |
 
 ## Data model
 
@@ -192,7 +199,7 @@ These are the product invariants. The tests in `src/**/*.test.ts` enforce most o
 
 1. **Logs are snapshots.** Completing a set copies its current values into `workoutLogs`. Editing a template later never changes past logs.
 2. **One completion per set per local day.** `logExerciseSetCompletion` checks and inserts in a single transaction, so a double tap can't log twice. Undo removes only that day's log.
-3. **Deleting a set keeps its history.** Deleting a whole exercise removes its logs, and the UI warns about this.
+3. **Deleting a set keeps its history.** Deleting a whole exercise removes its logs. Deletes happen immediately and show an **Undo** toast; the repository returns what it removed (`DeletedExercise`, the removed set and its index) so it can be put back exactly.
 4. **Weeks run Sunday to Saturday** in local time (`startOfWeek`). Day-strip progress resets every Sunday.
 5. **Exercise order is per day.** `sortOrder` is set when an exercise is added (appended) and changed only by move up/down.
 6. **Seeding never overwrites.** Built-in exercises are inserted only if missing, so a user's edits survive app updates.
@@ -235,6 +242,10 @@ The PWA is built with `vite-plugin-pwa` in `generateSW` mode, configured in `vit
 - **Updates:** `registerType: "autoUpdate"`. A new deploy activates on the next load, because `index.html`, `sw.js` and the manifest are served `no-cache` (see `netlify.toml`).
 - **Registration:** `src/app/pwa.ts`. It's disabled in `yarn dev` to avoid stale caches while developing.
 - **iOS** has no install prompt, so `features/pwa/IosInstallPrompt` explains "Share → Add to Home Screen".
+
+**Backups:** Settings → Export writes the whole database to a JSON file (`data/backup.ts`), using the share sheet on phones and a download on desktop. Import validates the file, asks for confirmation and replaces everything in one transaction.
+
+**Keeping the screen on:** while today's workout has unfinished sets, `useWakeLock` holds a Screen Wake Lock and re-acquires it when the app returns to the foreground. Unsupported browsers simply ignore it.
 
 The theme preference is stored in `localStorage` through `shared/lib/storage.ts`, which never throws, and is applied before first paint in `main.tsx`.
 

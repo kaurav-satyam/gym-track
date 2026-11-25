@@ -32,7 +32,10 @@ export function formatNumber(value?: number) {
   return String(Math.round(value * 100) / 100);
 }
 
-/** "40 kg × 10" for reps exercises, "90 sec" for time exercises. */
+/**
+ * "40 kg × 10" for reps exercises, "90 sec" for time exercises.
+ * A reps set with no weight (or 0) but some reps is bodyweight: "BW × 8".
+ */
 export function formatSetValues(
   values: Pick<ExerciseSet, SetField>,
   exerciseType: ExerciseType,
@@ -40,6 +43,10 @@ export function formatSetValues(
 ) {
   if (exerciseType === "time") {
     return `${formatNumber(values.time)} ${unit}`;
+  }
+
+  if (!values.weight && values.reps != null) {
+    return `BW × ${formatNumber(values.reps)}`;
   }
 
   return `${formatNumber(values.weight)} ${unit} × ${formatNumber(values.reps)}`;

@@ -86,16 +86,22 @@ function NavItem({
       aria-current={active ? "page" : undefined}
       title={layout === "rail" ? item.label : undefined}
       className={cn(
-        "flex flex-col items-center justify-center gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]",
-        layout === "rail" ? "h-14 w-14 rounded-2xl" : "h-16",
-        active
-          ? "text-(--accent)"
-          : "text-(--text-muted) hover:text-(--text-strong)",
-        active && layout === "rail" && "bg-(--surface-control)",
+        "group flex flex-col items-center justify-center gap-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]",
+        layout === "rail" ? "h-16 w-16 rounded-2xl" : "h-16",
+        active ? "text-(--accent)" : "text-(--text-muted) hover:text-(--text-strong)",
       )}
     >
-      <Icon aria-hidden="true" size={22} strokeWidth={active ? 2.4 : 2} />
-      <span className="text-[11px] font-medium">{item.label}</span>
+      <span
+        className={cn(
+          "flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-200 group-active:scale-95",
+          active && "bg-(--accent-soft)",
+        )}
+      >
+        <Icon aria-hidden="true" size={22} strokeWidth={active ? 2.4 : 2} />
+      </span>
+      <span className={cn("text-[11px]", active ? "font-semibold" : "font-medium")}>
+        {item.label}
+      </span>
     </NavLink>
   );
 }

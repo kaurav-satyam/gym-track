@@ -48,33 +48,45 @@ export default function SetRow({
     <li
       className={cn(
         "rounded-2xl transition-colors",
-        isNext && !editing && "bg-(--surface-control)",
+        isNext && !editing && "bg-(--accent-soft)",
         editing && "bg-(--surface-inset)",
       )}
     >
       <div className="flex items-center gap-1">
         <button
           type="button"
-          className="flex min-h-12 min-w-0 flex-1 items-center gap-3 rounded-2xl px-3 text-left"
+          className="flex min-h-14 min-w-0 flex-1 items-center gap-3 rounded-2xl px-2 text-left"
           aria-expanded={editing}
           aria-label={`Edit set ${setNumber}`}
           onClick={onToggleEdit}
         >
           <span
             className={cn(
-              "w-5 shrink-0 text-sm tabular-nums",
-              isNext ? "font-semibold text-(--accent)" : "text-(--text-muted)",
+              "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums",
+              done
+                ? "bg-(--success-soft) text-(--success)"
+                : isNext
+                  ? "bg-(--accent) text-(--accent-ink)"
+                  : "bg-(--surface-control) text-(--text-muted)",
             )}
           >
             {setNumber}
           </span>
-          <span
-            className={cn(
-              "truncate text-base font-medium tabular-nums",
-              done ? "text-(--text-muted)" : "text-(--text-strong)",
+          <span className="min-w-0">
+            <span
+              className={cn(
+                "block truncate text-[17px] font-semibold tabular-nums tracking-tight",
+                done ? "text-(--text-muted)" : "text-(--text-strong)",
+              )}
+            >
+              {formatSetValues(set, exerciseType, unit)}
+            </span>
+            {/* Once done today the latest log *is* today's, so only show it before. */}
+            {previousLog && !done && (
+              <span className="block truncate text-xs font-medium tabular-nums text-(--text-muted)">
+                Last {formatSetValues(previousLog, exerciseType, unit)}
+              </span>
             )}
-          >
-            {formatSetValues(set, exerciseType, unit)}
           </span>
         </button>
 
@@ -83,12 +95,12 @@ export default function SetRow({
           aria-label={done ? `Undo set ${setNumber}` : `Complete set ${setNumber}`}
           aria-pressed={done}
           className={cn(
-            "mr-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 transition active:scale-90",
+            "mr-1.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 transition active:scale-90",
             done
               ? "border-transparent bg-(--success) text-white"
               : isNext
-                ? "border-(--accent) text-(--accent)"
-                : "border-(--surface-border-strong) text-transparent",
+                ? "border-transparent bg-(--accent) text-(--accent-ink) shadow-[0_6px_18px_var(--accent-soft)]"
+                : "border-(--surface-border) text-(--surface-border-strong)",
           )}
           onClick={onToggleDone}
         >
@@ -97,7 +109,7 @@ export default function SetRow({
       </div>
 
       {editing && (
-        <div className="space-y-2 px-3 pb-3 pt-1">
+        <div className="space-y-2 px-2 pb-3 pt-1">
           {fieldsFor(exerciseType).map((field) => (
             <ValueStepper
               key={field}
@@ -109,15 +121,10 @@ export default function SetRow({
             />
           ))}
 
-          <div className="flex items-center justify-between pt-1 text-xs">
-            <span className="text-(--text-muted)">
-              {previousLog
-                ? `Last: ${formatSetValues(previousLog, exerciseType, unit)}`
-                : "No history yet"}
-            </span>
+          <div className="flex items-center justify-end pt-1 text-xs">
             <button
               type="button"
-              className="rounded-lg px-2 py-1 font-medium text-(--danger)"
+              className="rounded-full bg-(--danger-soft) px-3 py-1.5 font-semibold text-(--danger) transition active:scale-95"
               onClick={onRemove}
             >
               Remove set
