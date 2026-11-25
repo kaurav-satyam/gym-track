@@ -99,12 +99,13 @@ export default function SetRow({
             done
               ? "border-transparent bg-(--success) text-white"
               : isNext
-                ? "border-transparent bg-(--accent) text-(--accent-ink) shadow-[0_6px_18px_var(--accent-soft)]"
-                : "border-(--surface-border) text-(--surface-border-strong)",
+                ? "border-(--accent) hover:bg-(--accent-soft)"
+                : "border-(--surface-border-strong) hover:bg-(--surface-control)",
           )}
           onClick={onToggleDone}
         >
-          <Check size={18} strokeWidth={3} />
+          {/* Only a done set shows a ✓: filled = done, empty = still to do. */}
+          {done && <Check size={18} strokeWidth={3} />}
         </button>
       </div>
 

@@ -51,6 +51,8 @@ shared ← domain ← data ← features ← app
 
 - Minimal and mobile-first, with three tabs: Today, Progress and Settings.
 - Colours come only from the CSS variables in `src/index.css` (light and dark). No hard-coded colours.
+- Set state must be unambiguous: a filled green ✓ only ever means "done today". Unfinished sets show an empty ring; the next set gets an accent ring, number chip and row highlight.
+- An exercise card's whole header is its expand/collapse button. Keep the chevron inside it.
 - Shared primitives are in `src/shared/ui`. The muscle-map components are in `src/shared/muscle-map`.
 - If a UI change alters what the store screenshots show, regenerate them with `yarn pwa:screenshots`.
 

@@ -103,6 +103,17 @@ export default function ExerciseRow({
     }
   }
 
+  const title = (
+    <span
+      className={cn(
+        "block truncate text-[15px] font-semibold",
+        isComplete && !showBody ? "text-(--text-muted)" : "text-(--text-strong)",
+      )}
+    >
+      {exercise.title}
+    </span>
+  );
+
   return (
     <li
       className={cn(
@@ -110,48 +121,9 @@ export default function ExerciseRow({
         showBody ? "border-(--accent-border)" : "border-(--surface-card-border)",
       )}
     >
-      <div className="flex items-center gap-3 p-3.5">
-        <button
-          type="button"
-          className="flex min-w-0 flex-1 items-center gap-3 text-left"
-          aria-expanded={showBody}
-          disabled={editMode}
-          onClick={onToggle}
-        >
-          {!editMode && <ExerciseIcon exercise={exercise} />}
-          <span className="min-w-0 flex-1">
-            <span
-              className={cn(
-                "block truncate text-[15px] font-semibold",
-                isComplete && !showBody ? "text-(--text-muted)" : "text-(--text-strong)",
-              )}
-            >
-              {exercise.title}
-            </span>
-            {!editMode && (
-              <span className="mt-1.5 flex items-center gap-2">
-                {sets.length > 0 && (
-                  <span className="flex gap-1" aria-hidden="true">
-                    {sets.map((set) => (
-                      <span
-                        key={set.id}
-                        className={cn(
-                          "h-1.5 w-4 rounded-full transition-colors",
-                          completedSetIds.has(set.id) ? "bg-(--success)" : "bg-(--surface-control-hover)",
-                        )}
-                      />
-                    ))}
-                  </span>
-                )}
-                <span className="text-xs font-medium tabular-nums text-(--text-muted)">
-                  {sets.length === 0 ? "No sets" : `${doneCount}/${sets.length}`}
-                </span>
-              </span>
-            )}
-          </span>
-        </button>
-
-        {editMode ? (
+      {editMode ? (
+        <div className="flex items-center gap-3 p-3.5">
+          <span className="min-w-0 flex-1">{title}</span>
           <div className="flex shrink-0 items-center gap-1.5">
             <RowAction label={`Move ${exercise.title} up`} disabled={!canMoveUp} onClick={onMoveUp}>
               <ArrowUp size={16} />
@@ -163,19 +135,52 @@ export default function ExerciseRow({
               <Trash2 size={16} />
             </RowAction>
           </div>
-        ) : isComplete ? (
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--success-soft) text-(--success)">
-            <Check size={18} strokeWidth={3} />
+        </div>
+      ) : (
+        // The whole header (icon, title, pips and chevron) is one tap target.
+        <button
+          type="button"
+          className="flex w-full items-center gap-3 p-3.5 text-left"
+          aria-expanded={showBody}
+          aria-label={`${showBody ? "Collapse" : "Expand"} ${exercise.title}`}
+          onClick={onToggle}
+        >
+          <ExerciseIcon exercise={exercise} />
+          <span className="min-w-0 flex-1">
+            {title}
+            <span className="mt-1.5 flex items-center gap-2">
+              {sets.length > 0 && (
+                <span className="flex gap-1" aria-hidden="true">
+                  {sets.map((set) => (
+                    <span
+                      key={set.id}
+                      className={cn(
+                        "h-1.5 w-4 rounded-full transition-colors",
+                        completedSetIds.has(set.id) ? "bg-(--success)" : "bg-(--surface-control-hover)",
+                      )}
+                    />
+                  ))}
+                </span>
+              )}
+              <span className="text-xs font-medium tabular-nums text-(--text-muted)">
+                {sets.length === 0 ? "No sets" : `${doneCount}/${sets.length}`}
+              </span>
+            </span>
           </span>
-        ) : (
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--surface-control) text-(--text-muted)">
-            <ChevronDown
-              size={18}
-              className={cn("transition-transform duration-200", showBody && "rotate-180")}
-            />
-          </span>
-        )}
-      </div>
+          {isComplete && !showBody ? (
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--success-soft) text-(--success)">
+              <Check size={18} strokeWidth={3} />
+            </span>
+          ) : (
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--surface-control) text-(--text-muted)">
+              <ChevronDown
+                size={18}
+                className={cn("transition-transform duration-200", showBody && "rotate-180")}
+              />
+            </span>
+          )}
+        </button>
+      )}
 
       {showBody && (
         <div className="border-t border-(--surface-card-border) px-2 pb-2 pt-2">
